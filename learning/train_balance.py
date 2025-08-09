@@ -7,7 +7,7 @@ from envs.biped_balance_imu_env import BipedBalanceImuEnv
 def make_env(seed_offset=0):
     def _thunk():
         env = BipedBalanceImuEnv(
-            xml_path="assets/biped.xml",   # あなたの2足モデル
+            xml_path="./../assets/XBot-L-terrain.xml",   # あなたの2足モデル
             frame_skip=5,
             max_episode_steps=1000,
             push_every_steps=(300, 600),
@@ -19,7 +19,7 @@ def make_env(seed_offset=0):
     return _thunk
 
 if __name__ == "__main__":
-    n_envs = 4
+    n_envs = 1
     vec_env = SubprocVecEnv([make_env(i) for i in range(n_envs)])
     vec_env = VecMonitor(vec_env)
 

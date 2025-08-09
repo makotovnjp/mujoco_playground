@@ -14,7 +14,7 @@ class BipedBalanceImuEnv(MujocoEnv):
 
     def __init__(
         self,
-        xml_path="assets/XBot-L-terrain.xml,
+        xml_path="../../assets/XBot-L-terrain.xml",
         frame_skip=5,
         render_mode=None,
         max_episode_steps=1000,
