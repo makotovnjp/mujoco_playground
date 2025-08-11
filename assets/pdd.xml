@@ -1,0 +1,237 @@
+<mujoco model="pdd">
+  <compiler angle="radian" meshdir="meshes/"/>
+  <option timestep='0.002' iterations='50' solver='PGS' gravity='0 0 -9.81'>
+    <!-- <flag sensornoise="enable" frictionloss="enable" /> -->
+  </option>
+  <size njmax="500" nconmax="100" />
+
+  <visual>
+    <quality shadowsize='4096' />
+    <map znear='0.05' />
+  </visual>
+
+  <default>
+    <joint limited='true' />
+    <motor ctrllimited='true' />
+    <geom condim='4' contype="1" conaffinity="15" solref='0.001 2' friction='0.9 0.2 0.2' />
+    <equality solref='0.001 2' />
+    <default class='visualgeom'>
+      <geom material='visualgeom' condim='1' contype='0' conaffinity='0' />
+    </default>
+    <default class='visualgeom2'>
+      <geom material='visualgeom2' condim='1' contype='0' conaffinity='0' />
+    </default>
+    <default class='obstacle'>
+      <geom material='obstacle' condim='3' contype='1' conaffinity='15' />
+    </default>
+
+
+    <default class='joint_param'>
+      <joint damping="1" frictionloss="1" armature="0.01" />
+    </default>
+
+  </default>
+
+  <asset>
+    <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0" width="512"
+      height="512" />
+    <texture name="texplane" type="2d" builtin="checker" rgb1=".2 .3 .4" rgb2=".1 0.15 0.2"
+      width="512" height="512" mark="cross" markrgb=".8 .8 .8" />
+    <texture name="texplane2" type="2d" builtin="checker" rgb1="1 0.3137 0.1843"
+      rgb2="0.0 0.30196 0.38039"
+      width="512" height="512" mark="cross" markrgb=".8 .8 .8" />
+
+    <material name="matplane" reflectance="0." texture="texplane" texrepeat="1 1" texuniform="true" />
+    <material name="matplane2" reflectance="0.1" texture="texplane2" texrepeat="1 1"
+      texuniform="true" />
+
+    <material name='obstacle' rgba='0.9 0.6 0.2 1' />
+    <material name='visualgeom' rgba='0.5 0.9 0.2 1' />
+    <material name='visualgeom2' rgba='0.5 0.9 0.2 1' />
+
+    <mesh name="base_link" file="base_link.STL" />
+    <mesh name="leg_l1_link" file="leg_l1_link.STL" />
+    <mesh name="leg_l2_link" file="leg_l2_link.STL" />
+    <mesh name="leg_l3_link" file="leg_l3_link.STL" />
+    <mesh name="leg_l4_link" file="leg_l4_link.STL" />
+    <mesh name="leg_l5_link" file="leg_l5_link.STL" />
+    <mesh name="leg_r1_link" file="leg_r1_link.STL" />
+    <mesh name="leg_r2_link" file="leg_r2_link.STL" />
+    <mesh name="leg_r3_link" file="leg_r3_link.STL" />
+    <mesh name="leg_r4_link" file="leg_r4_link.STL" />
+    <mesh name="leg_r5_link" file="leg_r5_link.STL" />
+
+
+    <hfield name='hf0' nrow='200' ncol='200' size="10 5 0.2 .1" />
+  </asset>
+  <worldbody>
+    <light directional="true" diffuse=".4 .4 .4" specular="0.1 0.1 0.1" pos="0 0 5.0" dir="0 0 -1"
+      castshadow="false" />
+    <light directional="true" diffuse=".6 .6 .6" specular="0.2 0.2 0.2" pos="0 0 4" dir="0 0 -1" />
+    <geom name="ground" type="plane" size="0 0 1" pos="0.001 0 0" quat="1 0 0 0" material="matplane"
+      condim="1" conaffinity='15' />
+
+    <body name="base_link" pos="0.0 0.0 0.88">
+
+      <!-- <body name="base_link" pos="0.0 0.0 0.92"> -->
+      <geom type="mesh" mesh="base_link" group="1" class="visualgeom" />
+
+      <inertial pos="-0.0033599 -0.00084664 0.1336" mass="9.9576"
+        diaginertia="0.089966 0.060002 0.056135" />
+      <joint type='slide' axis='1 0 0' limited='false' />
+      <joint type='slide' axis='0 1 0' limited='false' />
+      <joint type='slide' axis='0 0 1' limited='false' />
+      <joint type='ball' limited='false' />
+      <site name='imu' size='0.01' pos='0.0 0 0.0' />
+
+      <geom type="mesh" contype="0" conaffinity="0" group="1" density="0"
+        rgba="0.75294 0.75294 0.75294 1" mesh="base_link" />
+      <geom type="mesh" rgba="0.75294 0.75294 0.75294 1" mesh="base_link" class="visualgeom" />
+      <body name="leg_l1_link" pos="-0.002 0.09 -0.1035">
+        <inertial pos="0.002501 5.3e-05 -0.002722" quat="0.472677 0.527005 0.495251 0.503556"
+          mass="0.453728" diaginertia="0.000163063 0.000147076 8.18618e-05" />
+        <joint name="leg_l1_joint" pos="0 0 0" axis="1 0 0" limited="true" range="-0.2 0.5"
+          frictionloss="0.2" />
+        <body name="leg_l2_link" pos="0 -0.00016972 -0.0325">
+          <inertial pos="-0.000273 0.043826 -0.058639" quat="0.7074 0.0648812 -0.0612384 0.70116"
+            mass="0.925998" diaginertia="0.00166463 0.00123897 0.0010754" />
+          <joint name="leg_l2_joint" pos="0 0 0" axis="0 0 1" limited="true" range="-0.5 1"
+            frictionloss="0.2" />
+          <geom size="0.065 0.073" pos="0 0.0046 -0.057" quat="0.707388 0.706825 0 0"
+            type="cylinder"
+            rgba="0.75294 0.75294 0.75294 1" />
+          <body name="leg_l3_link" pos="0 -0.01433 -0.0575">
+            <inertial pos="0.003163 -0.022552 -0.027258"
+              quat="0.678041 0.0230005 -0.0875592 0.729428"
+              mass="1.39047" diaginertia="0.00722081 0.00694653 0.00181065" />
+            <joint name="leg_l3_joint" pos="0 0 0" axis="0 1 0" limited="true" range="-0.8 1.2"
+              frictionloss="0.2" />
+            <geom size="0.03 0.125 0.025" pos="0.015 0.02 -0.1" quat="0.707388 0.706825 0 0"
+              type="box" rgba="0.75294 0.75294 0.75294 1" />
+            <body name="leg_l4_link" pos="0 0.0145 -0.24">
+              <inertial pos="-0.012044 0.006361 -0.093905"
+                quat="0.696191 0.0388817 0.0714045 0.713237" mass="0.649518"
+                diaginertia="0.00246473 0.00221871 0.000430556" />
+              <joint name="leg_l4_joint" pos="0 0 0" axis="0 1 0" limited="true" range="0 1.5"
+                frictionloss="0.2" />
+              <geom size="0.0205 0.125 0.015" pos="0 0 -0.105" quat="0.707388 0.706825 0 0"
+                type="box"
+                rgba="0.75294 0.75294 0.75294 1" />
+              <geom size="0.034 0.035" pos="-0.011 0.012 -0.079" quat="0.707388 0.706825 0 0"
+                type="cylinder" rgba="0.75294 0.75294 0.75294 1" />
+              <body name="leg_l5_link" pos="0.005 0 -0.23995">
+                <inertial pos="0.012435 0 -0.015511" mass="0.30265"
+                  diaginertia="0.0008 0.0008 0.0008" />
+                <joint name="leg_l5_joint" pos="0 0 0" axis="0 1 0" limited="true" range="-1.1 1.1"
+                  frictionloss="0.2" />
+                <geom size="0.05005 0.01725 0.00875" pos="0.01503 0 -0.0102"
+                  quat="0.707388 0.706825 0 0" type="box" rgba="0.75294 0.75294 0.75294 1" />
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="leg_r1_link" pos="-0.002 -0.09 -0.1035">
+        <inertial pos="0.002501 -5.3e-05 -0.002722" quat="0.503556 0.495251 0.527005 0.472677"
+          mass="0.453728" diaginertia="0.000163063 0.000147076 8.18618e-05" />
+        <joint name="leg_r1_joint" pos="0 0 0" axis="1 0 0" limited="true" range="-0.5 0.2"
+          frictionloss="0.2" />
+        <body name="leg_r2_link" pos="0 0.00016972 -0.0325">
+          <inertial pos="9e-05 -0.043826 -0.058639" quat="0.7074 0.0648812 -0.0612384 0.70116"
+            mass="0.925998" diaginertia="0.00166463 0.00123897 0.0010754" />
+          <joint name="leg_r2_joint" pos="0 0 0" axis="0 0 1" limited="true" range="-1 0.5"
+            frictionloss="0.2" />
+          <geom size="0.065 0.073" pos="0 -0.0033 -0.057" quat="0.707388 0.706825 0 0"
+            type="cylinder"
+            rgba="0.75294 0.75294 0.75294 1" />
+          <body name="leg_r3_link" pos="0 0.01633 -0.0575">
+            <inertial pos="0.003311 0.02265 -0.027271" quat="0.734236 -0.0877978 0.023126 0.672795"
+              mass="1.38862" diaginertia="0.00722344 0.00694292 0.00180965" />
+            <joint name="leg_r3_joint" pos="0 0 0" axis="0 1 0" limited="true" range="-0.8 1.2"
+              frictionloss="0.2" />
+            <geom size="0.03 0.125 0.025" pos="0.015 -0.02 -0.1" quat="0.707388 0.706825 0 0"
+              type="box" rgba="0.75294 0.75294 0.75294 1" />
+            <body name="leg_r4_link" pos="0 -0.0145 -0.24">
+              <inertial pos="-0.007886 -0.007123 -0.088091"
+                quat="0.589012 0.00853647 -0.018288 0.807872" mass="0.61472"
+                diaginertia="0.00177827 0.00175932 0.00018341" />
+              <joint name="leg_r4_joint" pos="0 0 0" axis="0 1 0" limited="true" range="0 1.5"
+                frictionloss="0.2" />
+              <geom size="0.0205 0.125 0.015" pos="0 0 -0.105" quat="0.707388 0.706825 0 0"
+                type="box"
+                rgba="0.75294 0.75294 0.75294 1" />
+              <geom size="0.034 0.035" pos="-0.011 -0.012 -0.079" quat="0.707388 0.706825 0 0"
+                type="cylinder" rgba="0.75294 0.75294 0.75294 1" />
+              <body name="leg_r5_link" pos="0.005 0 -0.23995">
+                <inertial pos="0.012435 -0.0005 -0.015511" mass="0.30265"
+                  diaginertia="0.0008 0.0008 0.0008" />
+                <joint name="leg_r5_joint" pos="0 0 0" axis="0 1 0" limited="true" range="-1.1 1.1"
+                  frictionloss="0.2" />
+                <geom size="0.05005 0.01725 0.00875" pos="0.01503 0 -0.0102"
+                  quat="0.707388 0.706825 0 0" type="box" rgba="0.75294 0.75294 0.75294 1" />
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+
+  </worldbody>
+  <actuator>
+    <motor name="leg_l1_joint" joint="leg_l1_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
+    <motor name="leg_l2_joint" joint="leg_l2_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
+    <motor name="leg_l3_joint" joint="leg_l3_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
+    <motor name="leg_l4_joint" joint="leg_l4_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
+    <motor name="leg_l5_joint" joint="leg_l5_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
+    <motor name="leg_r1_joint" joint="leg_r1_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
+    <motor name="leg_r2_joint" joint="leg_r2_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
+    <motor name="leg_r3_joint" joint="leg_r3_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
+    <motor name="leg_r4_joint" joint="leg_r4_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
+    <motor name="leg_r5_joint" joint="leg_r5_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
+  </actuator>
+  <sensor>
+    <actuatorpos name='leg_l1_joint_p' actuator='leg_l1_joint' user='13' />
+    <actuatorpos name='leg_l2_joint_p' actuator='leg_l2_joint' user='13' />
+    <actuatorpos name='leg_l3_joint_p' actuator='leg_l3_joint' user='13' />
+    <actuatorpos name='leg_l4_joint_p' actuator='leg_l4_joint' user='13' />
+    <actuatorpos name='leg_l5_joint_p' actuator='leg_l5_joint' user='13' />
+    <actuatorpos name='leg_r1_joint_p' actuator='leg_r1_joint' user='13' />
+    <actuatorpos name='leg_r2_joint_p' actuator='leg_r2_joint' user='13' />
+    <actuatorpos name='leg_r3_joint_p' actuator='leg_r3_joint' user='13' />
+    <actuatorpos name='leg_r4_joint_p' actuator='leg_r4_joint' user='13' />
+    <actuatorpos name='leg_r5_joint_p' actuator='leg_r5_joint' user='13' />
+
+
+    <actuatorpos name='leg_l1_joint_v' actuator='leg_l1_joint' user='13' />
+    <actuatorpos name='leg_l2_joint_v' actuator='leg_l2_joint' user='13' />
+    <actuatorpos name='leg_l3_joint_v' actuator='leg_l3_joint' user='13' />
+    <actuatorpos name='leg_l4_joint_v' actuator='leg_l4_joint' user='13' />
+    <actuatorpos name='leg_l5_joint_v' actuator='leg_l5_joint' user='13' />
+    <actuatorpos name='leg_r1_joint_v' actuator='leg_r1_joint' user='13' />
+    <actuatorpos name='leg_r2_joint_v' actuator='leg_r2_joint' user='13' />
+    <actuatorpos name='leg_r3_joint_v' actuator='leg_r3_joint' user='13' />
+    <actuatorpos name='leg_r4_joint_v' actuator='leg_r4_joint' user='13' />
+    <actuatorpos name='leg_r5_joint_v' actuator='leg_r5_joint' user='13' />
+
+
+    <actuatorpos name='leg_l1_joint_f' actuator='leg_l1_joint' user='13' />
+    <actuatorpos name='leg_l2_joint_f' actuator='leg_l2_joint' user='13' />
+    <actuatorpos name='leg_l3_joint_f' actuator='leg_l3_joint' user='13' />
+    <actuatorpos name='leg_l4_joint_f' actuator='leg_l4_joint' user='13' />
+    <actuatorpos name='leg_l5_joint_f' actuator='leg_l5_joint' user='13' />
+    <actuatorpos name='leg_r1_joint_f' actuator='leg_r1_joint' user='13' />
+    <actuatorpos name='leg_r2_joint_f' actuator='leg_r2_joint' user='13' />
+    <actuatorpos name='leg_r3_joint_f' actuator='leg_r3_joint' user='13' />
+    <actuatorpos name='leg_r4_joint_f' actuator='leg_r4_joint' user='13' />
+    <actuatorpos name='leg_r5_joint_f ' actuator='leg_r5_joint' user='13' />
+
+
+    <framequat name='orientation' objtype='site' noise='0.001' objname='imu' />
+    <framepos name='position' objtype='site' noise='0.001' objname='imu' />
+    <gyro name='angular-velocity' site='imu' noise='0.005' cutoff='34.9' />
+    <velocimeter name='linear-velocity' site='imu' noise='0.001' cutoff='30' />
+    <accelerometer name='linear-acceleration' site='imu' noise='0.005' cutoff='157' />
+    <magnetometer name='magnetometer' site='imu' />
+
+  </sensor>
+</mujoco>
