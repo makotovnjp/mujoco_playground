@@ -1,6 +1,7 @@
 """
 ライブラリ
 pip install mujoco gymnasium jax jaxlib optax chex opencv-python
+pip install tensorflow-cpu tf2onnx
 
 実行例
 
@@ -17,19 +18,61 @@ python learning/train_hunter.py \
 """
 
 
+from jax.experimental import jax2tf
+import tensorflow as tf
+import tf2onnx
+
 import argparse, os, functools
 import numpy as np
 import gymnasium as gym
 import mujoco
 import jax, jax.numpy as jnp, optax
 
-# ========= 環境（立位 + ランダム外乱 + 画像/動画保存 + カメラ安全化） =========
-class StandEnv(gym.Env):
-    metadata = {"render_modes": ["human"], "render_fps": 200}
-    def __init__(self, xml_path, torso="base_link", frame_skip=5,
-                 camera=None, W=480, H=360, save_dir=None, save_every=10,
-                 video_path=None, video_fps=30,
-                 push_every=400, push_dur=20, fmin=80., fmax=180., horiz_only=True):
+# ========= ロボット環境（立位 + ランダム外乱 + 画像/動画保存 + カメラ安全化） =========
+class HunterEnv(gym.Env):
+    def __init__(
+       
+        self, 
+        xml_path, 
+        torso="base_link", 
+        frame_skip=5,
+        camera=None, 
+        W=480, 
+        H=360, 
+        save_dir=None, 
+        save_every=10,
+        video_path=None, 
+        video_fps=30,
+        push_every=400, 
+        push_dur=20, 
+        fmin=80., 
+        fmax=180., 
+        horiz_only=True
+        ):
+        """
+        MuJoCo ベースの環境を初期化します。
+
+        指定された XML モデルを読み込み、基準ボディ、レンダラ/カメラ、アクション・観測空間、
+        外乱（押し）設定、フレーム/動画保存設定を構成します。カメラ名が存在しない場合は
+        自動でフォールバックし、モデルにカメラが無ければフリーカメラを使用します。
+
+        Args:
+            xml_path (str): 読み込む MuJoCo モデル XML のファイルパス。
+            torso (str): 基準となる胴体ボディ名。見つからない場合は id=0 にフォールバック。
+            frame_skip (int): 1 ステップあたりの物理ステップ数（アクションのホールド長）。
+            camera (str | None): 使用するカメラ名。None の場合は最初のカメラ、なければフリーカメラ。
+            W (int): レンダリング画像の幅（ピクセル）。
+            H (int): レンダリング画像の高さ（ピクセル）。
+            save_dir (str | None): フレーム画像の保存先ディレクトリ。None なら保存しない。
+            save_every (int): フレーム保存の間隔（ステップ数）。1 以上にクリップ。
+            video_path (str | None): 動画を書き出すファイルパス。None なら動画出力なし。
+            video_fps (int | float): 動画出力時のフレームレート。
+            push_every (int): 外乱（押し）を加える間隔（ステップ数）。1 以上にクリップ。
+            push_dur (int): 外乱を継続するステップ数。1 以上にクリップ。
+            fmin (float): 外乱力の最小大きさ。
+            fmax (float): 外乱力の最大大きさ。
+            horiz_only (bool): True の場合、外乱力は水平成分（XY 平面）のみに制限。
+        """
         # --- モデル読み込み ---
         self.model = mujoco.MjModel.from_xml_path(xml_path)
         self.data  = mujoco.MjData(self.model)
@@ -103,6 +146,7 @@ class StandEnv(gym.Env):
     def _up(self):
         xmat = self.data.xmat[self.torso].reshape(3,3)
         return xmat[:,2]
+    
     def _obs(self):
         return np.concatenate([self.data.qpos.ravel(), self.data.qvel.ravel(), self._up()], dtype=np.float32)
 
@@ -158,7 +202,7 @@ class StandEnv(gym.Env):
         self.gstep += 1
         return obs, rew, terminated, False, info
 
-    # --- 画像取得（新旧API対応） ---
+    # --- 画像取得 ---
     def get_rgb(self):
         try:
             # 新API: camera に name/None が使える
@@ -198,9 +242,9 @@ class StandEnv(gym.Env):
         if self.writer is not None:
             self.writer.release(); self.writer = None
 
-# ========= 極小 PPO（JAX） =========
+# ========= PPO（JAX） =========
 class Cfg:
-    seed=0; total_steps=100_000; horizon=1024
+    seed=0; total_steps=3000; horizon=1024
     mb=64; epochs=5; gamma=0.99; lam=0.95; clip=0.2; vf=0.5; ent=0.0; lr=3e-4
 
 def mlp(sizes, key):
@@ -209,12 +253,15 @@ def mlp(sizes, key):
         w=jax.random.normal(k,(m,n))/jnp.sqrt(m); b=jnp.zeros((n,))
         ps.append((w,b))
     return ps
+
 def fwd(ps,x):
     for w,b in ps[:-1]: x=jnp.tanh(x@w+b)
     w,b=ps[-1]; return x@w+b
+
 @functools.partial(jax.jit, static_argnums=())
 def pi(params, obs):
     mean=fwd(params["pi"], obs); std=jnp.exp(params["logstd"]); return mean, std
+
 @jax.jit
 def vf(params, obs): return jnp.squeeze(fwd(params["v"], obs), -1)
 def logp_gauss(m,s,a): return -0.5*jnp.sum(((a-m)**2)/(s**2)+2*jnp.log(s)+jnp.log(2*jnp.pi),axis=-1)
@@ -251,14 +298,49 @@ def init_agent(obs, act, key):
         "logstd": jnp.zeros((act,))
     }
 
+
+# ========= ONNX エクスポート =========
+def export_policy_value_onnx(params, obs_dim: int, onnx_path: str, opset: int = 17):
+    """
+    入力:  obs [batch, obs_dim] (float32)
+    出力:  mean [batch, act_dim], value [batch], logstd [act_dim]
+    """
+
+    def jax_model(x):
+        mean, _ = pi(params, x.astype(jnp.float32))
+        v = vf(params, x.astype(jnp.float32))
+        logstd = params["logstd"]  # [act_dim]
+        return mean, v, logstd
+
+    tf_fn = jax2tf.convert(jax_model, with_gradient=False)
+    tf_func = tf.function(
+        tf_fn,
+        input_signature=[tf.TensorSpec(shape=[None, obs_dim], dtype=tf.float32)],
+        autograph=False,
+    )
+    concrete = tf_func.get_concrete_function()
+
+    out_dir = os.path.dirname(onnx_path)
+    if out_dir:
+        os.makedirs(out_dir, exist_ok=True)
+
+    tf2onnx.convert.from_function(
+        concrete_function=concrete,
+        opset=opset,
+        output_path=onnx_path,
+    )
+    print(f"[ONNX] saved to: {onnx_path} (opset={opset})")
+
+
 # ========= 学習ループ =========
 def train(args):
-    env = StandEnv(args.xml_path, torso=args.torso_name, frame_skip=5,
+    env = HunterEnv(args.xml_path, torso=args.torso_name, frame_skip=5,
                    camera=args.camera_name, W=args.vision_width, H=args.vision_height,
                    save_dir=args.save_dir, save_every=args.save_every,
                    video_path=args.video_path, video_fps=args.video_fps,
                    push_every=args.push_every, push_dur=args.push_duration,
                    fmin=args.push_fmin, fmax=args.push_fmax, horiz_only=not args.push_allow_vertical)
+    
     cfg=Cfg; key=jax.random.PRNGKey(cfg.seed)
     obs_dim=env.observation_space.shape[0]; act_dim=env.action_space.shape[0]
     params=init_agent(obs_dim, act_dim, key)
@@ -293,6 +375,7 @@ def train(args):
                 obs,_=env.reset(); ep_ret=0.0; ep_len=0
             if g>=cfg.total_steps: break
         buf["val"][-1] = float(jax.device_get(vf(params, jnp.asarray(obs))))
+
         # GAE
         adv=np.zeros_like(buf["rew"],np.float32); last=0.0
         for t in reversed(range(len(buf["rew"]))):
@@ -303,6 +386,7 @@ def train(args):
         adv=(adv-adv.mean())/(adv.std()+1e-8)
         dataset={"obs":jnp.asarray(buf["obs"]),"act":jnp.asarray(buf["act"]),
                  "logp_old":jnp.asarray(buf["logp"]),"adv":jnp.asarray(adv),"ret":jnp.asarray(ret)}
+        
         # PPO update
         N=len(buf["rew"]); idx=np.arange(N)
         for _ in range(cfg.epochs):
@@ -315,18 +399,22 @@ def train(args):
     env.close()
     if env.video_path: print(f"[Video] saved to: {env.video_path}")
 
+    # export_policy_value_onnx(params, obs_dim, "out/policy.onnx", 17)
+
 if __name__=="__main__":
     ap=argparse.ArgumentParser()
     ap.add_argument("--xml_path", required=True)
     ap.add_argument("--torso_name", default="base_link")   # あなたのXMLに合わせたデフォルト
+
     # Vision/保存
     ap.add_argument("--camera_name", default=None, help="MuJoCo <camera name=...>. 未指定/不在なら自動フォールバック")
     ap.add_argument("--vision_width", type=int, default=480)
     ap.add_argument("--vision_height", type=int, default=360)
     ap.add_argument("--save_dir", default="out/frames")
-    ap.add_argument("--save_every", type=int, default=10)
+    ap.add_argument("--save_every", type=int, default=100)
     ap.add_argument("--video_path", default="out/run.mp4")
     ap.add_argument("--video_fps", type=int, default=30)
+
     # 外乱（押し）
     ap.add_argument("--push_every", type=int, default=400)
     ap.add_argument("--push_duration", type=int, default=20)
@@ -334,4 +422,5 @@ if __name__=="__main__":
     ap.add_argument("--push_fmax", type=float, default=200.0)
     ap.add_argument("--push_allow_vertical", action="store_true")
     args=ap.parse_args()
+
     train(args)
