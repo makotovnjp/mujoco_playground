@@ -33,6 +33,33 @@ class HunterEnv(mjx_env.MjxEnv):
         self._mjx_model = mjx.put_model(self._mj_model, impl=self._config.impl)
         self._xml_path = xml_path
 
+    def reset(self, rng: jax.Array):
+        # Example: Reset the environment state. This is a placeholder and should be adapted to your state structure.
+        # Typically, you would randomize initial state using rng if needed.
+        # Here, we just call the parent reset if available, or return a dummy state.
+        # Replace with your own logic as needed.
+        if hasattr(super(), 'reset'):
+            return super().reset(rng)
+        else:
+            # Dummy state: replace with your own state structure
+            import jax.numpy as jnp
+            obs = jnp.zeros(self.action_size)
+            return obs
+
+    def step(self, state, action):
+        # Example: Step the environment. This is a placeholder and should be adapted to your state structure.
+        # Typically, you would apply the action, simulate, and return the new state, reward, done, info.
+        if hasattr(super(), 'step'):
+            return super().step(state, action)
+        else:
+            # Dummy next state, reward, done, info
+            import jax.numpy as jnp
+            next_state = state
+            reward = 0.0
+            done = False
+            info = {}
+            return next_state, reward, done, info
+
     def get_gravity(self, data: mjx.Data) -> jax.Array:
         return mjx_env.get_sensor_data(self.mj_model, data, consts.GRAVITY_SENSOR)
 
