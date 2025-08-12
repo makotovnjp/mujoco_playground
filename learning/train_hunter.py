@@ -1,26 +1,17 @@
 """
 ライブラリ
-uv pip install mujoco gymnasium jax jaxlib optax chex opencv-python
-uv pip install tensorflow-cpu tf2onnx
-
-# まず競合を避けるために既存をアンインストール
-pip uninstall -y tensorflow tensorflow-cpu tf2onnx
-
-# CPU環境なら:
+uv pip install -U mujoco gymnasium jax jaxlib optax chex opencv-python
 uv pip install -U tf-nightly tf2onnx
 
-# GPU環境なら(環境に応じて公式手順どおりに):
-# uv pip install -U tf-nightly-gpu tf2onnx  # (CUDA/TensorRTの整合は公式手順に従ってください
-
 実行例
-
 python learning/train_hunter.py \
 --xml_path /home/hachix/repos/smart_one/mujoco_playground/assets/pdd.xml \
 --torso_name base_link \
 --save_dir out/frames --save_every 10 \
 --video_path out/run.mp4 --video_fps 30 \
 --push_every 400 --push_duration 20 --push_fmin 100 --push_fmax 200 \
---export_onnx out/policy.onnx --onnx_opset 17
+--export_onnx out/policy.onnx --onnx_opset 17 \
+--spawn_z 0.9 --settle_steps 600 --settle_hits 3
 
 使い方メモ
 - 観測: [各モーターのトルク (ctrl) | IMU(orientation, gyro, accel)]
@@ -35,13 +26,15 @@ import gymnasium as gym
 import mujoco
 import jax, jax.numpy as jnp, optax
 
-# ========= 環境（観測=トルク+IMU / 行動=トルク[-1..1]→ctrlrange 変換） =========
+# ========= 環境（観測=トルク+IMU / 行動=トルク[-1..1]→ctrlrange 変換 / 着地セトル付） =========
 class HunterEnv(gym.Env):
     def __init__(self, 
         xml_path, torso="base_link", frame_skip=5,
         camera=None, W=480, H=360, save_dir=None, save_every=10,
         video_path=None, video_fps=30,
-        push_every=400, push_dur=20, fmin=80., fmax=180., horiz_only=True):
+        push_every=400, push_dur=20, fmin=80., fmax=180., horiz_only=True,
+        # 着地関連
+        spawn_z=0.9, settle_steps=600, settle_contact_hits=3):
 
         self.model = mujoco.MjModel.from_xml_path(xml_path)
         self.data  = mujoco.MjData(self.model)
@@ -120,23 +113,88 @@ class HunterEnv(gym.Env):
         self._remain = 0
         self._force = np.zeros(3, np.float32)
 
+        # 着地用設定
+        self.spawn_z = float(spawn_z)
+        self.settle_steps = int(settle_steps)
+        self.settle_contact_hits = int(settle_contact_hits)
+
+        # 地面ジオム候補（plane 全部 + name=ground があれば追加）
+        self.ground_ids = set(int(g) for g in range(self.model.ngeom)
+                              if int(self.model.geom_type[g]) == int(mujoco.mjtGeom.mjGEOM_PLANE))
+        gid = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_GEOM, "ground")
+        if gid >= 0:
+            self.ground_ids.add(int(gid))
+        if not self.ground_ids:
+            print("[WARN] no plane geoms detected; settle will accept any contact.")
+
+        # ルート自由関節の qpos アドレス（slide x/y/z と ball quat）
+        self._root_idx = {"x":None, "y":None, "z":None, "quat":None}
+        for j in range(self.model.njnt):
+            if int(self.model.jnt_bodyid[j]) != self.torso:
+                continue
+            jtype = int(self.model.jnt_type[j])
+            adr   = int(self.model.jnt_qposadr[j])
+            if jtype == mujoco.mjtJoint.mjJNT_SLIDE:
+                ax = self.model.jnt_axis[j]
+                if abs(ax[0]) > 0.9: self._root_idx["x"] = adr
+                if abs(ax[1]) > 0.9: self._root_idx["y"] = adr
+                if abs(ax[2]) > 0.9: self._root_idx["z"] = adr
+            elif jtype == mujoco.mjtJoint.mjJNT_BALL:
+                self._root_idx["quat"] = adr  # 4要素
+
         # その他
         self.qpos_init = self.model.key_qpos.copy() if self.model.nkey > 0 else None
         self._last_xy = np.zeros(2, np.float32)
         self.dt = float(self.model.opt.timestep) * float(self.frame_skip)
         self.gstep = 0
 
+    # ---- ルート姿勢をセット ----
+    def _set_root_pose(self, x=0.0, y=0.0, z=None, quat=(1.0,0.0,0.0,0.0)):
+        z = self.spawn_z if z is None else float(z)
+        if self._root_idx["x"] is not None: self.data.qpos[self._root_idx["x"]] = x
+        if self._root_idx["y"] is not None: self.data.qpos[self._root_idx["y"]] = y
+        if self._root_idx["z"] is not None: self.data.qpos[self._root_idx["z"]] = z
+        qi = self._root_idx["quat"]
+        if qi is not None:
+            self.data.qpos[qi:qi+4] = np.asarray(quat, dtype=np.float64)
+
+    # ---- 着地が確認できるまで数百ステップ回す ----
+    def _settle_to_ground(self):
+        ctrl_backup = self.data.ctrl.copy()
+        self.data.ctrl[:] = self.act_mid
+        hits = 0
+        for _ in range(self.settle_steps):
+            mujoco.mj_step(self.model, self.data)
+            touched = False
+            if self.data.ncon > 0:
+                for c in range(self.data.ncon):
+                    con = self.data.contact[c]
+                    if not self.ground_ids:
+                        touched = True
+                        break
+                    if int(con.geom1) in self.ground_ids or int(con.geom2) in self.ground_ids:
+                        touched = True
+                        break
+            if touched:
+                hits += 1
+                if hits >= self.settle_contact_hits:
+                    break
+        self.data.ctrl[:] = ctrl_backup
+
+    # ---- IMU 読み出し ----
     def _read_imu(self):
         parts = []
         for _, adr, dim in self._imu_slices:
             parts.append(self.data.sensordata[adr:adr+dim])
         return np.concatenate(parts, dtype=np.float32) if parts else np.zeros((0,), np.float32)
 
+    # ---- 観測 ----
     def _obs(self):
         torques = self.data.ctrl.copy().astype(np.float32)
         imu = self._read_imu()
         return np.concatenate([torques, imu], dtype=np.float32)
 
+    # ---- 外乱 ----
     def _maybe_start_push(self):
         if self.gstep % self.push_every != 0: return
         v = (np.array([np.random.uniform(-1,1), np.random.uniform(-1,1), 0.0], np.float32)
@@ -145,14 +203,20 @@ class HunterEnv(gym.Env):
         self._force = v * np.random.uniform(self.fmin, self.fmax)
         self._remain = self.push_dur
 
+    # ---- Gym API ----
     def reset(self, *, seed=None, options=None):
         mujoco.mj_resetData(self.model, self.data)
         if self.qpos_init is not None and len(self.qpos_init)==self.model.nq:
             self.data.qpos[:] = self.qpos_init
         else:
             self.data.qpos[:] = 0; self.data.qvel[:] = 0
+            self._set_root_pose(z=self.spawn_z, quat=(1.0,0.0,0.0,0.0))
         self.data.ctrl[:] = self.act_mid
         mujoco.mj_forward(self.model, self.data)
+
+        # ★ 着地セトル
+        self._settle_to_ground()
+
         self._last_xy = self.data.xpos[self.torso,:2].copy()
         self._remain = 0
         self.data.xfrc_applied[:,:] = 0.0
@@ -229,7 +293,7 @@ class HunterEnv(gym.Env):
 
 # ========= PPO（JAX） =========
 class Cfg:
-    seed=0; total_steps=1000; horizon=1024
+    seed=0; total_steps=10000; horizon=1024
     mb=64; epochs=5; gamma=0.99; lam=0.95; clip=0.2; vf=0.5; ent=0.0; lr=3e-4
 
 def mlp(sizes, key):
@@ -307,7 +371,6 @@ def export_policy_value_onnx(params, obs_dim: int, act_mid: np.ndarray, act_scal
         logstd = params["logstd"]
         return torque_mean, v, logstd
 
-    # 可変バッチ → 失敗時に B=1 固定
     tried_dynamic = True
     try:
         tf_fn = jax2tf.convert(jax_model, with_gradient=False, polymorphic_shapes=["(b,{})".format(obs_dim)])
@@ -341,7 +404,8 @@ def train(args):
                    save_dir=args.save_dir, save_every=args.save_every,
                    video_path=args.video_path, video_fps=args.video_fps,
                    push_every=args.push_every, push_dur=args.push_duration,
-                   fmin=args.push_fmin, fmax=args.push_fmax, horiz_only=not args.push_allow_vertical)
+                   fmin=args.push_fmin, fmax=args.push_fmax, horiz_only=not args.push_allow_vertical,
+                   spawn_z=args.spawn_z, settle_steps=args.settle_steps, settle_contact_hits=args.settle_hits)
     
     cfg=Cfg; key=jax.random.PRNGKey(cfg.seed)
     obs_dim=env.observation_space.shape[0]; act_dim=env.action_space.shape[0]
@@ -422,6 +486,10 @@ if __name__=="__main__":
     ap.add_argument("--push_fmin", type=float, default=100.0)
     ap.add_argument("--push_fmax", type=float, default=200.0)
     ap.add_argument("--push_allow_vertical", action="store_true")
+    # 着地パラメータ
+    ap.add_argument("--spawn_z", type=float, default=0.9)
+    ap.add_argument("--settle_steps", type=int, default=600)
+    ap.add_argument("--settle_hits", type=int, default=3)
     # ONNX
     ap.add_argument("--export_onnx", default=None, help="保存先（例: out/policy.onnx）")
     ap.add_argument("--onnx_opset", type=int, default=17)
