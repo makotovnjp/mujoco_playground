@@ -12,6 +12,7 @@ from mujoco_playground._src.locomotion.hunter import hunter_constants as consts
 def get_assets() -> Dict[str, bytes]:
     assets = {}
     mjx_env.update_assets(assets, consts.ROOT_PATH, "*.xml")
+    mjx_env.update_assets(assets, consts.ROOT_PATH, "meshes", "*.STL")
     return assets
 
 class HunterEnv(mjx_env.MjxEnv):
