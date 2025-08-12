@@ -18,11 +18,11 @@ class HunterEnv(mjx_env.MjxEnv):
     """Base class for Hunter environments."""
     def __init__(
         self,
-        xml_path: str,
         config: config_dict.ConfigDict,
         config_overrides: Optional[Dict[str, Union[str, int, list[Any]]]] = None,
     ) -> None:
         super().__init__(config, config_overrides)
+        xml_path = epath.Path(consts.HUNTER_XML)
         self._model_assets = get_assets()
         self._mj_model = mujoco.MjModel.from_xml_string(
             epath.Path(xml_path).read_text(), assets=self._model_assets
