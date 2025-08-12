@@ -43,7 +43,7 @@ def get_default_config(env_name: str):
       "episode_length": 1000,
       "push_every": 200,
       "push_strength": 80.0,
-      "torso_name": "torso",
+      "torso_name": "base_link",
     }
   elif env_name in manipulation.ALL_ENVS:
     return manipulation.get_default_config(env_name)
