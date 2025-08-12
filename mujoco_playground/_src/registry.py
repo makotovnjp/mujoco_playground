@@ -23,6 +23,7 @@ from mujoco_playground._src import dm_control_suite
 from mujoco_playground._src import locomotion
 from mujoco_playground._src import manipulation
 from mujoco_playground._src import mjx_env
+from mujoco_playground.envs.custom.hunter_standing_env import HunterStandingEnv
 
 DomainRandomizer = Optional[
     Callable[[mjx.Model, jax.Array], Tuple[mjx.Model, mjx.Model]]
@@ -36,7 +37,15 @@ ALL_ENVS = (
 
 
 def get_default_config(env_name: str):
-  if env_name in manipulation.ALL_ENVS:
+  if env_name == "HunterBipedStanding":
+    return {
+      "frame_skip": 10,
+      "episode_length": 1000,
+      "push_every": 200,
+      "push_strength": 80.0,
+      "torso_name": "torso",
+    }
+  elif env_name in manipulation.ALL_ENVS:
     return manipulation.get_default_config(env_name)
   elif env_name in locomotion.ALL_ENVS:
     return locomotion.get_default_config(env_name)
@@ -51,7 +60,12 @@ def load(
     config: Optional[ml_collections.ConfigDict] = None,
     config_overrides: Optional[Dict[str, Union[str, int, list[Any]]]] = None,
 ) -> mjx_env.MjxEnv:
-  if env_name in manipulation.ALL_ENVS:
+  if env_name == "HunterBipedStanding":
+    return HunterStandingEnv(
+      xml_path="path/to/hunter_biped_standing.xml",
+      torso_body="base_link",
+    )
+  elif env_name in manipulation.ALL_ENVS:
     return manipulation.load(env_name, config, config_overrides)
   elif env_name in locomotion.ALL_ENVS:
     return locomotion.load(env_name, config, config_overrides)
