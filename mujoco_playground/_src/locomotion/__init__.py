@@ -40,6 +40,8 @@ from mujoco_playground._src.locomotion.spot import joystick as spot_joystick
 from mujoco_playground._src.locomotion.spot import joystick_gait_tracking as spot_joystick_gait_tracking
 from mujoco_playground._src.locomotion.t1 import joystick as t1_joystick
 from mujoco_playground._src.locomotion.t1 import randomize as t1_randomize
+from mujoco_playground._src.locomotion.hunter.base import HunterEnv
+from mujoco_playground._src.locomotion.hunter.default_config import default_config as hunter_default_config
 
 
 mjx_env.ensure_menagerie_exists()  # Ensure menagerie exists when module is imported.
@@ -86,6 +88,7 @@ _envs = {
     "T1JoystickRoughTerrain": functools.partial(
         t1_joystick.Joystick, task="rough_terrain"
     ),
+    "Hunter": HunterEnv,
 }
 
 _cfgs = {
@@ -112,6 +115,7 @@ _cfgs = {
     "SpotJoystickGaitTracking": spot_joystick_gait_tracking.default_config,
     "T1JoystickFlatTerrain": t1_joystick.default_config,
     "T1JoystickRoughTerrain": t1_joystick.default_config,
+    "Hunter": hunter_default_config,
 }
 
 _randomizer = {
