@@ -23,7 +23,6 @@ from mujoco_playground._src import dm_control_suite
 from mujoco_playground._src import locomotion
 from mujoco_playground._src import manipulation
 from mujoco_playground._src import mjx_env
-from mujoco_playground.envs.custom.hunter_standing_env import HunterStandingEnv
 
 DomainRandomizer = Optional[
     Callable[[mjx.Model, jax.Array], Tuple[mjx.Model, mjx.Model]]
