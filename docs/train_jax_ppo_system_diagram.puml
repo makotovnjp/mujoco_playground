@@ -32,6 +32,16 @@ package "mujoco_playground" {
     }
 
     package "dm_control_suite" {
+        class "cartpole" as cartpole <<module>> {
+            +reset():
+            +step():
+        }
+
+        class "cheetah" as cheetah <<module>> {
+            +reset():
+            +step():
+        }
+
         interface "dm_control_suite_if" {
             +register_environment(env_name: str, env_class: Type[mjx_env.MjxEnv], cfg_class: Callable[[], config_dict.ConfigDict]): None
             +get_default_config(env_name: str): Callable[[], config_dict.ConfigDict]
@@ -40,6 +50,16 @@ package "mujoco_playground" {
     }
 
     package "locomotion" {
+        class "h1" as h1 <<module>> {
+            +reset():
+            +step():
+        }
+
+        class "go1" as go1 <<module>> {
+            +reset():
+            +step():
+        }
+        
         interface "locomotion_if" {
             +register_environment(env_name: str, env_class: Type[mjx_env.MjxEnv], cfg_class: Callable[[], config_dict.ConfigDict]): None
             +get_default_config(env_name: str): Callable[[], config_dict.ConfigDict]
@@ -47,16 +67,20 @@ package "mujoco_playground" {
             +get_domain_randomizer(env_name: str): Optional[Callable[[mjx.Model, jax.Array], Tuple[mjx.Model, mjx.Model]]]
         }
 
-        package "h1" {
-            class H1Env {
-
-            }
-
-        }
 
     }
 
     package "manipulation" {
+         class "aloha" as aloha <<module>> {
+            +reset():
+            +step():
+        }
+
+        class "franka_emika_panda" as franka_emika_panda <<module>> {
+            +reset():
+            +step():
+        }
+
         interface "manipulation_if" {
             +register_environment(env_name: str, env_class: Type[mjx_env.MjxEnv], cfg_class: Callable[[], config_dict.ConfigDict]): None
             +get_default_config(env_name: str): Callable[[], config_dict.ConfigDict]
@@ -106,14 +130,24 @@ mujoco_playground._src.registry --> mujoco_playground._src.dm_control_suite.dm_c
 mujoco_playground._src.registry --> mujoco_playground._src.locomotion.locomotion_if
 mujoco_playground._src.registry --> mujoco_playground._src.manipulation.manipulation_if
 
-' mujoco_playground._src.locomotion.locomotion_if --> mujoco_playground._src.locomotion.h1.H1Env: 
+locomotion_if --> h1
+locomotion_if --> go1
 
+manipulation_if --> aloha
+manipulation_if --> franka_emika_panda
+
+dm_control_suite_if --> cartpole
+dm_control_suite_if --> cheetah
 
 mujoco_playground._src.wrapper --> mujoco_playground._src.mjx_env: MjxEnv
 
-mujoco_playground._src.dm_control_suite --|> mujoco_playground._src.mjx_env: MjxEnv
-h1.H1Env --|> mujoco_playground._src.mjx_env: MjxEnv
-mujoco_playground._src.manipulation --|> mujoco_playground._src.mjx_env: MjxEnv
+' MjxEnvの継承関係
+h1 --|> mujoco_playground._src.mjx_env: MjxEnv
+go1 --|> mujoco_playground._src.mjx_env: MjxEnv
+aloha --|> mujoco_playground._src.mjx_env: MjxEnv
+franka_emika_panda --|> mujoco_playground._src.mjx_env: MjxEnv
+cartpole --|> mujoco_playground._src.mjx_env: MjxEnv
+cheetah --|> mujoco_playground._src.mjx_env: MjxEnv
 
 ' train_jax_ppoからconfigへのコール
 train_jax_ppo --> config_if: brax_ppo_config\nbrax_vision_ppo_config\nbrax_sac_config
