@@ -81,7 +81,7 @@ group "Evaluation"
         registry -> env : load(env_name)
         application -> wrapper : wrap_for_brax_training
     else
-        note right: use the same env with training
+        application -> application: use the same env with training
     end
 
     ' 評価関数登録
