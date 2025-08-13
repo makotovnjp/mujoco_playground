@@ -1,7 +1,7 @@
 @startuml
 
 actor Terminal
-participant "learning/train_jax_ppo" as application
+participant "learning/train_jax_ppo.py" as application
 participant "mujoco_playground/config" as config
 participant "mujoco_playground/_src/registry.py" as registry
 participant "mujoco_playground/_src/wrapper.py" as wrapper
