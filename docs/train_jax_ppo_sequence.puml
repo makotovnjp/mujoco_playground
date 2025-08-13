@@ -1,0 +1,100 @@
+@startuml
+
+actor Terminal
+participant "learning/train_jax_ppo" as application
+participant "mujoco_playground/config" as config
+participant "mujoco_playground/_src/registry.py" as registry
+participant "mujoco_playground/_src/wrapper.py" as wrapper
+participant "mujoco_playground/_src/manipulation\nmujoco_playground/_src/locomotion\nmujoco_playground/_src/dm_control_suite" as env
+participant "brax.training.agents.ppo" as ppo
+participant "rscope.brax" as rscope_utils
+participant "jax" as jax
+
+
+Terminal -> application : env_name, vision
+note right: vision: True (use vision-based PPO), False (use state-based PPO)
+
+box "Setting Environment and PPO network"
+group "Setting Environment and PPO network"
+    ' 指定する環境名に対してデフォルトの設定を取得
+    application -> registry : get_default_config(env_name)
+    registry -> env : get_default_config(env_name)
+    note right: Retrieve default configuration for the specified environment.
+
+    ' 設定取得
+    alt vision == true
+        application -> config : brax_vision_ppo_config(env_name)
+    else
+        application -> config : brax_ppo_config(env_name)
+    end
+
+    note right: Retrieve training parameters (number of steps, learning rate, etc.) for the specified environment.
+
+    ' Visualizationの設定
+    application -> application: Visualization (wandb or TensorBoard settings)
+
+    ' 既存モデルがある場合はロードする。
+    application -> application : load checkpoint if have already trained model
+
+    alt vision == true
+        application -> ppo : make_ppo_networks_vision
+    else
+        application -> ppo : make_ppo_networks
+    end
+    note right: Create PPO networks
+
+    ' Domain randomizationの取得
+    application -> registry : get_domain_randomizer
+    registry -> env : get_domain_randomizer
+    note right: Apply random disturbances (e.g., pushing) to the robot during training.
+
+end group
+
+box "Train"
+group "Train"
+    ' 学習実行関数を登録
+    alt vision == true
+        application -> wrapper : wrap_for_brax_training
+        application -> ppo: train (training_params, network_factory, wrap_env_fn=wrapper.wrap_for_brax_training )
+    else
+        application -> ppo: train (training_params, network_factory, wrap_env_fn=None )
+    end
+
+    ' 学習進捗を表示する関数の登録
+    application -> application : define progress function
+
+    ' 学習結果RollOutの設定
+    application -> rscope_utils: BraxRolloutSaver
+    note right: BraxRolloutSaver is a utility that executes policy rollouts \n in a Brax environment and enables saving and visualizing the results.
+
+    ' 学習実行
+    application -> application: call registered train function
+    note right: The training result consists of the inference function \n for the trained policy and the policy parameters.
+
+end group
+
+box "Evaluation"
+group "Evaluation"
+    ' 評価環境をロードする
+    alt vision == false
+        application -> registry : load(env_name)
+        registry -> env : load(env_name)
+        application -> wrapper : wrap_for_brax_training
+    else
+        note right: use the same env with training
+    end
+
+    ' 評価関数登録
+    application -> jax : jit (inference_fn)
+    note right: inference_fn is a result of train function
+
+    ' 評価環境リセット
+    application -> jax : jit (eval_env.reset)
+
+    ' 評価環境のStep関数登録
+    application -> jax : jit (eval_env.step)
+
+    ' 評価実行
+    application -> application: call registered eval function
+    note right:Execute the registered evaluation function and step function for the configured \n number of evaluation steps, and save the results. The output is saved as rollout.mp4
+end group
