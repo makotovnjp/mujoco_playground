@@ -98,3 +98,5 @@ group "Evaluation"
     application -> application: call registered eval function
     note right:Execute the registered evaluation function and step function for the configured \n number of evaluation steps, and save the results. The output is saved as rollout.mp4
 end group
+
+@enduml

@@ -1,0 +1,124 @@
+@startuml
+allowmixing
+title Mujoco Playground JAX PPO Training Sequence Diagram
+
+skinparam packageStyle rectangle
+skinparam componentStyle rectangle
+skinparam shadowing false
+
+' ===== Packages (directories) =====
+package "learning" {
+    file "learning/train_jax_ppo.py" as train_jax_ppo <<module>>
+}
+
+package "mujoco_playground" {
+  package "_src" {
+    class "registry.py" as registry <<module>> {
+        +get_default_config(env_name: str)
+        +load(env_name: str, config, config_overrides): mjx_env.MjxEnv
+        +get_domain_randomizer(env_name: str)
+    }
+
+    class "wrapper.py" as wrapper <<module>> {
+        +wrap_for_brax_training(env_name: str): Wrapper
+    }
+
+    file "mjx_env.py" as mjx_env <<module>> {
+        class "MjxEnv" {
+            {abstract} +step(): 
+            +reset(): jax.Array
+            +render(mode: str): Any
+        }
+    }
+
+    package "dm_control_suite" {
+        interface "dm_control_suite_if" {
+            +register_environment(env_name: str, env_class: Type[mjx_env.MjxEnv], cfg_class: Callable[[], config_dict.ConfigDict]): None
+            +get_default_config(env_name: str): Callable[[], config_dict.ConfigDict]
+            +load(env_name: str, config, config_overrides): mjx_env.MjxEnv
+        }
+    }
+
+    package "locomotion" {
+        interface "locomotion_if" {
+            +register_environment(env_name: str, env_class: Type[mjx_env.MjxEnv], cfg_class: Callable[[], config_dict.ConfigDict]): None
+            +get_default_config(env_name: str): Callable[[], config_dict.ConfigDict]
+            +load(env_name: str, config, config_overrides): mjx_env.MjxEnv
+            +get_domain_randomizer(env_name: str): Optional[Callable[[mjx.Model, jax.Array], Tuple[mjx.Model, mjx.Model]]]
+        }
+
+        package "h1" {
+            class H1Env {
+
+            }
+
+        }
+
+    }
+
+    package "manipulation" {
+        interface "manipulation_if" {
+            +register_environment(env_name: str, env_class: Type[mjx_env.MjxEnv], cfg_class: Callable[[], config_dict.ConfigDict]): None
+            +get_default_config(env_name: str): Callable[[], config_dict.ConfigDict]
+            +load(env_name: str, config, config_overrides): mjx_env.MjxEnv
+            +get_domain_randomizer(env_name: str): Optional[Callable[[mjx.Model, jax.Array], Tuple[mjx.Model, mjx.Model]]]
+        }
+        
+    }
+  }
+
+  package "config" {
+    interface "config_if" {
+        +brax_ppo_config(env_name: str)
+        +brax_vision_ppo_config(env_name: str)
+        +brax_sac_config(env_name: str)
+    }
+
+    class "dm_control_suite_params.py" as dm_params <<module>> {
+        +brax_ppo_config(env_name: str)
+        +brax_vision_ppo_config(env_name: str)
+        +brax_sac_config(env_name: str)
+    }
+
+    class "locomotion_params.py" as locomotion_params <<module>> {
+        +brax_ppo_config(env_name: str)
+        +brax_vision_ppo_config(env_name: str)
+        +brax_sac_config(env_name: str)
+    }
+
+
+
+    class "manipulation_params.py" as manipulation_params <<module>> {
+        +brax_ppo_config(env_name: str)
+        +brax_vision_ppo_config(env_name: str)
+        +brax_sac_config(env_name: str)
+    }
+  }
+
+}
+
+' ===== Class relationships =====
+' train_jax_ppoから_srcへのコール
+train_jax_ppo --> mujoco_playground._src.registry: get_default_config\nload()\nget_domain_randomizer()
+train_jax_ppo --> mujoco_playground._src.wrapper: wrap_for_brax_training()
+
+mujoco_playground._src.registry --> mujoco_playground._src.dm_control_suite.dm_control_suite_if
+mujoco_playground._src.registry --> mujoco_playground._src.locomotion.locomotion_if
+mujoco_playground._src.registry --> mujoco_playground._src.manipulation.manipulation_if
+
+' mujoco_playground._src.locomotion.locomotion_if --> mujoco_playground._src.locomotion.h1.H1Env: 
+
+
+mujoco_playground._src.wrapper --> mujoco_playground._src.mjx_env: MjxEnv
+
+mujoco_playground._src.dm_control_suite --|> mujoco_playground._src.mjx_env: MjxEnv
+h1.H1Env --|> mujoco_playground._src.mjx_env: MjxEnv
+mujoco_playground._src.manipulation --|> mujoco_playground._src.mjx_env: MjxEnv
+
+' train_jax_ppoからconfigへのコール
+train_jax_ppo --> config_if: brax_ppo_config\nbrax_vision_ppo_config\nbrax_sac_config
+config_if --> dm_params: brax_ppo_config\nbrax_vision_ppo_config\nbrax_sac_config
+config_if --> locomotion_params: brax_ppo_config\nbrax_vision_ppo_config\nbrax_sac_config
+config_if --> manipulation_params: brax_ppo_config\nbrax_vision_ppo_config\nbrax_sac_config
+
+@enduml
