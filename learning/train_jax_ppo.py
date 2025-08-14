@@ -90,7 +90,7 @@ _DOMAIN_RANDOMIZATION = flags.DEFINE_boolean(
 )
 _SEED = flags.DEFINE_integer("seed", 1, "Random seed")
 _NUM_TIMESTEPS = flags.DEFINE_integer(
-    "num_timesteps", 1_000_000, "Number of timesteps"
+    "num_timesteps", 1_000, "Number of timesteps"
 )
 _NUM_EVALS = flags.DEFINE_integer("num_evals", 5, "Number of evaluations")
 _REWARD_SCALING = flags.DEFINE_float("reward_scaling", 0.1, "Reward scaling")
