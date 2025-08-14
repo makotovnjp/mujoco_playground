@@ -20,6 +20,10 @@ group "Setting Environment and PPO network"
     application -> registry : get_default_config(env_name)
     registry -> env : get_default_config(env_name)
     note right: Retrieve default configuration for the specified environment.
+    
+    ' 指定する環境名に対して環境をロードする。
+    application -> registry : load(env_name)
+    registry -> env : load(env_name)
 
     ' 設定取得
     alt vision == true
