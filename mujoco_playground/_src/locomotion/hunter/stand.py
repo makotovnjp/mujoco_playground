@@ -132,7 +132,7 @@ class Stand(hunter_base.HunterEnv):
 
         # Step the simulation
         data = mjx_env.step(
-            self.mjx_model, state.data, motor_targets, self._n_frames
+            self.mjx_model, state.data, motor_targets, self.n_substeps
         )
 
         # Get observation
