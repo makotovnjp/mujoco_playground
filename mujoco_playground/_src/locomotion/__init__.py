@@ -114,7 +114,7 @@ _cfgs = {
     "SpotJoystickGaitTracking": spot_joystick_gait_tracking.default_config,
     "T1JoystickFlatTerrain": t1_joystick.default_config,
     "T1JoystickRoughTerrain": t1_joystick.default_config,
-    "HunterStand": hunter_default_config,
+    "HunterStand": hunter_stand.default_config,
 }
 
 _randomizer = {
