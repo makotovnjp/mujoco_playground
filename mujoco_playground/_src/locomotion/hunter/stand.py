@@ -96,8 +96,7 @@ class Stand(hunter_base.HunterEnv):
         data = mjx.forward(self.mjx_model, data)
         qpos = qpos.at[2].set(0.3)  # 初期高さ
         qpos = qpos.at[3:7].set([1, 0, 0, 0])  # 初期姿勢
-        data.qpos = qpos
-        data.qvel = qvel
+        data = data.replace(qpos=qpos, qvel=qvel)
 
         info = {
             "rng": rng,
