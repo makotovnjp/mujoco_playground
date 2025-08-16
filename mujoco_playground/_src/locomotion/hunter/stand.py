@@ -60,7 +60,7 @@ class Stand(hunter_base.HunterEnv):
         # Default standing pose with slightly bent knees
         self._init_q = jp.zeros(self._mjx_model.nq)
         # Set floating base position (x, y, z, quat)
-        self._init_q = self._init_q.at[2].set(0.88)  # z position
+        self._init_q = self._init_q.at[2].set(0.88)  # z position - proper standing height
         self._init_q = self._init_q.at[3:7].set(jp.array([1, 0, 0, 0]))  # quat
         # Set joint positions for stable standing
         joint_init = jp.array([0.0, 0.0, 0.1, 0.2, -0.1] * 2)  # 10 joints
@@ -76,7 +76,6 @@ class Stand(hunter_base.HunterEnv):
 
     def reset(self, rng: jax.Array) -> mjx_env.State:
         """Reset the environment to the initial standing position."""
-        print("Resetting environment to standing position...")
         rng, noise_rng = jax.random.split(rng, 2)
 
         # Initialize robot to standing position without noise
@@ -110,8 +109,6 @@ class Stand(hunter_base.HunterEnv):
 
     def step(self, state: mjx_env.State, action: jax.Array) -> mjx_env.State:
         """Step the environment forward."""
-
-        print("step...")
         
         rng, noise_rng = jax.random.split(state.info["rng"], 2)
 
