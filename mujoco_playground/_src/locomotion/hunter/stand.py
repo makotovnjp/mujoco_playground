@@ -1,17 +1,3 @@
-# Copyright 2025 DeepMind Technologies Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# ==============================================================================
 """Standing task for Hunter robot."""
 
 from typing import Any, Dict, Optional, Union
@@ -94,7 +80,8 @@ class Stand(hunter_base.HunterEnv):
 
         # Add small random perturbation to initial position
         q_noise = 0.02 * jax.random.normal(noise_rng, (self._mjx_model.nq,))
-        qpos = self._init_q + q_noise
+        # qpos = self._init_q + q_noise
+        qpos = jp.zeros(self.mjx_model.nq)
         qvel = jp.zeros(self._mjx_model.nv)
 
         data = mjx_env.make_data(
@@ -105,7 +92,12 @@ class Stand(hunter_base.HunterEnv):
             nconmax=self._config.nconmax,
             njmax=self._config.njmax,
         )
+        
         data = mjx.forward(self.mjx_model, data)
+        qpos = qpos.at[2].set(0.3)  # 初期高さ
+        qpos = qpos.at[3:7].set([1, 0, 0, 0])  # 初期姿勢
+        data.qpos = qpos
+        data.qvel = qvel
 
         info = {
             "rng": rng,
