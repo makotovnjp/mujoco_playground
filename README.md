@@ -73,7 +73,7 @@ For vision-based environments, please refer to the installation instructions in 
 
 For basic usage, navigate to the repo's directory and run:
 ```bash
-python learning/train_jax_ppo.py --env_name CartpoleBalance
+python learning/train_jax_ppo.py --env_name HunterStand --num_timesteps 10
 ```
 
 ### Training Visualization
