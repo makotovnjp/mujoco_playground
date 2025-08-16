@@ -61,7 +61,7 @@ class Stand(hunter_base.HunterEnv):
         # Default standing pose with slightly bent knees
         self._init_q = jp.zeros(self._mjx_model.nq)
         # Set floating base position (x, y, z, quat)
-        self._init_q = self._init_q.at[2].set(-0.16)  # z position - proper standing height
+        self._init_q = self._init_q.at[2].set(-0.17)  # z position - proper standing height
         self._init_q = self._init_q.at[3:7].set(jp.array([1, 0, 0, 0]))  # quat
         # Set joint positions for stable standing
         joint_init = jp.array([0.0, 0.0, 0.1, 0.2, -0.1] * 2)  # 10 joints
