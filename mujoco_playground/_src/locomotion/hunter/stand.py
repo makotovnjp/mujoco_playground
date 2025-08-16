@@ -76,6 +76,7 @@ class Stand(hunter_base.HunterEnv):
 
     def reset(self, rng: jax.Array) -> mjx_env.State:
         """Reset the environment to the initial standing position."""
+        print("resetting...")
         rng, noise_rng = jax.random.split(rng, 2)
 
         # Initialize robot to standing position without noise
@@ -109,6 +110,8 @@ class Stand(hunter_base.HunterEnv):
 
     def step(self, state: mjx_env.State, action: jax.Array) -> mjx_env.State:
         """Step the environment forward."""
+
+        print("stepping...")
         
         rng, noise_rng = jax.random.split(state.info["rng"], 2)
 
