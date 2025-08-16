@@ -94,7 +94,7 @@ class Stand(hunter_base.HunterEnv):
         )
         
         data = mjx.forward(self.mjx_model, data)
-        qpos = qpos.at[2].set(0.3)  # 初期高さ
+        qpos = qpos.at[2].set(0.0)  # 初期高さ
         qpos = qpos.at[3:7].set([1, 0, 0, 0])  # 初期姿勢
         data = data.replace(qpos=qpos, qvel=qvel)
 
@@ -108,13 +108,13 @@ class Stand(hunter_base.HunterEnv):
         for k in self._config.reward_config.scales.keys():
             metrics[f"reward/{k}"] = jp.zeros(())
 
-        obs_history = jp.zeros(15 * self._get_obs_size())
-        obs = self._get_obs(data, info, obs_history, noise_rng)
+        obs = self._get_obs(data, info, noise_rng)
         reward, done = jp.zeros(2)
         return mjx_env.State(data, obs, reward, done, metrics, info)
 
     def step(self, state: mjx_env.State, action: jax.Array) -> mjx_env.State:
         """Step the environment forward."""
+        
         rng, noise_rng = jax.random.split(state.info["rng"], 2)
 
         # Convert action to joint targets
@@ -127,7 +127,7 @@ class Stand(hunter_base.HunterEnv):
         )
 
         # Get observation
-        obs = self._get_obs(data, state.info, state.obs, noise_rng)
+        obs = self._get_obs(data, state.info, noise_rng)
 
         # Check termination conditions
         base_z = data.xpos[self._base_body_id, 2]
@@ -168,7 +168,6 @@ class Stand(hunter_base.HunterEnv):
         self,
         data: mjx.Data,
         info: dict[str, Any],
-        obs_history: jax.Array,
         rng: jax.Array,
     ) -> jax.Array:
         """Get the observation vector."""
@@ -203,8 +202,6 @@ class Stand(hunter_base.HunterEnv):
             )
             obs = obs + noise
 
-        # Update observation history
-        obs = jp.roll(obs_history, obs.size).at[:obs.size].set(obs)
         return obs
 
     def _get_gravity_vector(self, data: mjx.Data) -> jax.Array:
@@ -253,9 +250,10 @@ class Stand(hunter_base.HunterEnv):
         joint_limits = -(lower_violation + upper_violation)
 
         # Height reward
-        base_height = data.xpos[self._base_body_id, 2]
-        target_height = 0.88
-        height = -jp.abs(base_height - target_height)
+        # base_height = data.xpos[self._base_body_id, 2]
+        # target_height = 0.88
+        # height = -jp.abs(base_height - target_height)
+        height = 0.0
 
         return {
             "upright": upright,
