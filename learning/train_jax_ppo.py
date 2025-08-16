@@ -155,7 +155,7 @@ _LOG_TRAINING_METRICS = flags.DEFINE_boolean(
 )
 _TRAINING_METRICS_STEPS = flags.DEFINE_integer(
     "training_metrics_steps",
-    1_000_000,
+    1_000,
     "Number of steps between logging training metrics. Increase if training"
     " experiences slowdown.",
 )
@@ -480,8 +480,9 @@ def main(argv):
         else state
     )
     rollout.append(state0)
-    if state0.done:
-      break
+    # TODO: please uncomment the following line if you want to stop
+    # if state0.done:
+    #   break
 
   # Render and save the rollout
   render_every = 2
