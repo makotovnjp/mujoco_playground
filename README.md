@@ -81,7 +81,10 @@ python learning/train_jax_ppo.py --env_name HunterStand --num_timesteps 10
 To interactively view trajectories throughout training with [rscope](https://github.com/Andrew-Luo1/rscope/tree/main), install it (`pip install rscope`) and run:
 
 ```
-python learning/train_jax_ppo.py --env_name PandaPickCube --rscope_envs 16 --run_evals=False --deterministic_rscope=True
+python learning/train_jax_ppo.py --env_name HunterStand --num_timesteps 10 --rscope_envs 16 --run_evals=False --deterministic_rscope=True
+
+python learning/train_jax_ppo.py --env_name H1InplaceGaitTracking --num_timesteps 10 --rscope_envs 16 --run_evals=False --deterministic_rscope=True
+
 # In a separate terminal
 python -m rscope
 ```
