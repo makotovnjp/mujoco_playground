@@ -76,12 +76,11 @@ class Stand(hunter_base.HunterEnv):
 
     def reset(self, rng: jax.Array) -> mjx_env.State:
         """Reset the environment to the initial standing position."""
+        print("Resetting environment to standing position...")
         rng, noise_rng = jax.random.split(rng, 2)
 
-        # Add small random perturbation to initial position
-        q_noise = 0.02 * jax.random.normal(noise_rng, (self._mjx_model.nq,))
-        # qpos = self._init_q + q_noise
-        qpos = jp.zeros(self.mjx_model.nq)
+        # Initialize robot to standing position without noise
+        qpos = self._init_q  # Use the pre-defined stable standing pose
         qvel = jp.zeros(self._mjx_model.nv)
 
         data = mjx_env.make_data(
@@ -94,9 +93,6 @@ class Stand(hunter_base.HunterEnv):
         )
         
         data = mjx.forward(self.mjx_model, data)
-        qpos = qpos.at[2].set(0.0)  # 初期高さ
-        qpos = qpos.at[3:7].set([1, 0, 0, 0])  # 初期姿勢
-        data = data.replace(qpos=qpos, qvel=qvel)
 
         info = {
             "rng": rng,
@@ -114,12 +110,23 @@ class Stand(hunter_base.HunterEnv):
 
     def step(self, state: mjx_env.State, action: jax.Array) -> mjx_env.State:
         """Step the environment forward."""
+
+        print("step...")
         
         rng, noise_rng = jax.random.split(state.info["rng"], 2)
 
-        # Convert action to joint targets
-        motor_targets = self._default_pose + action * self._config.action_scale
-        motor_targets = jp.clip(motor_targets, self._lowers, self._uppers)
+        # Maintain standing position using PD control
+        current_pos = state.data.qpos[7:]  # Current joint positions
+        target_pos = self._default_pose  # Target standing pose
+        
+        # Simple PD control to maintain position
+        kp = 1000.0  # Position gain
+        kd = 100.0   # Velocity gain
+        
+        pos_error = target_pos - current_pos
+        vel_error = -state.data.qvel[6:]  # We want zero velocity
+        
+        motor_targets = kp * pos_error + kd * vel_error
 
         # Step the simulation
         data = mjx_env.step(
@@ -129,32 +136,34 @@ class Stand(hunter_base.HunterEnv):
         # Get observation
         obs = self._get_obs(data, state.info, noise_rng)
 
-        # Check termination conditions
-        base_z = data.xpos[self._base_body_id, 2]
-        base_quat = data.xquat[self._base_body_id]
-        up_dot = jp.abs(base_quat[0])  # Simplified upright check
+        # Check termination conditions - never terminate for position holding
+        done = jp.float32(False)  # Never terminate
+        # base_z = data.xpos[self._base_body_id, 2]
+        # base_quat = data.xquat[self._base_body_id]
+        # up_dot = jp.abs(base_quat[0])  # Simplified upright check
 
-        done = base_z < 0.5  # Robot fell down
-        done |= up_dot < 0.5  # Robot tipped over significantly
-        done |= jp.any(data.qpos[7:] < self._lowers)  # Joint limits
-        done |= jp.any(data.qpos[7:] > self._uppers)
+        # done = base_z < 0.5  # Robot fell down
+        # done |= up_dot < 0.5  # Robot tipped over significantly
+        # done |= jp.any(data.qpos[7:] < self._lowers)  # Joint limits
+        # done |= jp.any(data.qpos[7:] > self._uppers)
 
-        # Calculate rewards
-        rewards = self._get_reward(data, action, state.info)
-        rewards = {
-            k: v * self._config.reward_config.scales[k]
-            for k, v in rewards.items()
-        }
-        reward = jp.clip(sum(rewards.values()) * self.dt, -1000.0, 1000.0)
+        # No rewards - just return zero
+        reward = jp.float32(0.0)
+        # rewards = self._get_reward(data, action, state.info)
+        # rewards = {
+        #     k: v * self._config.reward_config.scales[k]
+        #     for k, v in rewards.items()
+        # }
+        # reward = jp.clip(sum(rewards.values()) * self.dt, -1000.0, 1000.0)
 
         # Update info
         state.info["last_act"] = action
         state.info["step"] += 1
         state.info["rng"] = rng
 
-        # Update metrics
-        for k, v in rewards.items():
-            state.metrics[f"reward/{k}"] = v
+        # No reward metrics to update
+        # for k, v in rewards.items():
+        #     state.metrics[f"reward/{k}"] = v
 
         done = jp.float32(done)
         state = state.replace(data=data, obs=obs, reward=reward, done=done)
@@ -162,7 +171,7 @@ class Stand(hunter_base.HunterEnv):
 
     def _get_obs_size(self) -> int:
         """Get the size of the observation vector."""
-        return 3 + 3 + 10 + 10 + 10  # gravity + angular_vel + qpos + qvel + action
+        return 3 + 3 + 10 + 10  # gravity + angular_vel + qpos + qvel (no action)
 
     def _get_obs(
         self,
@@ -183,16 +192,15 @@ class Stand(hunter_base.HunterEnv):
         # Joint velocities (10)
         joint_vel = data.qvel[6:]
 
-        # Previous action (10)
-        last_act = info["last_act"]
+        # No action in observation since we don't use actions
+        # last_act = info["last_act"]
 
         obs = jp.concatenate([
             gravity,      # 3
             angvel,       # 3
             joint_pos,    # 10
             joint_vel,    # 10
-            last_act,     # 10
-            # total: 36
+            # total: 26
         ])
 
         # Add noise if specified
