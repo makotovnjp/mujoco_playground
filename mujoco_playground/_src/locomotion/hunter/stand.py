@@ -18,13 +18,13 @@ def default_config() -> config_dict.ConfigDict:
     return config_dict.create(
         ctrl_dt=0.02,
         sim_dt=0.004,
-        episode_length=1000,
+        episode_length=100,
         action_repeat=1,
-        action_scale=1.0,  # Direct torque scaling
+        action_scale=0.6,  # Direct torque scaling
         obs_noise=0.01,
         reward_config=config_dict.create(
             scales=config_dict.create(
-                upright=2.0,
+                upright=1.0,
                 stability=1.0, 
                 effort=0.01,  # Lower effort penalty for torque control
                 joint_limits=1.0,
@@ -61,10 +61,12 @@ class Stand(hunter_base.HunterEnv):
         # Default standing pose with slightly bent knees
         self._init_q = jp.zeros(self._mjx_model.nq)
         # Set floating base position (x, y, z, quat)
-        self._init_q = self._init_q.at[2].set(-0.17)  # z position - proper standing height
+        self._init_q = self._init_q.at[2].set(0.0)  # z position - proper standing height
         self._init_q = self._init_q.at[3:7].set(jp.array([1, 0, 0, 0]))  # quat
+        
         # Set joint positions for stable standing
-        joint_init = jp.array([0.0, 0.0, 0.1, 0.2, -0.1] * 2)  # 10 joints
+        # joint_init = jp.array([0.0, 0.0, 0.1, 0.2, -0.1] * 2)  # 10 joints
+        joint_init = jp.array([0.0, 0.0, -0.2, 0.4, -0.15] * 2)  # 10 joints
         self._init_q = self._init_q.at[7:].set(joint_init)
 
         self._default_pose = joint_init
@@ -115,7 +117,8 @@ class Stand(hunter_base.HunterEnv):
         rng, noise_rng = jax.random.split(state.info["rng"], 2)
 
         # Convert action to joint torques (direct torque control)
-        motor_targets = action * self._config.action_scale
+        motor_targets = self._default_pose + action * self._config.action_scale
+        
         # Clip torques to safe limits
         torque_limits = 100.0  # Maximum torque in Nm
         motor_targets = jp.clip(motor_targets, -torque_limits, torque_limits)
@@ -133,7 +136,7 @@ class Stand(hunter_base.HunterEnv):
         base_quat = data.xquat[self._base_body_id]
         up_dot = jp.abs(base_quat[0])  # Simplified upright check
 
-        done = base_z < -0.3  # Robot fell down (below ground level)
+        done = base_z < 0.0  # Robot fell down (below ground level)
         done |= up_dot < 0.5  # Robot tipped over significantly
         done |= jp.any(data.qpos[7:] < self._lowers)  # Joint limits
         done |= jp.any(data.qpos[7:] > self._uppers)
@@ -249,9 +252,9 @@ class Stand(hunter_base.HunterEnv):
         upright = base_quat[0] ** 2  # Reward for staying upright (w component squared)
 
         # Stability reward - penalize high velocities
-        lin_vel = jp.linalg.norm(data.qvel[:3])
-        ang_vel = jp.linalg.norm(data.qvel[3:6])
-        joint_vel = jp.linalg.norm(data.qvel[6:])
+        lin_vel = jp.sum(jp.square(data.qvel[:3]))
+        ang_vel = jp.sum(jp.square(data.qvel[3:6]))
+        joint_vel = jp.sum(jp.square(data.qvel[6:]))
         stability = jp.exp(-1.0 * (lin_vel + ang_vel + 0.1 * joint_vel))
 
         # Effort penalty - penalize high torques (more important for torque control)
@@ -260,17 +263,19 @@ class Stand(hunter_base.HunterEnv):
 
         # Joint limit penalty
         joint_pos = data.qpos[7:]
-        lower_violation = jp.sum(jp.maximum(0, self._lowers - joint_pos))
-        upper_violation = jp.sum(jp.maximum(0, joint_pos - self._uppers))
-        joint_limits = jp.exp(-5.0 * (lower_violation + upper_violation))
+        # lower_violation = jp.sum(jp.maximum(0, self._lowers - joint_pos))
+        # upper_violation = jp.sum(jp.maximum(0, joint_pos - self._uppers))
+        # joint_limits = jp.exp(1.0 * (lower_violation + upper_violation))
+        joint_limits = 1.0
 
         # Height reward - encourage staying at proper height
         base_height = data.xpos[self._base_body_id, 2]
-        target_height = -0.17  # Match the init height
-        height = jp.exp(-5.0 * jp.abs(base_height - target_height))
+        target_height = -0.01  # Match the current init height
+        height = jp.exp(-1.0 * jp.abs(base_height - target_height))
 
         # Pose reward - encourage staying close to default standing pose
-        pose_error = jp.linalg.norm(joint_pos - self._default_pose)
+        # pose_error = jp.linalg.norm(joint_pos - self._default_pose)
+        pose_error = jp.sum(jp.square(joint_pos - self._default_pose))
         pose_reward = jp.exp(-1.0 * pose_error)
 
         return {

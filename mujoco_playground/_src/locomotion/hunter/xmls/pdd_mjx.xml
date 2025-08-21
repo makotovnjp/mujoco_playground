@@ -24,9 +24,22 @@
     <default class='obstacle'>
       <geom material='obstacle' condim='3' contype='1' conaffinity='15' />
     </default>
-
+    
     <default class='joint_param'>
       <joint damping="1" frictionloss="1" armature="0.01" />
+    </default>
+
+    <default class="collision">
+        <geom group="3" mass="0" density="0"/>
+        <default class="foot">
+          <geom type="sphere" size=".001"/>
+          <default class="foot1">
+            <geom size="0.001" contype="0" conaffinity="0" density="0"/>
+          </default>
+          <default class="foot2">
+            <geom size="0.001"/>
+          </default>
+        </default>
     </default>
   </default>
 
@@ -68,7 +81,7 @@
     <geom name="ground" type="plane" size="0 0 1" pos="0.001 0 0" quat="1 0 0 0" material="matplane"
       condim="1" conaffinity='15' />
 
-    <body name="base_link" pos="0.0 0.0 0.88">
+    <body name="base_link" pos="0.0 0.0 0.7">
       <geom type="mesh" mesh="base_link" group="1" class="visualgeom" />
 
       <inertial pos="-0.0033599 -0.00084664 0.1336" mass="9.9576"
@@ -122,6 +135,10 @@
                   frictionloss="0.2" />
                 <geom size="0.05005 0.01725 0.00875" pos="0.01503 0 -0.0102"
                   quat="0.707388 0.706825 0 0" type="box" rgba="0.75294 0.75294 0.75294 1" />
+                
+                <geom name="left_foot1" class="foot1"/>
+                <geom name="left_foot2" class="foot2"/>  
+                <site name="left_foot" pos="0 0 0" />
               </body>
             </body>
           </body>
@@ -166,6 +183,10 @@
                   frictionloss="0.2" />
                 <geom size="0.05005 0.01725 0.00875" pos="0.01503 0 -0.0102"
                   quat="0.707388 0.706825 0 0" type="box" rgba="0.75294 0.75294 0.75294 1" />
+                
+                <geom name="right_foot1" class="foot1"/>
+                <geom name="right_foot2" class="foot2"/> 
+                <site name ="right_foot" pos="0 0 0" />
               </body>
             </body>
           </body>

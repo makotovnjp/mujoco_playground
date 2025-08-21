@@ -151,10 +151,9 @@ def brax_ppo_config(env_name: str) -> config_dict.ConfigDict:
     rl_config.num_timesteps = 10
     rl_config.num_evals = 10
     rl_config.episode_length = 10
-    rl_config.num_envs = 4096
     rl_config.network_factory = config_dict.create(
-        policy_hidden_layer_sizes=(64, 64),
-        value_hidden_layer_sizes=(64, 64),
+        policy_hidden_layer_sizes=(128, 64),
+        value_hidden_layer_sizes=(128, 64),
         policy_obs_key="state",
         value_obs_key="state",
     )
