@@ -117,7 +117,7 @@ class Stand(hunter_base.HunterEnv):
         rng, noise_rng = jax.random.split(state.info["rng"], 2)
 
         # Convert action to joint torques (direct torque control)
-        motor_targets = self._default_pose + action * self._config.action_scale
+        motor_targets = action * self._config.action_scale
         
         # Clip torques to safe limits
         torque_limits = 100.0  # Maximum torque in Nm
