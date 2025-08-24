@@ -44,6 +44,7 @@ from mujoco_playground import wrapper
 from mujoco_playground.config import dm_control_suite_params
 from mujoco_playground.config import locomotion_params
 from mujoco_playground.config import manipulation_params
+import csv
 
 xla_flags = os.environ.get("XLA_FLAGS", "")
 xla_flags += " --xla_gpu_triton_gemm_any=True"
@@ -468,21 +469,39 @@ def main(argv):
       jax.tree_util.tree_map(lambda x: x[0], state) if _VISION.value else state
   )
   rollout = [state0]
+  
+  # Log eval action to csv
+  joint_names = []
+  for i in range(env._mj_model.nu):
+      name = mujoco.mj_id2name(env._mj_model, mujoco.mjtObj.mjOBJ_ACTUATOR, i)
+      print(i, name)
+      joint_names.append(name)
+  csv_header = ["steps"] + joint_names
 
-  # Run evaluation rollout
-  for _ in range(env_cfg.episode_length):
-    act_rng, rng = jax.random.split(rng)
-    ctrl, _ = jit_inference_fn(state.obs, act_rng)
-    state = jit_step(state, ctrl)
-    state0 = (
-        jax.tree_util.tree_map(lambda x: x[0], state)
-        if _VISION.value
-        else state
-    )
-    rollout.append(state0)
-    # TODO: please uncomment the following line if you want to stop
-    # if state0.done:
-    #   break
+  with open("actions_log.csv", mode="w", newline="") as file:
+    writer = csv.writer(file)
+    writer.writerow(csv_header)
+    step = 0
+
+    # Run evaluation rollout
+    for _ in range(env_cfg.episode_length):
+      act_rng, rng = jax.random.split(rng)
+      ctrl, _ = jit_inference_fn(state.obs, act_rng)
+      state = jit_step(state, ctrl)
+      state0 = (
+          jax.tree_util.tree_map(lambda x: x[0], state)
+          if _VISION.value
+          else state
+      )
+      rollout.append(state0)
+      step += 1
+
+      # Log step + action values
+      writer.writerow([step] + list(ctrl))
+
+      # TODO: please uncomment the following line if you want to stop
+      # if state0.done:
+      #   break
 
   # Render and save the rollout
   render_every = 2

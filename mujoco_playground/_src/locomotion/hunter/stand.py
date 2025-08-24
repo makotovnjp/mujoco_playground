@@ -20,7 +20,7 @@ def default_config() -> config_dict.ConfigDict:
         sim_dt=0.004,
         episode_length=100,
         action_repeat=1,
-        action_scale=0.6,  # Direct torque scaling
+        action_scale=1.6,  # Direct torque scaling
         obs_noise=0.01,
         reward_config=config_dict.create(
             scales=config_dict.create(
@@ -77,6 +77,18 @@ class Stand(hunter_base.HunterEnv):
         self._base_body_id = self._mj_model.body(hunter_constants.ROOT_BODY).id
         self._imu_site_id = self._mj_model.site("imu").id
 
+        # # --- Get motor IDs ---
+        # # Each actuator controls exactly one joint in most torque-control setups
+        # motor_ids = []
+        # for i in range(self._mj_model.nu):  # nu = number of actuators
+        #     joint_id = self._mj_model.actuator_trnid[i][0]  # first entry is joint ID
+        #     motor_ids.append(joint_id)
+        # self.motor_id = jp.array(motor_ids)
+
+        # # --- Store default pose for relative joint positions ---
+        # self._default_qpos = self._init_q[7:]  # first keyframe as default pose
+        
+
     def reset(self, rng: jax.Array) -> mjx_env.State:
         """Reset the environment to the initial standing position."""
         print("resetting...")
@@ -124,9 +136,15 @@ class Stand(hunter_base.HunterEnv):
         motor_targets = jp.clip(motor_targets, -torque_limits, torque_limits)
 
         # Step the simulation
-        data = mjx_env.step(
-            self.mjx_model, state.data, motor_targets, self.n_substeps
-        )
+        # data = mjx_env.step(
+        #     self.mjx_model, state.data, motor_targets, self.n_substeps
+        # )
+
+        # Step physics n_substeps
+        data = state.data
+        for _ in range(self.n_substeps):
+            data = data.replace(ctrl=motor_targets)
+            data = mjx.step(self.mjx_model, data)
 
         # Get observation
         obs = self._get_obs(data, state.info, noise_rng)
@@ -136,7 +154,7 @@ class Stand(hunter_base.HunterEnv):
         base_quat = data.xquat[self._base_body_id]
         up_dot = jp.abs(base_quat[0])  # Simplified upright check
 
-        done = base_z < 0.0  # Robot fell down (below ground level)
+        done = base_z < 0.3  # Robot fell down (below ground level)
         done |= up_dot < 0.5  # Robot tipped over significantly
         done |= jp.any(data.qpos[7:] < self._lowers)  # Joint limits
         done |= jp.any(data.qpos[7:] > self._uppers)
@@ -185,11 +203,17 @@ class Stand(hunter_base.HunterEnv):
         # Current joint torques (10) - previous action represents applied torques
         joint_torques = info["last_act"]
 
+        # # --- Joint states ---
+        # qpos = data.qpos[self.motor_id] - self._default_qpos  # relative joint angles
+        # qvel = data.qvel[self.motor_id]                       # joint velocities
+
         obs = jp.concatenate([
             gravity,        # 3
             linear_accel,   # 3
             angular_vel,    # 3
             joint_torques,  # 10
+            # qpos,
+            # qvel,
             # total: 19
         ])
 
@@ -270,13 +294,13 @@ class Stand(hunter_base.HunterEnv):
 
         # Height reward - encourage staying at proper height
         base_height = data.xpos[self._base_body_id, 2]
-        target_height = -0.01  # Match the current init height
+        target_height = 0.69  # Match the current init height
         height = jp.exp(-1.0 * jp.abs(base_height - target_height))
 
         # Pose reward - encourage staying close to default standing pose
         # pose_error = jp.linalg.norm(joint_pos - self._default_pose)
         pose_error = jp.sum(jp.square(joint_pos - self._default_pose))
-        pose_reward = jp.exp(-1.0 * pose_error)
+        pose_reward = jp.exp(-5.0 * pose_error)
 
         return {
             "upright": upright,

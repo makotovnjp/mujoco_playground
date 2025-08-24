@@ -148,9 +148,9 @@ def brax_ppo_config(env_name: str) -> config_dict.ConfigDict:
     )
 
   elif env_name == "HunterStand":
-    rl_config.num_timesteps = 10
-    rl_config.num_evals = 10
-    rl_config.episode_length = 10
+    rl_config.num_timesteps = 2000000
+    rl_config.num_evals = 20
+    rl_config.episode_length = 100
     rl_config.network_factory = config_dict.create(
         policy_hidden_layer_sizes=(128, 64),
         value_hidden_layer_sizes=(128, 64),
