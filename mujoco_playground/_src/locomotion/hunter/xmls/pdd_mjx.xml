@@ -84,8 +84,8 @@
     <body name="base_link" pos="0.0 0.0 0.7">
       <geom type="mesh" mesh="base_link" group="1" class="visualgeom" />
 
-      <inertial pos="-0.0033599 -0.00084664 0.1336" mass="9.9576"
-        diaginertia="0.089966 0.060002 0.056135" />
+      <inertial pos="-0.010856 -6.8e-05 -0.007128" mass="5.67363"  
+      	diaginertia="0.0355096 0.0296524 0.0283549" />
       <joint type='slide' axis='1 0 0' limited='false' />
       <joint type='slide' axis='0 1 0' limited='false' />
       <joint type='slide' axis='0 0 1' limited='false' />
@@ -196,16 +196,16 @@
   </worldbody>
   
   <actuator>
-    <motor name="leg_l1_joint" joint="leg_l1_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
-    <motor name="leg_l2_joint" joint="leg_l2_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
-    <motor name="leg_l3_joint" joint="leg_l3_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
-    <motor name="leg_l4_joint" joint="leg_l4_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
-    <motor name="leg_l5_joint" joint="leg_l5_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
-    <motor name="leg_r1_joint" joint="leg_r1_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
-    <motor name="leg_r2_joint" joint="leg_r2_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
-    <motor name="leg_r3_joint" joint="leg_r3_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
-    <motor name="leg_r4_joint" joint="leg_r4_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
-    <motor name="leg_r5_joint" joint="leg_r5_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
+    <motor name="leg_l1_joint" joint="leg_l1_joint" gear="1" ctrllimited="true" ctrlrange="-200 200" />
+    <motor name="leg_l2_joint" joint="leg_l2_joint" gear="1" ctrllimited="true" ctrlrange="-200 200" />
+    <motor name="leg_l3_joint" joint="leg_l3_joint" gear="1" ctrllimited="true" ctrlrange="-200 200" />
+    <motor name="leg_l4_joint" joint="leg_l4_joint" gear="1" ctrllimited="true" ctrlrange="-200 200" />
+    <motor name="leg_l5_joint" joint="leg_l5_joint" gear="1" ctrllimited="true" ctrlrange="-200 200" />
+    <motor name="leg_r1_joint" joint="leg_r1_joint" gear="1" ctrllimited="true" ctrlrange="-200 200" />
+    <motor name="leg_r2_joint" joint="leg_r2_joint" gear="1" ctrllimited="true" ctrlrange="-200 200" />
+    <motor name="leg_r3_joint" joint="leg_r3_joint" gear="1" ctrllimited="true" ctrlrange="-200 200" />
+    <motor name="leg_r4_joint" joint="leg_r4_joint" gear="1" ctrllimited="true" ctrlrange="-200 200" />
+    <motor name="leg_r5_joint" joint="leg_r5_joint" gear="1" ctrllimited="true" ctrlrange="-200 200" />
   </actuator>
   
   <sensor>
