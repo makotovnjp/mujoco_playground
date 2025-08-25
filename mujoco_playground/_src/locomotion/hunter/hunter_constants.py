@@ -40,9 +40,9 @@ RIGHT_FEET_GEOMS = [
 ROOT_BODY = "base_link"
 
 # Sensor names from pdd.xml
-GRAVITY_SENSOR = "orientation"  # framequat sensor
-GLOBAL_LINVEL_SENSOR = "linear-velocity"  # velocimeter sensor
-GLOBAL_ANGVEL_SENSOR = "angular-velocity"  # gyro sensor
-LOCAL_LINVEL_SENSOR = "linear-velocity"  # velocimeter sensor
-ACCELEROMETER_SENSOR = "linear-acceleration"  # accelerometer sensor
-GYRO_SENSOR = "angular-velocity"  # gyro sensor
+GRAVITY_SENSOR = "upvector"
+GLOBAL_LINVEL_SENSOR = "global_linvel"
+GLOBAL_ANGVEL_SENSOR = "global_angvel"
+LOCAL_LINVEL_SENSOR = "local_linvel"
+ACCELEROMETER_SENSOR = "accelerometer"
+GYRO_SENSOR = "gyro"
