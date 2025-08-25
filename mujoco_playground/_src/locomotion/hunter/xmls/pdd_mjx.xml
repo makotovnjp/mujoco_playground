@@ -84,8 +84,8 @@
     <body name="base_link" pos="0.0 0.0 0.7">
       <geom type="mesh" mesh="base_link" group="1" class="visualgeom" />
 
-      <inertial pos="-0.0033599 -0.00084664 0.1336" mass="9.9576"
-        diaginertia="0.089966 0.060002 0.056135" />
+      <inertial pos="-0.0033599 -0.00084664 0.1336" mass="9.9576" 
+      	diaginertia="0.089966 0.060002 0.056135" />
       <joint type='slide' axis='1 0 0' limited='false' />
       <joint type='slide' axis='0 1 0' limited='false' />
       <joint type='slide' axis='0 0 1' limited='false' />
@@ -242,11 +242,16 @@
     <actuatorfrc name='leg_r4_joint_f' actuator='leg_r4_joint' user='13' />
     <actuatorfrc name='leg_r5_joint_f' actuator='leg_r5_joint' user='13' />
 
-    <framequat name='orientation' objtype='site' noise='0.001' objname='imu' />
-    <framepos name='position' objtype='site' noise='0.001' objname='imu' />
-    <gyro name='angular-velocity' site='imu' noise='0.005' cutoff='34.9' />
-    <velocimeter name='linear-velocity' site='imu' noise='0.001' cutoff='30' />
-    <accelerometer name='linear-acceleration' site='imu' noise='0.005' cutoff='157' />
-    <magnetometer name='magnetometer' site='imu' />
+
+    <gyro site="imu" name="gyro"/>
+    <velocimeter site="imu" name="local_linvel"/>
+    <accelerometer site="imu" name="accelerometer"/>
+    <framepos objtype="site" objname="imu" name="position"/>
+    <framezaxis objtype="site" objname="imu" name="upvector"/>
+    <framexaxis objtype="site" objname="imu" name="forwardvector"/>
+    <framelinvel objtype="site" objname="imu" name="global_linvel"/>
+    <frameangvel objtype="site" objname="imu" name="global_angvel"/>
+    <framequat objtype="site" objname="imu" name="orientation"/>
+
   </sensor>
 </mujoco>
