@@ -20,16 +20,19 @@ def default_config() -> config_dict.ConfigDict:
         sim_dt=0.004,
         episode_length=100,
         action_repeat=1,
-        action_scale=1.6,  # Direct torque scaling
+        # action_scale=1.6,  # Direct torque scaling
+        action_scale=0.6,
         obs_noise=0.01,
         reward_config=config_dict.create(
             scales=config_dict.create(
                 upright=1.0,
-                stability=1.0, 
-                effort=0.01,  # Lower effort penalty for torque control
-                joint_limits=1.0,
-                height=1.0,
-                pose=1.0,
+                stability=0.5, 
+                # effort=-0.0002,  # Lower effort penalty for torque control
+                effort=0.0,  # Lower effort penalty for torque control
+                joint_limits=0.0,
+                height=2.0,
+                pose=-1.0,
+                # penalty_fall=100,
             ),
         ),
         impl="jax",
@@ -66,12 +69,15 @@ class Stand(hunter_base.HunterEnv):
         
         # Set joint positions for stable standing
         # joint_init = jp.array([0.0, 0.0, 0.1, 0.2, -0.1] * 2)  # 10 joints
-        joint_init = jp.array([0.0, 0.0, -0.2, 0.4, -0.15] * 2)  # 10 joints
+        # joint_init = jp.array([0.0, 0.0, -0.2, 0.4, -0.15] * 2)  # 10 joints
+        joint_init = jp.array([0.0, 0.0, 0.2, 0.4, 0.15, 0.0, 0.0, -0.2, 0.4, -0.15])  # 10 joints
         self._init_q = self._init_q.at[7:].set(joint_init)
 
         self._default_pose = joint_init
-        self._lowers = jp.array([-0.2, -0.5, -0.8, 0.0, -1.1] * 2)
-        self._uppers = jp.array([0.5, 1.0, 1.2, 1.5, 1.1] * 2)
+        # self._lowers = jp.array([-0.2, -0.5, -0.8, 0.0, -1.1] * 2)
+        # self._uppers = jp.array([0.5, 1.0, 1.2, 1.5, 1.1] * 2)
+        self._lowers = self._mj_model.actuator_ctrlrange[:, 0]
+        self._uppers = self._mj_model.actuator_ctrlrange[:, 1]
 
         # Body and sensor IDs
         self._base_body_id = self._mj_model.body(hunter_constants.ROOT_BODY).id
@@ -129,22 +135,23 @@ class Stand(hunter_base.HunterEnv):
         rng, noise_rng = jax.random.split(state.info["rng"], 2)
 
         # Convert action to joint torques (direct torque control)
-        motor_targets = action * self._config.action_scale
+        motor_targets = self._default_pose + action * self._config.action_scale
         
         # Clip torques to safe limits
-        torque_limits = 100.0  # Maximum torque in Nm
-        motor_targets = jp.clip(motor_targets, -torque_limits, torque_limits)
+        # torque_limits = 100.0  # Maximum torque in Nm
+        # motor_targets = jp.clip(motor_targets, -torque_limits, torque_limits)
+        motor_targets = jp.clip(motor_targets, self._lowers, self._uppers)
 
         # Step the simulation
-        # data = mjx_env.step(
-        #     self.mjx_model, state.data, motor_targets, self.n_substeps
-        # )
+        data = mjx_env.step(
+            self.mjx_model, state.data, motor_targets, self.n_substeps
+        )
 
-        # Step physics n_substeps
-        data = state.data
-        for _ in range(self.n_substeps):
-            data = data.replace(ctrl=motor_targets)
-            data = mjx.step(self.mjx_model, data)
+        # # Step physics n_substeps
+        # data = state.data
+        # for _ in range(self.n_substeps):
+        #     data = data.replace(ctrl=motor_targets)
+        #     data = mjx.step(self.mjx_model, data)
 
         # Get observation
         obs = self._get_obs(data, state.info, noise_rng)
@@ -156,8 +163,8 @@ class Stand(hunter_base.HunterEnv):
 
         done = base_z < 0.3  # Robot fell down (below ground level)
         done |= up_dot < 0.5  # Robot tipped over significantly
-        done |= jp.any(data.qpos[7:] < self._lowers)  # Joint limits
-        done |= jp.any(data.qpos[7:] > self._uppers)
+        # done |= jp.any(data.qpos[7:] < self._lowers)  # Joint limits
+        # done |= jp.any(data.qpos[7:] > self._uppers)
 
         # Calculate rewards for training
         rewards = self._get_reward(data, action, state.info)
@@ -182,7 +189,9 @@ class Stand(hunter_base.HunterEnv):
 
     def _get_obs_size(self) -> int:
         """Get the size of the observation vector."""
-        return 3 + 3 + 3 + 10  # gravity + linear_accel + angular_vel + joint_torques
+        # return 3 + 3 + 3 + 10  # gravity + linear_accel + angular_vel + joint_torques
+        # Observation vector: gravity(3) + accelerometer(3) + gyro(3) + joint_torques(10) + joint_pos(10) + joint_vel(10) = 39
+        return 3 + 3 + 3 + 10 + 10 + 10
 
     def _get_obs(
         self,
@@ -192,15 +201,17 @@ class Stand(hunter_base.HunterEnv):
     ) -> jax.Array:
         """Get the observation vector with IMU data and joint torques."""
         # IMU data: Gravity vector in base frame (3)
-        gravity = self._get_gravity_vector(data)
+        gravity = self.get_gravity(data)
 
         # IMU data: Linear acceleration (3)
-        linear_accel = self._get_linear_acceleration(data)
-
+        # linear_accel = self._get_linear_acceleration(data)
+        linear_accel = self.get_accelerometer(data)
+        
         # IMU data: Angular velocity (3)
-        angular_vel = self._get_angular_velocity(data)
+        # angular_vel = self._get_angular_velocity(data)
+        angular_vel = self.get_gyro(data)
 
-        # Current joint torques (10) - previous action represents applied torques
+        # Current joint action (10) 
         joint_torques = info["last_act"]
 
         # # --- Joint states ---
@@ -215,6 +226,10 @@ class Stand(hunter_base.HunterEnv):
             # qpos,
             # qvel,
             # total: 19
+
+            data.qpos[7:] - self._default_pose,  # 10
+            data.qvel[6:],  # 10
+            # total: 39
         ])
 
         # Add noise if specified
@@ -226,43 +241,6 @@ class Stand(hunter_base.HunterEnv):
 
         return obs
 
-    def _get_gravity_vector(self, data: mjx.Data) -> jax.Array:
-        """Get gravity vector in the base frame."""
-        # Extract rotation matrix from base quaternion
-        base_quat = data.xquat[self._base_body_id]
-        # Convert quaternion to rotation matrix
-        w, x, y, z = base_quat
-        rot_mat = jp.array([
-            [1 - 2*(y*y + z*z), 2*(x*y - w*z), 2*(x*z + w*y)],
-            [2*(x*y + w*z), 1 - 2*(x*x + z*z), 2*(y*z - w*x)],
-            [2*(x*z - w*y), 2*(y*z + w*x), 1 - 2*(x*x + y*y)]
-        ])
-        gravity_world = jp.array([0, 0, -1])
-        gravity_base = rot_mat.T @ gravity_world
-        return gravity_base
-
-    def _get_angular_velocity(self, data: mjx.Data) -> jax.Array:
-        """Get angular velocity of the base."""
-        return data.qvel[3:6]
-
-    def _get_linear_acceleration(self, data: mjx.Data) -> jax.Array:
-        """Get linear acceleration of the base in base frame."""
-        # Get linear acceleration from sensor data
-        # Note: This is a simplified version. In real implementation, 
-        # you might want to use actual accelerometer sensor data
-        base_accel_world = data.qacc[:3]  # Linear acceleration in world frame
-        
-        # Transform to base frame using base quaternion
-        base_quat = data.xquat[self._base_body_id]
-        w, x, y, z = base_quat
-        rot_mat = jp.array([
-            [1 - 2*(y*y + z*z), 2*(x*y - w*z), 2*(x*z + w*y)],
-            [2*(x*y + w*z), 1 - 2*(x*x + z*z), 2*(y*z - w*x)],
-            [2*(x*z - w*y), 2*(y*z + w*x), 1 - 2*(x*x + y*y)]
-        ])
-        
-        base_accel_local = rot_mat.T @ base_accel_world
-        return base_accel_local
 
     def _get_reward(
         self,
@@ -279,28 +257,35 @@ class Stand(hunter_base.HunterEnv):
         lin_vel = jp.sum(jp.square(data.qvel[:3]))
         ang_vel = jp.sum(jp.square(data.qvel[3:6]))
         joint_vel = jp.sum(jp.square(data.qvel[6:]))
-        stability = jp.exp(-1.0 * (lin_vel + ang_vel + 0.1 * joint_vel))
+        # stability = jp.exp(-1.0 * (lin_vel + ang_vel + 0.1 * joint_vel))
+        stability = -1.0 * (lin_vel + ang_vel + 0.1 * joint_vel)
+
 
         # Effort penalty - penalize high torques (more important for torque control)
         torque_magnitude = jp.linalg.norm(action)
-        effort = jp.exp(-0.001 * torque_magnitude)
+        # effort = jp.exp(-0.01 * torque_magnitude)
+        effort = torque_magnitude
 
         # Joint limit penalty
         joint_pos = data.qpos[7:]
         # lower_violation = jp.sum(jp.maximum(0, self._lowers - joint_pos))
         # upper_violation = jp.sum(jp.maximum(0, joint_pos - self._uppers))
         # joint_limits = jp.exp(1.0 * (lower_violation + upper_violation))
-        joint_limits = 1.0
+        joint_limits = 0.0
 
         # Height reward - encourage staying at proper height
         base_height = data.xpos[self._base_body_id, 2]
         target_height = 0.69  # Match the current init height
         height = jp.exp(-1.0 * jp.abs(base_height - target_height))
 
+        # is_upright = (base_height>0.3)
+        # penalty_fall = -1.0 * (1 - is_upright)
+
         # Pose reward - encourage staying close to default standing pose
         # pose_error = jp.linalg.norm(joint_pos - self._default_pose)
         pose_error = jp.sum(jp.square(joint_pos - self._default_pose))
-        pose_reward = jp.exp(-5.0 * pose_error)
+        # pose_reward = jp.exp(-5.0 * pose_error)
+        pose_reward = pose_error
 
         return {
             "upright": upright,
@@ -309,4 +294,5 @@ class Stand(hunter_base.HunterEnv):
             "joint_limits": joint_limits,
             "height": height,
             "pose": pose_reward,
+            # "penalty_fall":penalty_fall,
         }
