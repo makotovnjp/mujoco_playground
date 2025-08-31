@@ -119,7 +119,7 @@
             <inertial pos="0.003163 -0.022552 -0.027258"
               quat="0.678041 0.0230005 -0.0875592 0.729428"
               mass="1.39047" diaginertia="0.00722081 0.00694653 0.00181065" />
-            <joint name="leg_l3_joint" pos="0 0 0" axis="0 -1 0" limited="true" range="-0.8 1.2"
+            <joint name="leg_l3_joint" pos="0 0 0" axis="0 1 0" limited="true" range="-0.8 1.2"
               frictionloss="0.2" />
             <geom size="0.03 0.125 0.025" pos="0.015 0.02 -0.1" quat="0.707388 0.706825 0 0"
               type="box" rgba="0.75294 0.75294 0.75294 1" />
@@ -137,7 +137,7 @@
               <body name="leg_l5_link" pos="0.005 0 -0.23995">
                 <inertial pos="0.012435 0 -0.015511" mass="0.30265"
                   diaginertia="0.0008 0.0008 0.0008" />
-                <joint name="leg_l5_joint" pos="0 0 0" axis="0 -1 0" limited="true" range="-1.1 1.1"
+                <joint name="leg_l5_joint" pos="0 0 0" axis="0 1 0" limited="true" range="-1.1 1.1"
                   frictionloss="0.2" />
                 <geom size="0.05005 0.01725 0.00875" pos="0.01503 0 -0.0102"
                   quat="0.707388 0.706825 0 0" type="box" rgba="0.75294 0.75294 0.75294 1" />
