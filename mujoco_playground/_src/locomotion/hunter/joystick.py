@@ -24,22 +24,25 @@ def default_config() -> config_dict.ConfigDict:
       action_scale=0.5,
       obs_noise=0.0,
       max_foot_height=0.13,
-      lin_vel_x=[-0.6, 1.5],
-      lin_vel_y=[-0.8, 0.8],
+      lin_vel_x=[-1.5, 1.5],
+      lin_vel_y=[-0.5, 0.5],
       ang_vel_yaw=[-0.7, 0.7],
       reward_config=config_dict.create(
           scales=config_dict.create(
-              tracking_lin_vel=1.5,
-              tracking_ang_vel=0.8,
-              lin_vel_z=-2.0,
-              ang_vel_xy=-0.05,
-              orientation=-5.0,
+              tracking_lin_vel=3.5,
+              tracking_ang_vel=0.75,
+              lin_vel_z=-0.0,
+
+              ang_vel_xy=-0.0,
+              orientation=-0.0,
               torques=-0.0002,
-              action_rate=-0.2,
-              stand_still=-0.5,
+              action_rate=-0.01,
+              stand_still=-0.0,
               termination=-1.0,
-              feet_slip=-0.1,
+              feet_slip=-0.0,
               feet_clearance=-0.5,
+
+              pose=-2.5,
           ),
           tracking_sigma=0.25,
       ),
@@ -280,6 +283,7 @@ class Joystick(hunter_base.HunterEnv):
         "termination": self._cost_termination(done, info["step"]),
         "feet_slip": self._cost_feet_slip(data),
         "feet_clearance": self._cost_feet_clearance(data),
+        "pose": self._cost_pose(data.qpos[7:]),
     }
 
   def _reward_tracking_lin_vel(
@@ -299,6 +303,11 @@ class Joystick(hunter_base.HunterEnv):
     # Tracking of angular velocity commands (yaw).
     ang_vel_error = jp.square(commands[2] - ang_vel[2])
     return jp.exp(-ang_vel_error / self._config.reward_config.tracking_sigma)
+
+  def _cost_pose(self, joint_angles: jax.Array) -> jax.Array:
+    # Penalize deviation from the default pose for certain joints.
+    current = joint_angles[:]
+    return jp.sum(jp.square(current - self._default_pose))
 
   def _cost_lin_vel_z(self, global_linvel) -> jax.Array:
     # Penalize z axis base linear velocity.
