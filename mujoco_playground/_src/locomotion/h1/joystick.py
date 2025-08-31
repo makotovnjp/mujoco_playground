@@ -158,7 +158,7 @@ class Joystick(h1_base.H1Env):
     motor_targets = self._default_pose + action * self._config.action_scale
     motor_targets = jp.clip(motor_targets, self._lowers, self._uppers)
     data = mjx_env.step(
-        self.mjx_model, state.data, motor_targets, self._n_frames  # pytype: disable=attribute-error
+        self.mjx_model, state.data, motor_targets, self.n_substeps  # pytype: disable=attribute-error
     )
 
     obs = self._get_obs(data, state.info, state.obs, noise_rng)
@@ -224,19 +224,19 @@ class Joystick(h1_base.H1Env):
     return obs
 
   def _get_gravity(self, data: mjx.Data) -> jax.Array:
-    return self._get_sensor_data(data, "upvector_torso")
+    return self._get_sensor_data(data, "upvector")
 
   def _get_localrpyrate(self, data: mjx.Data) -> jax.Array:
-    return self._get_sensor_data(data, "localrpyrate_torso")
+    return self._get_sensor_data(data, "gyro")
 
   def _get_global_linvel(self, data: mjx.Data) -> jax.Array:
-    return self._get_sensor_data(data, "global_linvel_torso")
+    return self._get_sensor_data(data, "global_linvel")
 
   def _get_global_angvel(self, data: mjx.Data) -> jax.Array:
-    return self._get_sensor_data(data, "global_angvel_torso")
+    return self._get_sensor_data(data, "global_angvel")
 
   def _get_local_linvel(self, data: mjx.Data) -> jax.Array:
-    return self._get_sensor_data(data, "local_linvel_torso")
+    return self._get_sensor_data(data, "local_linvel")
 
   def _get_sensor_data(self, data: mjx.Data, sensor_name: str) -> jax.Array:
     sensor_id = self._mj_model.sensor(sensor_name).id

@@ -147,7 +147,7 @@ def brax_ppo_config(env_name: str) -> config_dict.ConfigDict:
       value_obs_key="privileged_state",
     )
 
-  elif env_name in ("HunterStand", "HunterJoystick"):
+  elif env_name in ("HunterStand"):
     rl_config.num_timesteps = 20000
     rl_config.num_evals = 10
     rl_config.episode_length = 100
@@ -166,7 +166,8 @@ def brax_ppo_config(env_name: str) -> config_dict.ConfigDict:
       "Op3Joystick",
       "SpotFlatTerrainJoystick",
       "SpotGetup",
-      "SpotJoystickGaitTracking"
+      "SpotJoystickGaitTracking",
+      "HunterJoystick"
   ):
     pass  # use default config
   else:

@@ -48,7 +48,7 @@ def default_config() -> config_dict.ConfigDict:
       njmax=19 + 8 * 4,
   )
 
-class Joystick(hunter_base.Hunter):
+class Joystick(hunter_base.HunterEnv):
   """Hunter environment with joystick control."""
 
   def __init__(
@@ -79,8 +79,11 @@ class Joystick(hunter_base.Hunter):
     self._default_pose = joint_init
 
     # Set joint limits
-    self._lowers = self._mj_model.jnt_range[1:, 0]
-    self._uppers = self._mj_model.jnt_range[1:, 1]
+    self._lowers = self._mj_model.actuator_ctrlrange[:, 0]
+    self._uppers = self._mj_model.actuator_ctrlrange[:, 1]
+
+    self._base_body_id = self._mj_model.body(hunter_constants.ROOT_BODY).id
+    self._imu_site_id = self._mj_model.site("imu").id
 
     self._feet_site_id = np.array(
         [self._mj_model.site(name).id for name in hunter_constants.FEET_SITES]
@@ -151,13 +154,13 @@ class Joystick(hunter_base.Hunter):
     return mjx_env.State(data, obs, reward, done, metrics, info)
 
 
-  def step(self, action: jp.ndarray):
+  def step(self, state: mjx_env.State, action: jax.Array) -> mjx_env.State:
     rng, cmd_rng, noise_rng = jax.random.split(state.info["rng"], 3)
 
     motor_targets = self._default_pose + action * self._config.action_scale
     motor_targets = jp.clip(motor_targets, self._lowers, self._uppers)
     data = mjx_env.step(
-        self.mjx_model, state.data, motor_targets, self._n_frames  # pytype: disable=attribute-error
+        self.mjx_model, state.data, motor_targets, self.n_substeps  # pytype: disable=attribute-error
     )
 
     obs = self._get_obs(data, state.info, state.obs, noise_rng)
@@ -165,7 +168,7 @@ class Joystick(hunter_base.Hunter):
     joint_vel = data.qvel[6:]
     base_z = data.xpos[self._base_body_id, 2]
 
-    done = self._get_gravity(data)[-1] < 0
+    done = self.get_gravity(data)[-1] < 0
     done |= jp.any(joint_angles < self._lowers)
     done |= jp.any(joint_angles > self._uppers)
     done |= base_z < 0.65
@@ -270,7 +273,7 @@ class Joystick(hunter_base.Hunter):
         # Regularization rewards.
         "lin_vel_z": self._cost_lin_vel_z(self._get_global_linvel(data)),
         "ang_vel_xy": self._cost_ang_vel_xy(self._get_global_angvel(data)),
-        "orientation": self._cost_orientation(self._get_gravity(data)),
+        "orientation": self._cost_orientation(self.get_gravity(data)),
         "torques": self._cost_torques(data.qfrc_actuator),
         "action_rate": self._cost_action_rate(action, info["last_act"]),
         "stand_still": self._cost_stand_still(info["command"], data.qpos[7:]),
