@@ -49,6 +49,7 @@ def default_config() -> config_dict.ConfigDict:
               # Costs.
               ang_vel_xy=-0.0,
               lin_vel_z=-0.0,
+              orientation=-1.0,
               pose=-1.0,
               foot_slip=-0.0,
               action_rate=0.0,
@@ -61,6 +62,11 @@ def default_config() -> config_dict.ConfigDict:
           ang_vel_yaw=[-1.0, 1.0],
           lin_vel_threshold=0.1,
           ang_vel_threshold=0.1,
+      ),
+      push_config=config_dict.create(
+          enable=True,
+          interval_range=[5.0, 10.0],
+          magnitude_range=[0.1, 1.0],
       ),
       gait_frequency=[0.5, 2.0],
       gaits=["walk"],
@@ -109,8 +115,8 @@ class Joystick(hunter_base.HunterEnv):
         5, 6, 7, 8, 9,  # right leg
     ])  # fmt: skip
     self._weights = jp.array([
-        1.0, 1.0, 0.01, 0.01, 1.0,
-        1.0, 1.0, 0.01, 0.01, 1.0,
+        1.0, 100.0, 0.01, 0.01, 1.0,
+        1.0, 100.0, 0.01, 0.01, 1.0,
     ])  # fmt: skip
 
     self._hx_default_pose = self._default_pose[self._hx_idxs]
@@ -202,6 +208,16 @@ class Joystick(hunter_base.HunterEnv):
         maxval=self._config.foot_height[1],
     )
 
+    # Sample push interval.
+    rng, push_rng = jax.random.split(rng)
+    push_interval = jax.random.uniform(
+        push_rng,
+        minval=self._config.push_config.interval_range[0],
+        maxval=self._config.push_config.interval_range[1],
+    )
+    push_interval_steps = jp.round(push_interval / self.dt).astype(jp.int32)
+
+
     # info = {
     #     "rng": rng,
     #     "last_act": jp.zeros(self.mjx_model.nu),
@@ -229,6 +245,10 @@ class Joystick(hunter_base.HunterEnv):
         "phase": phase,
         "phase_dt": phase_dt,
         "foot_height": foot_height,
+        # Push related.
+        "push": jp.array([0.0, 0.0]),
+        "push_step": 0,
+        "push_interval_steps": push_interval_steps,
     }
 
     metrics = {}
@@ -254,6 +274,28 @@ class Joystick(hunter_base.HunterEnv):
 
 
   def step(self, state: mjx_env.State, action: jax.Array) -> mjx_env.State:
+    
+    # Push related
+    state.info["rng"], push1_rng, push2_rng = jax.random.split(
+        state.info["rng"], 3
+    )
+    push_theta = jax.random.uniform(push1_rng, maxval=2 * jp.pi)
+    push_magnitude = jax.random.uniform(
+        push2_rng,
+        minval=self._config.push_config.magnitude_range[0],
+        maxval=self._config.push_config.magnitude_range[1],
+    )
+    push = jp.array([jp.cos(push_theta), jp.sin(push_theta)])
+    push *= (
+        jp.mod(state.info["push_step"] + 1, state.info["push_interval_steps"])
+        == 0
+    )
+    push *= self._config.push_config.enable
+    qvel = state.data.qvel
+    qvel = qvel.at[:2].set(push * push_magnitude + qvel[:2])
+    data = state.data.replace(qvel=qvel)
+    state = state.replace(data=data)
+
     rng, cmd_rng, noise_rng = jax.random.split(state.info["rng"], 3)
 
     motor_targets = self._default_pose + action * self._config.action_scale
@@ -312,6 +354,7 @@ class Joystick(hunter_base.HunterEnv):
     state.info["last_act"] = action
     # state.info["last_vel"] = joint_vel
     state.info["step"] += 1
+    state.info["push_step"] += 1
     phase_tp1 = state.info["phase"] + state.info["phase_dt"]
     state.info["phase"] = jp.fmod(phase_tp1 + jp.pi, 2 * jp.pi) - jp.pi
     state.info["rng"] = rng
@@ -476,8 +519,9 @@ class Joystick(hunter_base.HunterEnv):
         "lin_vel_z": self._cost_lin_vel_z(
             self.get_global_linvel(data), info["gait"]
         ),
+        "orientation": self._cost_orientation(self.get_gravity(data)),
         "pose": self._cost_pose(data.qpos[7:]),
-        "foot_slip": self._cost_foot_slip(data, contact),
+        "foot_slip": self._cost_feet_slip(data),
         "action_rate": self._cost_action_rate(
             info["last_act"], info["last_last_act"], action
         ),
