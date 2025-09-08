@@ -17,7 +17,8 @@ from mujoco_playground._src.locomotion.hunter import base as hunter_base
 from mujoco_playground._src.locomotion.hunter import hunter_constants
 
 _PHASES = np.array([
-    [0, np.pi],  # walk
+    # [0, np.pi],  # walk
+    [0.0, 0.0],
     [0, 0],  # jump
 ])
 
@@ -42,24 +43,32 @@ def default_config() -> config_dict.ConfigDict:
       reward_config=config_dict.create(
           scales=config_dict.create(
               # Rewards.
-              feet_phase=5.0,
+              # feet_phase=5.0,
               tracking_lin_vel=3.5,
               tracking_ang_vel=0.75,
-              feet_air_time=2.0,
+              # feet_air_time=2.0,
+              feet_phase=1.0,
+              # tracking_lin_vel=0.0,
+              # tracking_ang_vel=0.0,
+              feet_air_time=0.0,
+              feet_contact=1.0,
+              feet_clearance=-1.0,
+
               # Costs.
               ang_vel_xy=-0.0,
               lin_vel_z=-0.0,
-              orientation=-1.0,
-              pose=-1.0,
-              foot_slip=-0.0,
+              orientation=-0.2,
+              pose=-0.2,
+              stand_still=+2.0,
+              foot_slip=-0.1,
               action_rate=0.0,
           ),
           tracking_sigma=0.5,
       ),
       command_config=config_dict.create(
-          lin_vel_x=[-1.5, 1.5],
-          lin_vel_y=[-0.5, 0.5],
-          ang_vel_yaw=[-1.0, 1.0],
+          lin_vel_x=[-0.0, 0.0],
+          lin_vel_y=[-0.0, 0.0],
+          ang_vel_yaw=[-0.0, 0.0],
           lin_vel_threshold=0.1,
           ang_vel_threshold=0.1,
       ),
@@ -68,8 +77,9 @@ def default_config() -> config_dict.ConfigDict:
           interval_range=[5.0, 10.0],
           magnitude_range=[0.1, 1.0],
       ),
-      gait_frequency=[0.5, 2.0],
-      gaits=["walk"],
+      gait_frequency=[0.0, 0.5],
+      # gaits=["walk"],
+      gaits=["stand"],
       foot_height=[0.08, 0.4],
       impl="jax",
       nconmax=8 * 1024,
@@ -513,6 +523,7 @@ class Joystick(hunter_base.HunterEnv):
         "feet_air_time": self._reward_feet_air_time(
             info["feet_air_time"], first_contact, info["command"]
         ),
+        "feet_contact": self._reward_feet_contact(data),
     }
     neg = {
         "ang_vel_xy": self._cost_ang_vel_xy(self.get_global_angvel(data)),
@@ -522,9 +533,11 @@ class Joystick(hunter_base.HunterEnv):
         "orientation": self._cost_orientation(self.get_gravity(data)),
         "pose": self._cost_pose(data.qpos[7:]),
         "foot_slip": self._cost_feet_slip(data),
+        "stand_still": self._cost_stand_still(info["command"], data.qpos[7:]),
         "action_rate": self._cost_action_rate(
             info["last_act"], info["last_last_act"], action
         ),
+        "feet_clearance": self._cost_feet_clearance(data)
     }
     return pos, neg
 
@@ -564,6 +577,23 @@ class Joystick(hunter_base.HunterEnv):
     rew_air_time = jp.sum((air_time - 0.1) * first_contact)
     rew_air_time *= cmd_norm > 0.05  # No reward for zero commands.
     return rew_air_time
+
+  def _reward_feet_contact(
+    self, data:mjx.Data
+  ):
+    left_feet_contact = jp.array([
+        collision.geoms_colliding(data, geom_id, self._floor_geom_id)
+        for geom_id in self._left_feet_geom_id
+    ])
+    right_feet_contact = jp.array([
+        collision.geoms_colliding(data, geom_id, self._floor_geom_id)
+        for geom_id in self._right_feet_geom_id
+    ])
+    feet_contact = jp.hstack(
+        [left_feet_contact.any(), right_feet_contact.any()]
+    )
+    return jp.mean(feet_contact)
+
 
   def _cost_pose(self, joint_angles: jax.Array) -> jax.Array:
     # Penalize deviation from the default pose for certain joints.
@@ -638,6 +668,6 @@ class Joystick(hunter_base.HunterEnv):
     vel_norm = jp.sqrt(jp.linalg.norm(vel_xy, axis=-1))
     foot_pos = data.site_xpos[self._feet_site_id]
     foot_z = foot_pos[..., -1]
-    delta = (foot_z - self._config.max_foot_height) ** 2
+    delta = (foot_z - self._config.foot_height[1]) ** 2
     return jp.sum(delta * vel_norm)
     
