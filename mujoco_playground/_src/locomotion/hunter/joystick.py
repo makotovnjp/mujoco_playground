@@ -50,7 +50,7 @@ def default_config() -> config_dict.ConfigDict:
               feet_phase=1.0,
               # tracking_lin_vel=0.0,
               # tracking_ang_vel=0.0,
-              feet_air_time=0.0,
+              feet_air_time=2.0,
               feet_contact=1.0,
               feet_clearance=-1.0,
 
@@ -58,10 +58,10 @@ def default_config() -> config_dict.ConfigDict:
               ang_vel_xy=-0.0,
               lin_vel_z=-0.0,
               orientation=-0.2,
-              pose=-0.2,
-              stand_still=+2.0,
+              pose=-1.0,
+              stand_still=+3.0,
               foot_slip=-0.1,
-              action_rate=0.0,
+              action_rate=-0.01,
           ),
           tracking_sigma=0.5,
       ),
@@ -77,10 +77,10 @@ def default_config() -> config_dict.ConfigDict:
           interval_range=[5.0, 10.0],
           magnitude_range=[0.1, 1.0],
       ),
-      gait_frequency=[0.0, 0.5],
+      gait_frequency=[0.0, 0.25],
       # gaits=["walk"],
       gaits=["stand"],
-      foot_height=[0.08, 0.4],
+      foot_height=[0.25, 0.6],
       impl="jax",
       nconmax=8 * 1024,
       njmax=10 + 8 * 4,
@@ -468,14 +468,14 @@ class Joystick(hunter_base.HunterEnv):
     # Concatenate final observation.
     obs = jp.hstack(
         [
-            obs,
-            qvel_history,
-            qpos_error_history,
-            contact,
-            phase,
-            info["gait_freq"],
-            info["gait"],
-            info["foot_height"],
+            obs, #39
+            qvel_history, #10
+            qpos_error_history, #10
+            contact, #2
+            phase, #4
+            info["gait_freq"], #1
+            info["gait"], #1
+            info["foot_height"], #1
         ],
     )
 
