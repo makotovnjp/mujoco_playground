@@ -88,8 +88,8 @@
     <light directional="true" diffuse=".4 .4 .4" specular="0.1 0.1 0.1" pos="0 0 5.0" dir="0 0 -1"
       castshadow="false" />
     <light directional="true" diffuse=".6 .6 .6" specular="0.2 0.2 0.2" pos="0 0 4" dir="0 0 -1" />
-    <geom name="ground" type="plane" size="0 0 1" pos="0.001 0 0" quat="1 0 0 0" material="matplane"
-      condim="3" conaffinity='2' friction="0.6"/>
+    <geom name="ground" type="plane" size="0 0 0.01" pos="0.001 0 0" quat="1 0 0 0" material="matplane"
+      condim="3" conaffinity='0' friction="0.6"/>
 
     <body name="base_link" pos="0.0 0.0 0.7">
       <geom type="mesh" mesh="base_link" group="1" class="visualgeom" />
@@ -207,16 +207,6 @@
   </worldbody>
   
   <actuator>
-    <!-- <motor name="leg_l1_joint" joint="leg_l1_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
-    <motor name="leg_l2_joint" joint="leg_l2_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
-    <motor name="leg_l3_joint" joint="leg_l3_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
-    <motor name="leg_l4_joint" joint="leg_l4_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
-    <motor name="leg_l5_joint" joint="leg_l5_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
-    <motor name="leg_r1_joint" joint="leg_r1_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
-    <motor name="leg_r2_joint" joint="leg_r2_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
-    <motor name="leg_r3_joint" joint="leg_r3_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
-    <motor name="leg_r4_joint" joint="leg_r4_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
-    <motor name="leg_r5_joint" joint="leg_r5_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" /> -->
     <position class="hunter" name="leg_l1_joint" joint="leg_l1_joint" forcerange="-100 100" kp="100" kv="3"/>
     <position class="hunter" name="leg_l2_joint" joint="leg_l2_joint" forcerange="-100 100" kp="100" kv="3"/>
     <position class="hunter" name="leg_l3_joint" joint="leg_l3_joint" forcerange="-100 100" kp="100" kv="3"/>

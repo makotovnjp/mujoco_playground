@@ -17,9 +17,9 @@ from mujoco_playground._src.locomotion.hunter import base as hunter_base
 from mujoco_playground._src.locomotion.hunter import hunter_constants
 
 _PHASES = np.array([
-    # [0, np.pi],  # walk
-    [0.0, 0.0],
-    [0, 0],  # jump
+    [0, 0.5*np.pi],  # walk
+    # [0, 0],  # jump
+    [0.0, 0.0], # stand
 ])
 
 def default_config() -> config_dict.ConfigDict:
@@ -47,21 +47,23 @@ def default_config() -> config_dict.ConfigDict:
               tracking_lin_vel=3.5,
               tracking_ang_vel=0.75,
               # feet_air_time=2.0,
+
               feet_phase=1.0,
               # tracking_lin_vel=0.0,
               # tracking_ang_vel=0.0,
               feet_air_time=2.0,
-              feet_contact=1.0,
+              feet_contact=2.0,
               feet_clearance=-1.0,
 
               # Costs.
               ang_vel_xy=-0.0,
-              lin_vel_z=-0.0,
+              lin_vel_z=-5.0,
               orientation=-0.2,
               pose=-1.0,
-              stand_still=+3.0,
+              stand_still=+4.0,
               foot_slip=-0.1,
               action_rate=-0.01,
+              feet_distance=-1.0,
           ),
           tracking_sigma=0.5,
       ),
@@ -79,8 +81,8 @@ def default_config() -> config_dict.ConfigDict:
       ),
       gait_frequency=[0.0, 0.25],
       # gaits=["walk"],
-      gaits=["stand"],
-      foot_height=[0.25, 0.6],
+      gaits=["walk","stand"],
+      foot_height=[0.35, 0.6],
       impl="jax",
       nconmax=8 * 1024,
       njmax=10 + 8 * 4,
@@ -106,12 +108,21 @@ class Joystick(hunter_base.HunterEnv):
   def _post_init(self):
     # Default standing pose with slightly bent knees
     self._init_q = jp.zeros(self._mjx_model.nq)
-    # Set floating base position (x, y, z, quat)
-    self._init_q = self._init_q.at[2].set(-0.014)   # z position - proper standing height
     self._init_q = self._init_q.at[3:7].set(jp.array([1, 0, 0, 0]))  # quat
     
     # Set joint positions for stable standing
-    joint_init = jp.array([0.0, 0.0, -0.2, 0.5, -0.3, 0.0, 0.0, -0.2, 0.5, -0.3])   # 10 joints
+    # Set floating base position (x, y, z, quat)
+    # self._init_q = self._init_q.at[2].set(-0.014)   # z position - proper standing height
+    # joint_init = jp.array([0.0, 0.0, -0.2, 0.5, -0.3, 0.0, 0.0, -0.2, 0.5, -0.3])   # 10 joints
+
+    # SAME AS ROS1
+    # self._init_q = self._init_q.at[2].set(-0.05)  # z position - proper standing height
+    # joint_init = jp.array([0.1, 0.0, -0.4, 0.93, -0.53, -0.1, 0.0, -0.4, 0.93, -0.53]) 
+
+    # SAME AS CUSTOMER DOC
+    self._init_q = self._init_q.at[2].set(-0.029)  # z position - proper standing height
+    joint_init = jp.array([0.0, 0.0, -0.36, 0.72, -0.36, 0.0, -0.05, -0.36, 0.72, -0.36]) 
+
     self._init_q = self._init_q.at[7:].set(joint_init)
 
     self._default_pose = joint_init
@@ -125,8 +136,8 @@ class Joystick(hunter_base.HunterEnv):
         5, 6, 7, 8, 9,  # right leg
     ])  # fmt: skip
     self._weights = jp.array([
-        1.0, 100.0, 0.01, 0.01, 1.0,
-        1.0, 100.0, 0.01, 0.01, 1.0,
+        1.0, 10.0, 0.01, 0.01, 1.0,
+        1.0, 10.0, 0.01, 0.01, 1.0,
     ])  # fmt: skip
 
     self._hx_default_pose = self._default_pose[self._hx_idxs]
@@ -395,7 +406,9 @@ class Joystick(hunter_base.HunterEnv):
     joint_angles = data.qpos[7:]
     joint_limit_exceed = jp.any(joint_angles < self._lowers)
     joint_limit_exceed |= jp.any(joint_angles > self._uppers)
-    fall_termination = self.get_gravity(data)[-1] < 0.59
+    # fall_termination = self.get_gravity(data)[-1] < 0.59
+    fall_termination = self.get_gravity(data)[-1] < 0.49
+
     return jp.where(
         self._config.early_termination,
         joint_limit_exceed | fall_termination,
@@ -537,7 +550,8 @@ class Joystick(hunter_base.HunterEnv):
         "action_rate": self._cost_action_rate(
             info["last_act"], info["last_last_act"], action
         ),
-        "feet_clearance": self._cost_feet_clearance(data)
+        "feet_clearance": self._cost_feet_clearance(data),
+        "feet_distance": self._cost_feet_distance(data),
     }
     return pos, neg
 
@@ -670,4 +684,17 @@ class Joystick(hunter_base.HunterEnv):
     foot_z = foot_pos[..., -1]
     delta = (foot_z - self._config.foot_height[1]) ** 2
     return jp.sum(delta * vel_norm)
+
+  def _cost_feet_distance(
+      self, data: mjx.Data
+  ) -> jax.Array:
+    left_foot_pos = data.site_xpos[self._feet_site_id[0]]
+    right_foot_pos = data.site_xpos[self._feet_site_id[1]]
+    base_xmat = data.site_xmat[self._imu_site_id]
+    base_yaw = jp.arctan2(base_xmat[1, 0], base_xmat[0, 0])
+    feet_distance = jp.abs(
+        jp.cos(base_yaw) * (left_foot_pos[1] - right_foot_pos[1])
+        - jp.sin(base_yaw) * (left_foot_pos[0] - right_foot_pos[0])
+    )
+    return jp.clip(0.2 - feet_distance, min=0.0, max=0.1)
     
