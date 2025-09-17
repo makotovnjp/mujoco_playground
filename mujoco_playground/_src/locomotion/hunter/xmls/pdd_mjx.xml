@@ -89,7 +89,7 @@
       castshadow="false" />
     <light directional="true" diffuse=".6 .6 .6" specular="0.2 0.2 0.2" pos="0 0 4" dir="0 0 -1" />
     <geom name="ground" type="plane" size="0 0 0.01" pos="0.001 0 0" quat="1 0 0 0" material="matplane"
-      condim="3" conaffinity='0' friction="0.6"/>
+      condim="3" conaffinity='0' friction="0.6" contype="1"/>
 
     <body name="base_link" pos="0.0 0.0 0.7">
       <geom type="mesh" mesh="base_link" group="1" class="visualgeom" />
@@ -142,7 +142,7 @@
               <body name="leg_l5_link" pos="0.005 0 -0.23995">
                 <inertial pos="0.012435 0 -0.015511" mass="0.30265"
                   diaginertia="0.0008 0.0008 0.0008" />
-                <joint name="leg_l5_joint" pos="0 0 0" axis="0 1 0" limited="true" range="-0.32 0.52"
+                <joint name="leg_l5_joint" pos="0 0 0" axis="0 1 0" limited="true" range="-0.52 0.52"
                   frictionloss="0.2" />
                 <geom size="0.05005 0.01725 0.00875" pos="0.01503 0 -0.0102"
                   quat="0.707388 0.706825 0 0" type="box" rgba="0.75294 0.75294 0.75294 1" />
@@ -190,7 +190,7 @@
               <body name="leg_r5_link" pos="0.005 0 -0.23995">
                 <inertial pos="0.012435 -0.0005 -0.015511" mass="0.30265"
                   diaginertia="0.0008 0.0008 0.0008" />
-                <joint name="leg_r5_joint" pos="0 0 0" axis="0 1 0" limited="true" range="-0.32 0.52"
+                <joint name="leg_r5_joint" pos="0 0 0" axis="0 1 0" limited="true" range="-0.52 0.52"
                   frictionloss="0.2" />
                 <geom size="0.05005 0.01725 0.00875" pos="0.01503 0 -0.0102"
                   quat="0.707388 0.706825 0 0" type="box" rgba="0.75294 0.75294 0.75294 1" />
