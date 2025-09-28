@@ -19,7 +19,7 @@ from mujoco_playground._src.locomotion.hunter import hunter_constants
 _PHASES = np.array([
     [0, 0.5*np.pi],  # walk
     [0.0, 0.0], # stand
-    # [0, np.pi], # run
+    [0, np.pi], # run
 ])
 
 def default_config() -> config_dict.ConfigDict:
@@ -58,8 +58,9 @@ def default_config() -> config_dict.ConfigDict:
               # Costs.
               ang_vel_xy=-0.0,
               lin_vel_z=-0.0,
-              orientation=-2.0,
+              orientation=-1.0,
               pose=-1.0,
+              # stand_still=+4.0,
               stand_still=+0.0,
               foot_slip=-0.1,
               action_rate=-0.01,
@@ -67,46 +68,6 @@ def default_config() -> config_dict.ConfigDict:
           ),
           tracking_sigma=0.5,
       ),
-      command_config=config_dict.create(
-          lin_vel_x=[-1.5, 1.5],
-          lin_vel_y=[-0.5, 0.5],
-          ang_vel_yaw=[-1.0, 1.0],
-          lin_vel_threshold=0.1,
-          ang_vel_threshold=0.1,
-      ),
-
-      # reward_config=config_dict.create(
-      #     scales=config_dict.create(
-      #         # Rewards.
-      #         # feet_phase=5.0,
-      #         tracking_lin_vel=3.5,
-      #         tracking_ang_vel=0.75,
-      #         # feet_air_time=2.0,
-
-      #         feet_phase=3.0,
-      #         # tracking_lin_vel=0.0,
-      #         # tracking_ang_vel=0.0,
-      #         # # feet_air_time=2.0,
-      #         # feet_contact=0.5,
-      #         feet_air_time=0.0,
-      #         feet_contact=0.0,
-          
-      #         feet_clearance=-1.0,
-
-      #         # Costs.
-      #         ang_vel_xy=-0.0,
-      #         # lin_vel_z=-0.0,
-      #         lin_vel_z=-5.0,
-      #         orientation=-2.0,
-      #         pose=-1.0,
-      #         stand_still=+4.0,
-      #         # stand_still=+0.0,
-      #         foot_slip=-0.1,
-      #         action_rate=-0.01,
-      #         feet_distance=-0.3,
-      #     ),
-      #     tracking_sigma=0.5,
-      # ),
       # command_config=config_dict.create(
       #     lin_vel_x=[-0.0, 0.0],
       #     lin_vel_y=[-0.0, 0.0],
@@ -114,17 +75,22 @@ def default_config() -> config_dict.ConfigDict:
       #     lin_vel_threshold=0.1,
       #     ang_vel_threshold=0.1,
       # ),
+      command_config=config_dict.create(
+          lin_vel_x=[-1.5, 1.5],
+          lin_vel_y=[-0.5, 0.5],
+          ang_vel_yaw=[-1.0, 1.0],
+          lin_vel_threshold=0.1,
+          ang_vel_threshold=0.1,
+      ),
       push_config=config_dict.create(
-          enable=True,
+          enable=False,
           interval_range=[5.0, 10.0],
           magnitude_range=[0.1, 1.0],
       ),
-      # gait_frequency=[0.25, 2.0],
+      gait_frequency=[0.25, 2.0],
       # gait_frequency=[0.0, 0.5],
-      gait_frequency=[0.0, 0.25],
       # gaits=["walk"],
-      gaits=["walk","stand"],
-      # gaits=["walk","stand","run"],
+      gaits=["walk","stand","run"],
       foot_height=[0.15, 0.6],
       impl="jax",
       nconmax=8 * 1024,
@@ -525,13 +491,13 @@ class Joystick(hunter_base.HunterEnv):
     obs = jp.hstack(
         [
             obs, #39
-            # qvel_history, #10
-            # qpos_error_history, #10
-            # contact, #2
-            # phase, #4
+            qvel_history, #10
+            qpos_error_history, #10
+            contact, #2
+            phase, #4
             info["gait_freq"], #1
             info["gait"], #1
-            # info["foot_height"], #1
+            info["foot_height"], #1
         ],
     )
 

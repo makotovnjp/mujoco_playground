@@ -19,7 +19,7 @@ from mujoco_playground._src.locomotion.hunter import hunter_constants
 _PHASES = np.array([
     [0, 0.5*np.pi],  # walk
     [0.0, 0.0], # stand
-    # [0, np.pi], # run
+    [0, np.pi], # run
 ])
 
 def default_config() -> config_dict.ConfigDict:
@@ -44,23 +44,18 @@ def default_config() -> config_dict.ConfigDict:
           scales=config_dict.create(
               # Rewards.
               feet_phase=5.0,
-              tracking_lin_vel=3.5,
+              tracking_lin_vel=4.5,
               tracking_ang_vel=0.75,
-              # feet_air_time=2.0,
-
-              # feet_phase=3.0,
-              # tracking_lin_vel=0.0,
-              # tracking_ang_vel=0.0,
-              feet_air_time=2.0,
-              feet_contact=0.5,
-              feet_clearance=-1.0,
+              feet_air_time=3.5,
+              feet_contact=2.0,
+              feet_clearance=-0.5,
 
               # Costs.
               ang_vel_xy=-0.0,
-              lin_vel_z=-0.0,
+              lin_vel_z=-5.0,
               orientation=-2.0,
-              pose=-1.0,
-              stand_still=+0.0,
+              pose=-0.5,
+              stand_still=+0.5,
               foot_slip=-0.1,
               action_rate=-0.01,
               feet_distance=-0.0,
@@ -68,64 +63,23 @@ def default_config() -> config_dict.ConfigDict:
           tracking_sigma=0.5,
       ),
       command_config=config_dict.create(
-          lin_vel_x=[-1.5, 1.5],
-          lin_vel_y=[-0.5, 0.5],
+          lin_vel_x=[-0.3, 1.5],
+          lin_vel_y=[-0.3, 0.3],
           ang_vel_yaw=[-1.0, 1.0],
           lin_vel_threshold=0.1,
           ang_vel_threshold=0.1,
       ),
-
-      # reward_config=config_dict.create(
-      #     scales=config_dict.create(
-      #         # Rewards.
-      #         # feet_phase=5.0,
-      #         tracking_lin_vel=3.5,
-      #         tracking_ang_vel=0.75,
-      #         # feet_air_time=2.0,
-
-      #         feet_phase=3.0,
-      #         # tracking_lin_vel=0.0,
-      #         # tracking_ang_vel=0.0,
-      #         # # feet_air_time=2.0,
-      #         # feet_contact=0.5,
-      #         feet_air_time=0.0,
-      #         feet_contact=0.0,
-          
-      #         feet_clearance=-1.0,
-
-      #         # Costs.
-      #         ang_vel_xy=-0.0,
-      #         # lin_vel_z=-0.0,
-      #         lin_vel_z=-5.0,
-      #         orientation=-2.0,
-      #         pose=-1.0,
-      #         stand_still=+4.0,
-      #         # stand_still=+0.0,
-      #         foot_slip=-0.1,
-      #         action_rate=-0.01,
-      #         feet_distance=-0.3,
-      #     ),
-      #     tracking_sigma=0.5,
-      # ),
-      # command_config=config_dict.create(
-      #     lin_vel_x=[-0.0, 0.0],
-      #     lin_vel_y=[-0.0, 0.0],
-      #     ang_vel_yaw=[-0.0, 0.0],
-      #     lin_vel_threshold=0.1,
-      #     ang_vel_threshold=0.1,
-      # ),
       push_config=config_dict.create(
-          enable=True,
+          enable=False,
           interval_range=[5.0, 10.0],
           magnitude_range=[0.1, 1.0],
       ),
-      # gait_frequency=[0.25, 2.0],
+      gait_frequency=[0.1, 2.0],
       # gait_frequency=[0.0, 0.5],
-      gait_frequency=[0.0, 0.25],
-      # gaits=["walk"],
-      gaits=["walk","stand"],
-      # gaits=["walk","stand","run"],
-      foot_height=[0.15, 0.6],
+    #   gait_frequency=[0.0, 0.25],
+    #   gaits=["walk","stand"],
+      gaits=["walk","stand","run"],
+      foot_height=[0.75, 1.5],
       impl="jax",
       nconmax=8 * 1024,
       njmax=10 + 8 * 4,
@@ -152,15 +106,6 @@ class Joystick(hunter_base.HunterEnv):
     # Default standing pose with slightly bent knees
     self._init_q = jp.zeros(self._mjx_model.nq)
     self._init_q = self._init_q.at[3:7].set(jp.array([1, 0, 0, 0]))  # quat
-    
-    # Set joint positions for stable standing
-    # Set floating base position (x, y, z, quat)
-    # self._init_q = self._init_q.at[2].set(-0.014)   # z position - proper standing height
-    # joint_init = jp.array([0.0, 0.0, -0.2, 0.5, -0.3, 0.0, 0.0, -0.2, 0.5, -0.3])   # 10 joints
-
-    # SAME AS ROS1
-    # self._init_q = self._init_q.at[2].set(-0.05)  # z position - proper standing height
-    # joint_init = jp.array([0.1, 0.0, -0.4, 0.93, -0.53, -0.1, 0.0, -0.4, 0.93, -0.53]) 
 
     # SAME AS CUSTOMER DOC
     self._init_q = self._init_q.at[2].set(-0.029)  # z position - proper standing height
@@ -192,6 +137,13 @@ class Joystick(hunter_base.HunterEnv):
         [self._mj_model.site(name).id for name in hunter_constants.FEET_SITES]
     )
     self._floor_geom_id = self._mj_model.geom("ground").id
+    
+    self._stair_body_id = self._mj_model.body("stairs").id
+
+    self._stair_geom_id =  []
+    for i in range(self._mj_model.body("stairs").geomnum[0]):
+        self._stair_geom_id.append(self._mj_model.geom(f"stairs_{i+1}").id) 
+
     self._left_feet_geom_id = np.array(
         [self._mj_model.geom(name).id for name in hunter_constants.LEFT_FEET_GEOMS]
     )
@@ -281,15 +233,6 @@ class Joystick(hunter_base.HunterEnv):
     )
     push_interval_steps = jp.round(push_interval / self.dt).astype(jp.int32)
 
-
-    # info = {
-    #     "rng": rng,
-    #     "last_act": jp.zeros(self.mjx_model.nu),
-    #     "last_vel": jp.zeros(self.mjx_model.nv - 6),
-    #     "command": self.sample_command(cmd_rng),
-    #     "step": 0,
-    # }
-
     info = {
         "command": self.sample_command(cmd_rng),
         "rng": rng,
@@ -327,11 +270,27 @@ class Joystick(hunter_base.HunterEnv):
         collision.geoms_colliding(data, geom_id, self._floor_geom_id)
         for geom_id in self._right_feet_geom_id
     ])
-    contact = jp.hstack([jp.any(left_feet_contact), jp.any(right_feet_contact)])
 
-    # obs_history = jp.zeros(15 * 42)  # 15 steps of history.
-    # obs = self._get_obs(data, info, obs_history, noise_rng)
-    # reward, done = jp.zeros(2)
+    # Stair contact
+    left_feet_stair_contact = self._get_feet_and_stair_contact(
+        data, 
+        self._left_feet_geom_id, 
+        self._stair_geom_id
+    )
+    right_feet_stair_contact = self._get_feet_and_stair_contact(
+        data, 
+        self._right_feet_geom_id, 
+        self._stair_geom_id
+    )
+
+    left_feet_contact = jp.concatenate([left_feet_contact, left_feet_stair_contact])
+    right_feet_contact = jp.concatenate([right_feet_contact, right_feet_stair_contact])
+    
+    contact = jp.hstack([
+        jp.any(left_feet_contact), 
+        jp.any(right_feet_contact)
+    ])
+
     obs = self._get_obs(data, info, noise_rng, contact)
     reward, done = jp.zeros(2)
     return mjx_env.State(data, obs, reward, done, metrics, info)
@@ -377,7 +336,27 @@ class Joystick(hunter_base.HunterEnv):
         collision.geoms_colliding(data, geom_id, self._floor_geom_id)
         for geom_id in self._right_feet_geom_id
     ])
-    contact = jp.hstack([jp.any(left_feet_contact), jp.any(right_feet_contact)])
+
+    # Stair contact
+    left_feet_stair_contact = self._get_feet_and_stair_contact(
+        data, 
+        self._left_feet_geom_id, 
+        self._stair_geom_id
+        )
+    right_feet_stair_contact = self._get_feet_and_stair_contact(
+        data, 
+        self._right_feet_geom_id, 
+        self._stair_geom_id
+        )
+
+    left_feet_contact = jp.concatenate([left_feet_contact, left_feet_stair_contact])
+    right_feet_contact = jp.concatenate([right_feet_contact, right_feet_stair_contact])
+    
+    contact = jp.hstack([
+        jp.any(left_feet_contact), 
+        jp.any(right_feet_contact)
+    ])
+
     contact_filt = contact | state.info["last_contact"]
     first_contact = (state.info["feet_air_time"] > 0.0) * contact_filt
     state.info["feet_air_time"] += self.dt
@@ -385,23 +364,8 @@ class Joystick(hunter_base.HunterEnv):
     p_fz = p_f[..., -1]
     state.info["swing_peak"] = jp.maximum(state.info["swing_peak"], p_fz)
 
-    # obs = self._get_obs(data, state.info, state.obs, noise_rng)
     obs = self._get_obs(data, state.info, noise_rng, contact)
     done = self._get_termination(data)
-
-    # joint_angles = data.qpos[7:]
-    # joint_vel = data.qvel[6:]
-    # base_z = data.xpos[self._base_body_id, 2]
-
-    # done = self.get_gravity(data)[-1] < 0.59
-    # done |= jp.any(joint_angles < self._lowers)
-    # done |= jp.any(joint_angles > self._uppers)
-    # done |= base_z < 0.65
-
-    # rewards = self._get_reward(data, action, state.info, state.metrics, done)
-    # rewards = {
-    #     k: v * self._config.reward_config.scales[k] for k, v in rewards.items()
-    # }
 
     pos, neg = self._get_reward(
         data, action, state.info, state.metrics, done, first_contact, contact
@@ -555,6 +519,13 @@ class Joystick(hunter_base.HunterEnv):
     sensor_dim = self._mj_model.sensor_dim[sensor_id]
     return data.sensordata[sensor_adr : sensor_adr + sensor_dim]
 
+  def _get_feet_and_stair_contact(self, data: mjx.Data, feet_geom_id, _stair_geom_id) -> jax.Array:
+    _feet_contact = []
+    for stair_id in _stair_geom_id:
+        for feet_id in feet_geom_id:
+            _feet_contact.append(collision.geoms_colliding(data, feet_id, stair_id))  
+    return jp.array(_feet_contact)
+    
   def _get_reward(
       self,
       data: mjx.Data,
@@ -646,9 +617,26 @@ class Joystick(hunter_base.HunterEnv):
         collision.geoms_colliding(data, geom_id, self._floor_geom_id)
         for geom_id in self._right_feet_geom_id
     ])
-    feet_contact = jp.hstack(
-        [left_feet_contact.any(), right_feet_contact.any()]
-    )
+
+     # Stair contact
+    left_feet_stair_contact = self._get_feet_and_stair_contact(
+        data, 
+        self._left_feet_geom_id, 
+        self._stair_geom_id
+        )
+    right_feet_stair_contact = self._get_feet_and_stair_contact(
+        data, 
+        self._right_feet_geom_id, 
+        self._stair_geom_id
+        )
+
+    left_feet_contact = jp.concatenate([left_feet_contact, left_feet_stair_contact])
+    right_feet_contact = jp.concatenate([right_feet_contact, right_feet_stair_contact])
+    
+    feet_contact = jp.hstack([
+        jp.any(left_feet_contact), 
+        jp.any(right_feet_contact)
+    ])
     return jp.mean(feet_contact)
 
 
@@ -714,9 +702,25 @@ class Joystick(hunter_base.HunterEnv):
         collision.geoms_colliding(data, geom_id, self._floor_geom_id)
         for geom_id in self._right_feet_geom_id
     ])
-    feet_contact = jp.hstack(
-        [left_feet_contact.any(), right_feet_contact.any()]
-    )
+    # Stair contact
+    left_feet_stair_contact = self._get_feet_and_stair_contact(
+        data, 
+        self._left_feet_geom_id, 
+        self._stair_geom_id
+        )
+    right_feet_stair_contact = self._get_feet_and_stair_contact(
+        data, 
+        self._right_feet_geom_id, 
+        self._stair_geom_id
+        )
+
+    left_feet_contact = jp.concatenate([left_feet_contact, left_feet_stair_contact])
+    right_feet_contact = jp.concatenate([right_feet_contact, right_feet_stair_contact])
+    
+    feet_contact = jp.hstack([
+        jp.any(left_feet_contact), 
+        jp.any(right_feet_contact)
+    ])
     return jp.sum(vel_xy_norm_sq * feet_contact)
 
   def _cost_feet_clearance(self, data: mjx.Data) -> jax.Array:
