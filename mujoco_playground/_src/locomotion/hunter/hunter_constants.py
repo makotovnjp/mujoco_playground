@@ -17,8 +17,8 @@
 from mujoco_playground._src import mjx_env
 
 ROOT_PATH = mjx_env.ROOT_PATH / "locomotion" / "hunter" / "xmls"
-# HUNTER_XML = ROOT_PATH / "pdd_mjx.xml"
-HUNTER_XML = ROOT_PATH / "pdd_mjx_with_stair.xml"
+HUNTER_XML = ROOT_PATH / "pdd_mjx.xml"
+# HUNTER_XML = ROOT_PATH / "pdd_mjx_with_stair.xml"
 
 
 # Feet sites and geoms for foot standing tasks

@@ -17,9 +17,9 @@ from mujoco_playground._src.locomotion.hunter import base as hunter_base
 from mujoco_playground._src.locomotion.hunter import hunter_constants
 
 _PHASES = np.array([
+    # [0, np.pi], # run
     [0, 0.5*np.pi],  # walk
     [0.0, 0.0], # stand
-    [0, np.pi], # run
 ])
 
 def default_config() -> config_dict.ConfigDict:
@@ -44,18 +44,19 @@ def default_config() -> config_dict.ConfigDict:
           scales=config_dict.create(
               # Rewards.
               feet_phase=5.0,
-              tracking_lin_vel=4.5,
+              tracking_lin_vel=3.5,
               tracking_ang_vel=0.75,
-              feet_air_time=3.5,
-              feet_contact=2.0,
+              feet_air_time=2.0,
+              feet_contact=0.5,
+              feet_stair_contact=1.0,
               feet_clearance=-0.5,
 
               # Costs.
               ang_vel_xy=-0.0,
-              lin_vel_z=-5.0,
-              orientation=-2.0,
+              lin_vel_z=-0.0,
+              orientation=-1.0,
               pose=-0.5,
-              stand_still=+0.5,
+              stand_still=+0.0,
               foot_slip=-0.1,
               action_rate=-0.01,
               feet_distance=-0.0,
@@ -74,12 +75,13 @@ def default_config() -> config_dict.ConfigDict:
           interval_range=[5.0, 10.0],
           magnitude_range=[0.1, 1.0],
       ),
-      gait_frequency=[0.1, 2.0],
+      gait_frequency=[0.1, 1.0],
       # gait_frequency=[0.0, 0.5],
     #   gait_frequency=[0.0, 0.25],
-    #   gaits=["walk","stand"],
-      gaits=["walk","stand","run"],
-      foot_height=[0.75, 1.5],
+      gaits=["walk","stand"],
+    #   gaits=["run","walk","stand"],
+    #   gaits=["run","walk"],
+      foot_height=[0.5, 1.5],
       impl="jax",
       nconmax=8 * 1024,
       njmax=10 + 8 * 4,
@@ -337,20 +339,20 @@ class Joystick(hunter_base.HunterEnv):
         for geom_id in self._right_feet_geom_id
     ])
 
-    # Stair contact
-    left_feet_stair_contact = self._get_feet_and_stair_contact(
-        data, 
-        self._left_feet_geom_id, 
-        self._stair_geom_id
-        )
-    right_feet_stair_contact = self._get_feet_and_stair_contact(
-        data, 
-        self._right_feet_geom_id, 
-        self._stair_geom_id
-        )
+    # # Stair contact
+    # left_feet_stair_contact = self._get_feet_and_stair_contact(
+    #     data, 
+    #     self._left_feet_geom_id, 
+    #     self._stair_geom_id
+    #     )
+    # right_feet_stair_contact = self._get_feet_and_stair_contact(
+    #     data, 
+    #     self._right_feet_geom_id, 
+    #     self._stair_geom_id
+    #     )
 
-    left_feet_contact = jp.concatenate([left_feet_contact, left_feet_stair_contact])
-    right_feet_contact = jp.concatenate([right_feet_contact, right_feet_stair_contact])
+    # left_feet_contact = jp.concatenate([left_feet_contact, left_feet_stair_contact])
+    # right_feet_contact = jp.concatenate([right_feet_contact, right_feet_stair_contact])
     
     contact = jp.hstack([
         jp.any(left_feet_contact), 
@@ -521,9 +523,10 @@ class Joystick(hunter_base.HunterEnv):
 
   def _get_feet_and_stair_contact(self, data: mjx.Data, feet_geom_id, _stair_geom_id) -> jax.Array:
     _feet_contact = []
-    for stair_id in _stair_geom_id:
+    _weights = [1.0,2.0,3.0]
+    for idx, stair_id in enumerate(_stair_geom_id):
         for feet_id in feet_geom_id:
-            _feet_contact.append(collision.geoms_colliding(data, feet_id, stair_id))  
+            _feet_contact.append(collision.geoms_colliding(data, feet_id, stair_id) * _weights[idx])
     return jp.array(_feet_contact)
     
   def _get_reward(
@@ -551,6 +554,7 @@ class Joystick(hunter_base.HunterEnv):
             info["feet_air_time"], first_contact, info["command"]
         ),
         "feet_contact": self._reward_feet_contact(data),
+        "feet_stair_contact": self._reward_feet_stair_contact(data),
     }
     neg = {
         "ang_vel_xy": self._cost_ang_vel_xy(self.get_global_angvel(data)),
@@ -618,26 +622,39 @@ class Joystick(hunter_base.HunterEnv):
         for geom_id in self._right_feet_geom_id
     ])
 
-     # Stair contact
-    left_feet_stair_contact = self._get_feet_and_stair_contact(
-        data, 
-        self._left_feet_geom_id, 
-        self._stair_geom_id
-        )
-    right_feet_stair_contact = self._get_feet_and_stair_contact(
-        data, 
-        self._right_feet_geom_id, 
-        self._stair_geom_id
-        )
+    #  # Stair contact
+    # left_feet_stair_contact = self._get_feet_and_stair_contact(
+    #     data, 
+    #     self._left_feet_geom_id, 
+    #     self._stair_geom_id
+    #     )
+    # right_feet_stair_contact = self._get_feet_and_stair_contact(
+    #     data, 
+    #     self._right_feet_geom_id, 
+    #     self._stair_geom_id
+    #     )
 
-    left_feet_contact = jp.concatenate([left_feet_contact, left_feet_stair_contact])
-    right_feet_contact = jp.concatenate([right_feet_contact, right_feet_stair_contact])
+    # left_feet_contact = jp.concatenate([left_feet_contact, left_feet_stair_contact])
+    # right_feet_contact = jp.concatenate([right_feet_contact, right_feet_stair_contact])
     
     feet_contact = jp.hstack([
         jp.any(left_feet_contact), 
         jp.any(right_feet_contact)
     ])
     return jp.mean(feet_contact)
+
+   def _reward_feet_stair_contact(self, data: mjx.Data) -> jax.Array:
+    left_feet_stair_contact = self._get_feet_and_stair_contact(
+        data, 
+        self._left_feet_geom_id, 
+        self._stair_geom_id
+    )
+    right_feet_stair_contact = self._get_feet_and_stair_contact(
+        data, 
+        self._right_feet_geom_id, 
+        self._stair_geom_id
+    )
+    return jp.sum(left_feet_stair_contact) + jp.sum(right_feet_stair_contact)
 
 
   def _cost_pose(self, joint_angles: jax.Array) -> jax.Array:
@@ -702,20 +719,20 @@ class Joystick(hunter_base.HunterEnv):
         collision.geoms_colliding(data, geom_id, self._floor_geom_id)
         for geom_id in self._right_feet_geom_id
     ])
-    # Stair contact
-    left_feet_stair_contact = self._get_feet_and_stair_contact(
-        data, 
-        self._left_feet_geom_id, 
-        self._stair_geom_id
-        )
-    right_feet_stair_contact = self._get_feet_and_stair_contact(
-        data, 
-        self._right_feet_geom_id, 
-        self._stair_geom_id
-        )
+    # # Stair contact
+    # left_feet_stair_contact = self._get_feet_and_stair_contact(
+    #     data, 
+    #     self._left_feet_geom_id, 
+    #     self._stair_geom_id
+    #     )
+    # right_feet_stair_contact = self._get_feet_and_stair_contact(
+    #     data, 
+    #     self._right_feet_geom_id, 
+    #     self._stair_geom_id
+    #     )
 
-    left_feet_contact = jp.concatenate([left_feet_contact, left_feet_stair_contact])
-    right_feet_contact = jp.concatenate([right_feet_contact, right_feet_stair_contact])
+    # left_feet_contact = jp.concatenate([left_feet_contact, left_feet_stair_contact])
+    # right_feet_contact = jp.concatenate([right_feet_contact, right_feet_stair_contact])
     
     feet_contact = jp.hstack([
         jp.any(left_feet_contact), 

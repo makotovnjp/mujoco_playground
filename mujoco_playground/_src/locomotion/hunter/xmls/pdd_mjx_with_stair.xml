@@ -28,19 +28,26 @@
       <!-- <geom type="plane" size="5 5 0.1" rgba="0.9 0.9 0.9 1"/> -->
 
       <!-- Step 1 -->
-      <geom name= "stairs_1" type="box" size="0.5 0.2 0.05" pos="0 0.2 0.05" rgba="0.7 0.7 0.7 1"/>
+      <geom name= "stairs_1" type="box" size="0.5 0.2 0.025" pos="0 0.1 0.025" rgba="0.7 0.7 0.7 1"/>
       <!-- Step 2 -->
-      <geom name= "stairs_2" type="box" size="0.5 0.2 0.05" pos="0 0.4 0.15" rgba="0.6 0.6 0.6 1"/>
+      <geom name= "stairs_2" type="box" size="0.5 0.2 0.025" pos="0 0.3 0.075" rgba="0.6 0.6 0.6 1"/>
       <!-- Step 3 -->
-      <geom name= "stairs_3" type="box" size="0.5 0.2 0.05" pos="0 0.6 0.25" rgba="0.5 0.5 0.5 1"/>
+      <geom name= "stairs_3" type="box" size="0.5 0.2 0.025" pos="0 0.5 0.025" rgba="0.5 0.5 0.5 1"/>
+
+      <!-- Step 1 -->
+      <!-- <geom name= "stairs_1" type="box" size="0.5 0.2 0.05" pos="0 0.2 0.05" rgba="0.7 0.7 0.7 1"/> -->
+      <!-- Step 2 -->
+      <!-- <geom name= "stairs_2" type="box" size="0.5 0.2 0.05" pos="0 0.4 0.15" rgba="0.6 0.6 0.6 1"/> -->
+      <!-- Step 3 -->
+      <!-- <geom name= "stairs_3" type="box" size="0.5 0.2 0.05" pos="0 0.6 0.25" rgba="0.5 0.5 0.5 1"/> -->
       <!-- Step 4 -->
-      <geom name= "stairs_4" type="box" size="0.5 0.2 0.05" pos="0 0.8 0.35" rgba="0.4 0.4 0.4 1"/>
+      <!-- <geom name= "stairs_4" type="box" size="0.5 0.2 0.05" pos="0 0.8 0.35" rgba="0.4 0.4 0.4 1"/> -->
       <!-- Step 5 -->
-      <geom name= "stairs_5" type="box" size="0.5 0.2 0.05" pos="0 1.0 0.25" rgba="0.7 0.7 0.7 1"/>
+      <!-- <geom name= "stairs_5" type="box" size="0.5 0.2 0.05" pos="0 1.0 0.25" rgba="0.7 0.7 0.7 1"/> -->
       <!-- Step 6 -->
-      <geom name= "stairs_6" type="box" size="0.5 0.2 0.05" pos="0 1.2 0.15" rgba="0.6 0.6 0.6 1"/>
+      <!-- <geom name= "stairs_6" type="box" size="0.5 0.2 0.05" pos="0 1.2 0.15" rgba="0.6 0.6 0.6 1"/> -->
       <!-- Step 7 -->
-      <geom name= "stairs_7"type="box" size="0.5 0.2 0.05" pos="0 1.4 0.05" rgba="0.5 0.5 0.5 1"/>
+      <!-- <geom name= "stairs_7"type="box" size="0.5 0.2 0.05" pos="0 1.4 0.05" rgba="0.5 0.5 0.5 1"/> -->
     </body>
   </worldbody>
 </mujoco>
