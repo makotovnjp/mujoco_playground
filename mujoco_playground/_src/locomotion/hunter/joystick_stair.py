@@ -643,7 +643,7 @@ class Joystick(hunter_base.HunterEnv):
     ])
     return jp.mean(feet_contact)
 
-   def _reward_feet_stair_contact(self, data: mjx.Data) -> jax.Array:
+  def _reward_feet_stair_contact(self, data: mjx.Data) -> jax.Array:
     left_feet_stair_contact = self._get_feet_and_stair_contact(
         data, 
         self._left_feet_geom_id, 
