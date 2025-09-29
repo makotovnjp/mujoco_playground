@@ -40,80 +40,80 @@ def default_config() -> config_dict.ConfigDict:
               gravity=0.05,
           ),
       ),
-      reward_config=config_dict.create(
-          scales=config_dict.create(
-              # Rewards.
-              feet_phase=5.0,
-              tracking_lin_vel=3.5,
-              tracking_ang_vel=0.75,
-              # feet_air_time=2.0,
-
-              # feet_phase=3.0,
-              # tracking_lin_vel=0.0,
-              # tracking_ang_vel=0.0,
-              feet_air_time=2.0,
-              feet_contact=0.5,
-              feet_clearance=-1.0,
-
-              # Costs.
-              ang_vel_xy=-0.0,
-              lin_vel_z=-0.0,
-              orientation=-2.0,
-              pose=-1.0,
-              stand_still=+0.0,
-              foot_slip=-0.1,
-              action_rate=-0.01,
-              feet_distance=-0.0,
-          ),
-          tracking_sigma=0.5,
-      ),
-      command_config=config_dict.create(
-          lin_vel_x=[-1.5, 1.5],
-          lin_vel_y=[-0.5, 0.5],
-          ang_vel_yaw=[-1.0, 1.0],
-          lin_vel_threshold=0.1,
-          ang_vel_threshold=0.1,
-      ),
-
       # reward_config=config_dict.create(
       #     scales=config_dict.create(
       #         # Rewards.
-      #         # feet_phase=5.0,
+      #         feet_phase=5.0,
       #         tracking_lin_vel=3.5,
       #         tracking_ang_vel=0.75,
       #         # feet_air_time=2.0,
 
-      #         feet_phase=3.0,
+      #         # feet_phase=3.0,
       #         # tracking_lin_vel=0.0,
       #         # tracking_ang_vel=0.0,
-      #         # # feet_air_time=2.0,
-      #         # feet_contact=0.5,
-      #         feet_air_time=0.0,
-      #         feet_contact=0.0,
-          
+      #         feet_air_time=2.0,
+      #         feet_contact=0.5,
       #         feet_clearance=-1.0,
 
       #         # Costs.
       #         ang_vel_xy=-0.0,
-      #         # lin_vel_z=-0.0,
-      #         lin_vel_z=-5.0,
+      #         lin_vel_z=-0.0,
       #         orientation=-2.0,
       #         pose=-1.0,
-      #         stand_still=+4.0,
-      #         # stand_still=+0.0,
+      #         stand_still=+0.0,
       #         foot_slip=-0.1,
       #         action_rate=-0.01,
-      #         feet_distance=-0.3,
+      #         feet_distance=-0.0,
       #     ),
       #     tracking_sigma=0.5,
       # ),
       # command_config=config_dict.create(
-      #     lin_vel_x=[-0.0, 0.0],
-      #     lin_vel_y=[-0.0, 0.0],
-      #     ang_vel_yaw=[-0.0, 0.0],
+      #     lin_vel_x=[-1.5, 1.5],
+      #     lin_vel_y=[-0.5, 0.5],
+      #     ang_vel_yaw=[-1.0, 1.0],
       #     lin_vel_threshold=0.1,
       #     ang_vel_threshold=0.1,
       # ),
+
+      reward_config=config_dict.create(
+          scales=config_dict.create(
+              # Rewards.
+              # feet_phase=5.0,
+              tracking_lin_vel=3.5,
+              tracking_ang_vel=0.75,
+              # feet_air_time=2.0,
+
+              feet_phase=3.0,
+              # tracking_lin_vel=0.0,
+              # tracking_ang_vel=0.0,
+              feet_air_time=2.0,
+              feet_contact=0.5,
+              # feet_air_time=0.0,
+              # feet_contact=0.0,
+          
+              feet_clearance=-1.0,
+
+              # Costs.
+              ang_vel_xy=-0.0,
+              # lin_vel_z=-0.0,
+              lin_vel_z=-5.0,
+              orientation=-2.0,
+              pose=-1.0,
+              stand_still=+4.0,
+              # stand_still=+0.0,
+              foot_slip=-0.1,
+              action_rate=-0.01,
+              feet_distance=-0.3,
+          ),
+          tracking_sigma=0.5,
+      ),
+      command_config=config_dict.create(
+          lin_vel_x=[-0.0, 0.0],
+          lin_vel_y=[-0.0, 0.0],
+          ang_vel_yaw=[-0.0, 0.0],
+          lin_vel_threshold=0.1,
+          ang_vel_threshold=0.1,
+      ),
       push_config=config_dict.create(
           enable=True,
           interval_range=[5.0, 10.0],
