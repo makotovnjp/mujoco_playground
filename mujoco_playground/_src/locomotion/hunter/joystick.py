@@ -506,7 +506,7 @@ class Joystick(hunter_base.HunterEnv):
         self._config.obs_noise.level * self._config.obs_noise.scales.joint_vel
     )
     # obs = obs + (2 * jax.random.uniform(rng, shape=obs.shape) - 1) * noise_vec
-    obs = obs + (2 * jax.random.random(rng, shape=obs.shape) - 1) * noise_vec
+    obs = obs + (2 * jax.random.normal(rng, shape=obs.shape) - 1) * noise_vec
 
     # Update history.
     qvel_history = jp.roll(info["qvel_history"], 10).at[:10].set(data.qvel[6:])
