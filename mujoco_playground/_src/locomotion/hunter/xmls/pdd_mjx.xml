@@ -208,17 +208,17 @@
   </worldbody>
   
   <actuator>
-    <position class="hunter" name="leg_l1_joint" joint="leg_l1_joint" forcerange="-100 100" kp="15" kv="1.0"/>
-    <position class="hunter" name="leg_l2_joint" joint="leg_l2_joint" forcerange="-100 100" kp="5" kv="0.5"/>
-    <position class="hunter" name="leg_l3_joint" joint="leg_l3_joint" forcerange="-100 100" kp="15" kv="1.5"/>
-    <position class="hunter" name="leg_l4_joint" joint="leg_l4_joint" forcerange="-200 200" kp="25" kv="2.5"/>
-    <position class="hunter" name="leg_l5_joint" joint="leg_l5_joint" forcerange="-10 10" kp="5" kv="0.1"/>
+    <position class="hunter" name="leg_l1_joint" joint="leg_l1_joint" forcerange="-36 36" kp="15" kv="1.0"/>
+    <position class="hunter" name="leg_l2_joint" joint="leg_l2_joint" forcerange="-36 36" kp="5" kv="0.5"/>
+    <position class="hunter" name="leg_l3_joint" joint="leg_l3_joint" forcerange="-60 60" kp="15" kv="1.5"/>
+    <position class="hunter" name="leg_l4_joint" joint="leg_l4_joint" forcerange="-60 60" kp="25" kv="2.5"/>
+    <position class="hunter" name="leg_l5_joint" joint="leg_l5_joint" forcerange="-36 36" kp="5" kv="0.1"/>
 
-    <position class="hunter" name="leg_r1_joint" joint="leg_r1_joint" forcerange="-100 100" kp="15" kv="1.0"/>
-    <position class="hunter" name="leg_r2_joint" joint="leg_r2_joint" forcerange="-100 100" kp="5" kv="0.5"/>
-    <position class="hunter" name="leg_r3_joint" joint="leg_r3_joint" forcerange="-100 100" kp="15" kv="1.5"/>
-    <position class="hunter" name="leg_r4_joint" joint="leg_r4_joint" forcerange="-200 200" kp="25" kv="2.5"/>
-    <position class="hunter" name="leg_r5_joint" joint="leg_r5_joint" forcerange="-10 10" kp="5" kv="0.1"/>
+    <position class="hunter" name="leg_r1_joint" joint="leg_r1_joint" forcerange="-36 36" kp="15" kv="1.0"/>
+    <position class="hunter" name="leg_r2_joint" joint="leg_r2_joint" forcerange="-36 36" kp="5" kv="0.5"/>
+    <position class="hunter" name="leg_r3_joint" joint="leg_r3_joint" forcerange="-60 60" kp="15" kv="1.5"/>
+    <position class="hunter" name="leg_r4_joint" joint="leg_r4_joint" forcerange="-60 60" kp="25" kv="2.5"/>
+    <position class="hunter" name="leg_r5_joint" joint="leg_r5_joint" forcerange="-36 36" kp="5" kv="0.1"/>
   </actuator>
   
   <sensor>
