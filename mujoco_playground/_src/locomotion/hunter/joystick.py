@@ -32,7 +32,8 @@ def default_config() -> config_dict.ConfigDict:
       action_scale=1.0,
       history_len=1,
       obs_noise=config_dict.create(
-          level=0.6,
+          # level=0.6,
+          level=0.8,
           scales=config_dict.create(
               joint_pos=0.01,
               joint_vel=1.5,
@@ -504,7 +505,8 @@ class Joystick(hunter_base.HunterEnv):
     noise_vec = noise_vec.at[16:26].set(
         self._config.obs_noise.level * self._config.obs_noise.scales.joint_vel
     )
-    obs = obs + (2 * jax.random.uniform(rng, shape=obs.shape) - 1) * noise_vec
+    # obs = obs + (2 * jax.random.uniform(rng, shape=obs.shape) - 1) * noise_vec
+    obs = obs + (2 * jax.random.random(rng, shape=obs.shape) - 1) * noise_vec
 
     # Update history.
     qvel_history = jp.roll(info["qvel_history"], 10).at[:10].set(data.qvel[6:])
