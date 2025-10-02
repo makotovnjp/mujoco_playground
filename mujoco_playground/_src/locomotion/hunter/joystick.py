@@ -32,13 +32,13 @@ def default_config() -> config_dict.ConfigDict:
       action_scale=1.0,
       history_len=1,
       obs_noise=config_dict.create(
-          # level=0.6,
-          level=0.8,
+          level=0.6,
+          # level=0.8,
           scales=config_dict.create(
               joint_pos=0.01,
               joint_vel=1.5,
-              gyro=0.2,
-              gravity=0.05,
+              gyro=0.4,
+              gravity=0.1,
           ),
       ),
       # reward_config=config_dict.create(
@@ -122,7 +122,7 @@ def default_config() -> config_dict.ConfigDict:
       ),
       # gait_frequency=[0.25, 2.0],
       # gait_frequency=[0.0, 0.5],
-      gait_frequency=[0.0, 0.25],
+      gait_frequency=[0.0, 0.5],
       # gaits=["walk"],
       gaits=["walk","stand"],
       # gaits=["walk","stand","run"],
