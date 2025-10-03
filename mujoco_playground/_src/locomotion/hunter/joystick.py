@@ -29,7 +29,7 @@ def default_config() -> config_dict.ConfigDict:
       episode_length=1000,
       early_termination=True,
       action_repeat=1,
-      action_scale=1.0,
+      action_scale=0.5,
       history_len=1,
       obs_noise=config_dict.create(
           level=0.6,
