@@ -30,6 +30,7 @@ def default_config() -> config_dict.ConfigDict:
       early_termination=True,
       action_repeat=1,
       action_scale=0.5,
+      dof_vel_scale=0.05,
       history_len=1,
       obs_noise=config_dict.create(
           level=0.6,
@@ -478,7 +479,7 @@ class Joystick(hunter_base.HunterEnv):
         angular_vel,    # 3
         gravity,        # 3
         data.qpos[7:] - self._default_pose,  # 10
-        data.qvel[6:],  # 10
+        data.qvel[6:] * self._config.dof_vel_scale,  # 10
         info["last_act"],  # 10
         info["command"],  # 3
         # total: 39
