@@ -29,8 +29,7 @@ def default_config() -> config_dict.ConfigDict:
       episode_length=1000,
       early_termination=True,
       action_repeat=1,
-      action_scale=0.5,
-      dof_vel_scale=0.05,
+      action_scale=1.0,
       history_len=1,
       obs_noise=config_dict.create(
           level=0.6,
@@ -104,7 +103,7 @@ def default_config() -> config_dict.ConfigDict:
               stand_still=+4.0,
               # stand_still=+0.0,
               foot_slip=-0.1,
-              action_rate=-0.01,
+              action_rate=-0.5,
               feet_distance=-0.3,
           ),
           tracking_sigma=0.5,
