@@ -29,10 +29,10 @@ def default_config() -> config_dict.ConfigDict:
       episode_length=1000,
       early_termination=True,
       action_repeat=1,
-      action_scale=0.5,
+      action_scale=1.0,
       history_len=1,
       obs_noise=config_dict.create(
-          level=0.6,
+          level=1.0,
           # level=0.8,
           scales=config_dict.create(
               joint_pos=0.01,
@@ -103,8 +103,8 @@ def default_config() -> config_dict.ConfigDict:
               stand_still=+4.0,
               # stand_still=+0.0,
               foot_slip=-0.1,
-              action_rate=-0.01,
-              feet_distance=-0.3,
+              action_rate=-0.5,
+              feet_distance=-0.0,
           ),
           tracking_sigma=0.5,
       ),
@@ -281,15 +281,6 @@ class Joystick(hunter_base.HunterEnv):
         maxval=self._config.push_config.interval_range[1],
     )
     push_interval_steps = jp.round(push_interval / self.dt).astype(jp.int32)
-
-
-    # info = {
-    #     "rng": rng,
-    #     "last_act": jp.zeros(self.mjx_model.nu),
-    #     "last_vel": jp.zeros(self.mjx_model.nv - 6),
-    #     "command": self.sample_command(cmd_rng),
-    #     "step": 0,
-    # }
 
     info = {
         "command": self.sample_command(cmd_rng),

@@ -158,8 +158,8 @@ def brax_ppo_config(env_name: str) -> config_dict.ConfigDict:
         value_obs_key="state",
     )
   
-  elif env_name in ("HunterJoystickStair"):
-    rl_config.num_envs=4096
+  # elif env_name in ("HunterJoystickStair"):
+  #   rl_config.num_envs=4096  
 
   elif env_name in (
       "BarkourJoystick",
