@@ -32,7 +32,7 @@ def default_config() -> config_dict.ConfigDict:
       action_scale=1.0,
       history_len=1,
       obs_noise=config_dict.create(
-          level=1.0,
+          level=0.6,
           # level=0.8,
           scales=config_dict.create(
               joint_pos=0.01,

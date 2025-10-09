@@ -34,36 +34,39 @@ def domain_randomize(model: mjx.Model, rng: jax.Array):
     frictionloss = model.dof_frictionloss[6:] * jax.random.uniform(
         key, shape=(10,), minval=0.9, maxval=1.1
     )
-    dof_frictionloss = model.dof_frictionloss.at[6:].set(frictionloss)
+    # dof_frictionloss = model.dof_frictionloss.at[6:].set(frictionloss)
+    dof_frictionloss = model.dof_frictionloss
 
     # Scale armature: *U(1.0, 1.05).
     rng, key = jax.random.split(rng)
     armature = model.dof_armature[6:] * jax.random.uniform(
         key, shape=(10,), minval=1.0, maxval=1.05
     )
-    dof_armature = model.dof_armature.at[6:].set(armature)
-
+    # dof_armature = model.dof_armature.at[6:].set(armature)
+    dof_armature = model.dof_armature
+    
     # Scale all link masses: *U(0.9, 1.1).
     rng, key = jax.random.split(rng)
     dmass = jax.random.uniform(
         key, shape=(model.nbody,), minval=0.9, maxval=1.1
     )
-    body_mass = model.body_mass.at[:].set(model.body_mass * dmass)
+    # body_mass = model.body_mass.at[:].set(model.body_mass * dmass)
+    body_mass = model.body_mass.at[:].set(model.body_mass)
 
     # Add mass to torso: +U(-1.0, 1.0).
     rng, key = jax.random.split(rng)
     dmass = jax.random.uniform(key, minval=-1.0, maxval=1.0)
-    body_mass = body_mass.at[TORSO_BODY_ID].set(
-        body_mass[TORSO_BODY_ID] + dmass
-    )
+    # body_mass = body_mass.at[TORSO_BODY_ID].set(
+    #     body_mass[TORSO_BODY_ID] + dmass
+    # )
 
     # Jitter qpos0: +U(-0.05, 0.05).
     rng, key = jax.random.split(rng)
     qpos0 = model.qpos0
-    qpos0 = qpos0.at[7:].set(
-        qpos0[7:]
-        + jax.random.uniform(key, shape=(10,), minval=-0.05, maxval=0.05)
-    )
+    # qpos0 = qpos0.at[7:].set(
+    #     qpos0[7:]
+    #     + jax.random.uniform(key, shape=(10,), minval=-0.05, maxval=0.05)
+    # )
 
     return (
         geom_friction,
