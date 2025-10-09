@@ -545,6 +545,7 @@ class Joystick(hunter_base.HunterEnv):
         qpos_error_history, #10
         data.actuator_force,
         contact,  # 2
+        phase, #4
         info["feet_air_time"],  # 2
         info["foot_height"]  # 1
     ])
