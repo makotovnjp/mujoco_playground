@@ -158,8 +158,13 @@ def brax_ppo_config(env_name: str) -> config_dict.ConfigDict:
         value_obs_key="state",
     )
   
-  # elif env_name in ("HunterJoystickStair"):
-  #   rl_config.num_envs=4096
+  elif env_name in ("HunterJoystick"):
+    rl_config.network_factory = config_dict.create(
+        policy_hidden_layer_sizes=(128, 128, 128, 128),
+        value_hidden_layer_sizes=(256, 256, 256, 256, 256),
+        policy_obs_key="state",
+        value_obs_key="privileged_state",
+    )
 
   elif env_name in (
       "BarkourJoystick",
@@ -170,7 +175,6 @@ def brax_ppo_config(env_name: str) -> config_dict.ConfigDict:
       "SpotFlatTerrainJoystick",
       "SpotGetup",
       "SpotJoystickGaitTracking",
-      "HunterJoystick"
   ):
     pass  # use default config
   else:
