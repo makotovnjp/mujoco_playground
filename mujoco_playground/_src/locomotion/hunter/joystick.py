@@ -63,7 +63,7 @@ def default_config() -> config_dict.ConfigDict:
               pose=-1.0,
               stand_still=+0.0,
               foot_slip=-0.1,
-              action_rate=-0.01,
+              action_rate=-0.5,
               feet_distance=-0.0,
           ),
           tracking_sigma=0.5,
