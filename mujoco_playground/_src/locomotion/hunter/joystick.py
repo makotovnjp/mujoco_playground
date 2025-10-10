@@ -52,15 +52,15 @@ def default_config() -> config_dict.ConfigDict:
               # feet_phase=3.0,
               # tracking_lin_vel=0.0,
               # tracking_ang_vel=0.0,
-              feet_air_time=3.0,
+              feet_air_time=2.0,
               feet_contact=0.5,
               feet_clearance=-1.0,
 
               # Costs.
               ang_vel_xy=-0.0,
-              lin_vel_z=-5.0,
+              lin_vel_z=-0.0,
               orientation=-2.0,
-              pose=-0.5,
+              pose=-1.0,
               stand_still=+0.0,
               foot_slip=-0.1,
               action_rate=-0.01,
@@ -70,7 +70,7 @@ def default_config() -> config_dict.ConfigDict:
       ),
       command_config=config_dict.create(
           lin_vel_x=[-1.5, 1.5],
-          lin_vel_y=[-0.5, 0.5],
+          lin_vel_y=[-0.8, 0.8],
           ang_vel_yaw=[-1.0, 1.0],
           lin_vel_threshold=0.1,
           ang_vel_threshold=0.1,
@@ -179,8 +179,8 @@ class Joystick(hunter_base.HunterEnv):
         5, 6, 7, 8, 9,  # right leg
     ])  # fmt: skip
     self._weights = jp.array([
-        0.01, 100.0, 0.01, 0.01, 1.0,
-        0.01, 100.0, 0.01, 0.01, 1.0,
+        0.1, 10.0, 0.01, 0.01, 1.0,
+        0.1, 10.0, 0.01, 0.01, 1.0,
     ])  # fmt: skip
 
     self._hx_default_pose = self._default_pose[self._hx_idxs]
