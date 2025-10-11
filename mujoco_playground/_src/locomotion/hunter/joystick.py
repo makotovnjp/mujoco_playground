@@ -120,7 +120,7 @@ def default_config() -> config_dict.ConfigDict:
       push_config=config_dict.create(
           enable=True,
           interval_range=[5.0, 10.0],
-          magnitude_range=[0.1, 1.0],
+          magnitude_range=[0.1, 2.0],
       ),
       # gait_frequency=[0.25, 2.0],
       # gait_frequency=[0.0, 0.5],
@@ -128,7 +128,7 @@ def default_config() -> config_dict.ConfigDict:
       # gaits=["walk"],
       gaits=["walk"],
       # gaits=["walk","stand","run"],
-      foot_height=[0.2, 0.2],
+      foot_height=[0.1, 0.1],
       impl="jax",
       nconmax=8 * 1024,
       njmax=10 + 8 * 4,
