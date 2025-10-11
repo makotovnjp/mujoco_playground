@@ -17,7 +17,7 @@ from mujoco_playground._src.locomotion.hunter import base as hunter_base
 from mujoco_playground._src.locomotion.hunter import hunter_constants
 
 _PHASES = np.array([
-    [0, 0.5*np.pi],  # walk
+    [0, np.pi],  # walk
     [0.0, 0.0], # stand
     # [0, np.pi], # run
 ])
@@ -101,7 +101,7 @@ def default_config() -> config_dict.ConfigDict:
               lin_vel_z=-0.0,  # previous: -5.0
               orientation=-2.0,
               pose=-1.0,
-              stand_still=+4.0,
+              stand_still=0.0,  # previous: +4.0
               # stand_still=+0.0,
               foot_slip=-0.1,
               action_rate=-0.01,  # previous: -0.5
