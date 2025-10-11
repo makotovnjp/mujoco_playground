@@ -597,7 +597,7 @@ class Joystick(hunter_base.HunterEnv):
         "action_rate": self._cost_action_rate(
             info["last_act"], info["last_last_act"], action
         ),
-        "termination": self._cost_termination(done, info["step"]),
+        "termination": self._cost_termination(done),
         "feet_clearance": self._cost_feet_clearance(data),
         "feet_distance": self._cost_feet_distance(data),
     }
