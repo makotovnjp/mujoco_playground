@@ -100,7 +100,7 @@ def default_config() -> config_dict.ConfigDict:
               # lin_vel_z=-0.0,
               lin_vel_z=-0.0,  # previous: -5.0
               orientation=-2.0,
-              pose=-1.0,
+              pose=-0.1,
               stand_still=0.0,  # previous: +4.0
               # stand_still=+0.0,
               termination=-1.0,
