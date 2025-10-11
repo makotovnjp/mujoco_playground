@@ -89,7 +89,7 @@ def default_config() -> config_dict.ConfigDict:
               # tracking_lin_vel=0.0,
               # tracking_ang_vel=0.0,
               feet_air_time=2.0,
-              feet_contact=0.5,
+              feet_contact=0.0,
               # feet_air_time=0.0,
               # feet_contact=0.0,
           
@@ -103,6 +103,7 @@ def default_config() -> config_dict.ConfigDict:
               pose=-1.0,
               stand_still=0.0,  # previous: +4.0
               # stand_still=+0.0,
+              termination=-1.0,
               foot_slip=-0.1,
               action_rate=-0.01,  # previous: -0.5
               feet_distance=-0.3,
@@ -127,7 +128,7 @@ def default_config() -> config_dict.ConfigDict:
       # gaits=["walk"],
       gaits=["walk"],
       # gaits=["walk","stand","run"],
-      foot_height=[0.1, 0.1],
+      foot_height=[0.2, 0.2],
       impl="jax",
       nconmax=8 * 1024,
       njmax=10 + 8 * 4,
@@ -532,8 +533,8 @@ class Joystick(hunter_base.HunterEnv):
             # qpos_error_history, #10
             # contact, #2
             phase, #4
-            info["gait_freq"], #1
-            info["gait"], #1
+            # info["gait_freq"], #1
+            # info["gait"], #1
             # info["foot_height"], #1
         ],
     )
@@ -568,7 +569,7 @@ class Joystick(hunter_base.HunterEnv):
       first_contact: jax.Array,
       contact: jax.Array,
   ) -> tuple[dict[str, jax.Array], dict[str, jax.Array]]:
-    del done, metrics  # Unused.
+    del metrics  # Unused.
     pos = {
         "tracking_lin_vel": self._reward_tracking_lin_vel(
             info["command"], self.get_local_linvel(data)
@@ -596,6 +597,7 @@ class Joystick(hunter_base.HunterEnv):
         "action_rate": self._cost_action_rate(
             info["last_act"], info["last_last_act"], action
         ),
+        "termination": self._cost_termination(done, info["step"]),
         "feet_clearance": self._cost_feet_clearance(data),
         "feet_distance": self._cost_feet_distance(data),
     }
@@ -702,8 +704,8 @@ class Joystick(hunter_base.HunterEnv):
         unit_cmd[1] < 0.1
     )
 
-  def _cost_termination(self, done: jax.Array, step: jax.Array) -> jax.Array:
-    return done & (step < 500)
+  def _cost_termination(self, done: jax.Array) -> jax.Array:
+    return done
 
   def _cost_feet_slip(self, data: mjx.Data) -> jax.Array:
     feet_vel = data.sensordata[self._foot_linvel_sensor_adr]
