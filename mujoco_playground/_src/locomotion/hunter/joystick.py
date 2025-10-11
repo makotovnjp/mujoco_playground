@@ -98,13 +98,13 @@ def default_config() -> config_dict.ConfigDict:
               # Costs.
               ang_vel_xy=-0.0,
               # lin_vel_z=-0.0,
-              lin_vel_z=-5.0,
+              lin_vel_z=-0.0,  # previous: -5.0
               orientation=-2.0,
               pose=-1.0,
               stand_still=+4.0,
               # stand_still=+0.0,
               foot_slip=-0.1,
-              action_rate=-0.5,
+              action_rate=-0.01,  # previous: -0.5
               feet_distance=-0.3,
           ),
           tracking_sigma=0.5,
