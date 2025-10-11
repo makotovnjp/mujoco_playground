@@ -30,7 +30,7 @@ def default_config() -> config_dict.ConfigDict:
       early_termination=True,
       action_repeat=1,
       action_scale=0.5,
-      dof_vel_scale=0.05,
+      dof_vel_scale=1,
       history_len=1,
       obs_noise=config_dict.create(
           level=0.6,
@@ -181,8 +181,8 @@ class Joystick(hunter_base.HunterEnv):
         5, 6, 7, 8, 9,  # right leg
     ])  # fmt: skip
     self._weights = jp.array([
-        1.0, 100.0, 0.01, 0.01, 1.0,
-        1.0, 100.0, 0.01, 0.01, 1.0,
+        1.0, 1.0, 0.01, 0.01, 1.0,
+        1.0, 1.0, 0.01, 0.01, 1.0,
     ])  # fmt: skip
 
     self._hx_default_pose = self._default_pose[self._hx_idxs]
@@ -531,7 +531,7 @@ class Joystick(hunter_base.HunterEnv):
             # qvel_history, #10
             # qpos_error_history, #10
             # contact, #2
-            # phase, #4
+            phase, #4
             info["gait_freq"], #1
             info["gait"], #1
             # info["foot_height"], #1
