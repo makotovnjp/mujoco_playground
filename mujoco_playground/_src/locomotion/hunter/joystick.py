@@ -552,8 +552,8 @@ class Joystick(hunter_base.HunterEnv):
         # total: 43
     ])
 
-    accelerometer = self.get_accelerometer(data, "pelvis")
-    global_angvel = self.get_global_angvel(data, "pelvis")
+    accelerometer = self.get_accelerometer(data)
+    global_angvel = self.get_global_angvel(data)
     feet_vel = data.sensordata[self._foot_linvel_sensor_adr].ravel()
     root_height = data.qpos[2]
 
