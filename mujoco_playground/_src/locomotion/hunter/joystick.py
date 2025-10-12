@@ -358,10 +358,7 @@ class Joystick(hunter_base.HunterEnv):
     ])
     contact = jp.hstack([jp.any(left_feet_contact), jp.any(right_feet_contact)])
 
-    # obs_history = jp.zeros(15 * 42)  # 15 steps of history.
-    # obs = self._get_obs(data, info, obs_history, noise_rng)
-    # reward, done = jp.zeros(2)
-    obs = self._get_obs(data, info, noise_rng, contact)
+    obs = self._get_obs(data, info, contact)
     reward, done = jp.zeros(2)
     return mjx_env.State(data, obs, reward, done, metrics, info)
 
@@ -415,7 +412,7 @@ class Joystick(hunter_base.HunterEnv):
     state.info["swing_peak"] = jp.maximum(state.info["swing_peak"], p_fz)
 
     # obs = self._get_obs(data, state.info, state.obs, noise_rng)
-    obs = self._get_obs(data, state.info, noise_rng, contact)
+    obs = self._get_obs(data, state.info, contact)
     done = self._get_termination(data)
 
     # joint_angles = data.qpos[7:]
@@ -491,81 +488,94 @@ class Joystick(hunter_base.HunterEnv):
       self,
       data: mjx.Data,
       info: dict[str, Any],
-      rng: jax.Array,
       contact: jax.Array,
   ) -> jp.ndarray:
     # IMU data: Gravity vector in base frame (3)
     gravity = self.get_gravity(data)
-    linear_accel = self.get_accelerometer(data)
-    angular_vel = self.get_gyro(data)
-
-    # Current joint action (10) 
-    joint_torques = info["last_act"]
-
-    obs = jp.concatenate([
-        angular_vel,    # 3
-        gravity,        # 3
-        data.qpos[7:] - self._default_pose,  # 10
-        data.qvel[6:] * self._config.dof_vel_scale,  # 10
-        info["last_act"],  # 10
-        info["command"],  # 3
-        # total: 39
-    ])
-
-    # # Add noise if specified
-    # if self._config.obs_noise > 0.0:
-    #     noise = self._config.obs_noise * jax.random.normal(
-    #         rng, obs.shape
-    #     )
-    #     obs = jp.clip(obs, -100.0, 100.0) + noise
-
-    # Add noise.
-    noise_vec = jp.zeros_like(obs)
-    noise_vec = noise_vec.at[:3].set(
-        self._config.obs_noise.level * self._config.obs_noise.scales.gyro
+    info["rng"], noise_rng = jax.random.split(info["rng"])
+    noisy_gravity = (
+        gravity
+        + (2 * jax.random.uniform(noise_rng, shape=gravity.shape) - 1)
+        * self._config.noise_config.level
+        * self._config.noise_config.scales.gravity
     )
-    noise_vec = noise_vec.at[3:6].set(
-        self._config.obs_noise.level * self._config.obs_noise.scales.gravity
+    gyro = self.get_gyro(data)
+    info["rng"], noise_rng = jax.random.split(info["rng"])
+    noisy_gyro = (
+        gyro
+        + (2 * jax.random.uniform(noise_rng, shape=gyro.shape) - 1)
+        * self._config.noise_config.level
+        * self._config.noise_config.scales.gyro
     )
-    noise_vec = noise_vec.at[6:16].set(
-        self._config.obs_noise.level * self._config.obs_noise.scales.joint_pos
-    )
-    noise_vec = noise_vec.at[16:26].set(
-        self._config.obs_noise.level * self._config.obs_noise.scales.joint_vel
-    )
-    obs = obs + (2 * jax.random.uniform(rng, shape=obs.shape) - 1) * noise_vec
-    # obs = obs + (2 * jax.random.normal(rng, shape=obs.shape) - 1) * noise_vec
 
-    # Update history.
-    qvel_history = jp.roll(info["qvel_history"], 10).at[:10].set(data.qvel[6:])
-    qpos_error_history = (
-        jp.roll(info["qpos_error_history"], 10)
-        .at[:10]
-        .set(data.qpos[7:] - info["motor_targets"])
+    joint_angles = data.qpos[7:]
+    info["rng"], noise_rng = jax.random.split(info["rng"])
+    noisy_joint_angles = (
+        joint_angles
+        + (2 * jax.random.uniform(noise_rng, shape=joint_angles.shape) - 1)
+        * self._config.noise_config.level
+        * self._config.noise_config.scales.joint_pos
     )
-    info["qvel_history"] = qvel_history
-    info["qpos_error_history"] = qpos_error_history
+
+    joint_vel = data.qvel[6:]
+    info["rng"], noise_rng = jax.random.split(info["rng"])
+    noisy_joint_vel = (
+        joint_vel
+        + (2 * jax.random.uniform(noise_rng, shape=joint_vel.shape) - 1)
+        * self._config.noise_config.level
+        * self._config.noise_config.scales.joint_vel
+    )
+
+    linvel = self.get_local_linvel(data)
+    info["rng"], noise_rng = jax.random.split(info["rng"])
+    # TODO: Disable linvel noise for now as it causes instability
+    # noisy_linvel = (
+    #     linvel
+    #     + (2 * jax.random.uniform(noise_rng, shape=linvel.shape) - 1)
+    #     * self._config.noise_config.level
+    #     * self._config.noise_config.scales.linvel
+    # )
 
     cos = jp.cos(info["phase"])
     sin = jp.sin(info["phase"])
     phase = jp.concatenate([cos, sin])
 
-    # obs = jp.roll(obs_history, obs.size).at[: obs.size].set(obs)  
-    # Concatenate final observation.
-    obs = jp.hstack(
-        [
-            obs, #39
-            # qvel_history, #10
-            # qpos_error_history, #10
-            # contact, #2
-            phase, #4
-            # info["gait_freq"], #1
-            # info["gait"], #1
-            # info["foot_height"], #1
-        ],
-    )
+    state = jp.concatenate([
+        noisy_gyro,    # 3
+        noisy_gravity,        # 3
+        noisy_joint_angles - self._default_pose,  # 10
+        noisy_joint_vel * self._config.dof_vel_scale,  # 10
+        info["last_act"],  # 10
+        info["command"],  # 3
+        phase  # 3
+        # total: 43
+    ])
 
-    return obs
+    accelerometer = self.get_accelerometer(data, "pelvis")
+    global_angvel = self.get_global_angvel(data, "pelvis")
+    feet_vel = data.sensordata[self._foot_linvel_sensor_adr].ravel()
+    root_height = data.qpos[2]
+
+    privileged_state = jp.hstack([
+        state,
+        gyro,  # 3
+        accelerometer,  # 3
+        gravity,  # 3
+        linvel,  # 3
+        global_angvel,  # 3
+        joint_angles - self._default_pose,
+        joint_vel,
+        root_height,  # 1
+        data.actuator_force,  # 29
+        contact,  # 2
+        feet_vel,  # 4*3
+        info["feet_air_time"],  # 2
+    ])
+
+    return {
+        "state": state,
+        "privileged_state": privileged_state,
+    }
 
   def _get_local_angvel(self, data: mjx.Data) -> jax.Array:
     return self.get_gyro(data)
