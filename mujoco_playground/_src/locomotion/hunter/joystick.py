@@ -57,14 +57,15 @@ def default_config() -> config_dict.ConfigDict:
               feet_clearance=-1.0,
 
               # Costs.
-              ang_vel_xy=-0.0,
+              ang_vel_xy=-0.15,
               lin_vel_z=-0.0,
               orientation=-2.0,
               pose=-1.0,
               stand_still=+0.0,
               foot_slip=-0.1,
-              action_rate=-0.5,
+              action_rate=-0.01,
               feet_distance=-0.0,
+              termination=-1.0,
           ),
           tracking_sigma=0.5,
       ),
@@ -610,7 +611,7 @@ class Joystick(hunter_base.HunterEnv):
       first_contact: jax.Array,
       contact: jax.Array,
   ) -> tuple[dict[str, jax.Array], dict[str, jax.Array]]:
-    del done, metrics  # Unused.
+    del metrics  # Unused.
     pos = {
         "tracking_lin_vel": self._reward_tracking_lin_vel(
             info["command"], self.get_local_linvel(data)
@@ -640,6 +641,7 @@ class Joystick(hunter_base.HunterEnv):
         ),
         "feet_clearance": self._cost_feet_clearance(data),
         "feet_distance": self._cost_feet_distance(data),
+        "termination": self._cost_termination(done),
     }
     return pos, neg
 
@@ -744,8 +746,8 @@ class Joystick(hunter_base.HunterEnv):
         unit_cmd[1] < 0.1
     )
 
-  def _cost_termination(self, done: jax.Array, step: jax.Array) -> jax.Array:
-    return done & (step < 500)
+  def _cost_termination(self, done: jax.Array) -> jax.Array:
+    return done
 
   def _cost_feet_slip(self, data: mjx.Data) -> jax.Array:
     feet_vel = data.sensordata[self._foot_linvel_sensor_adr]
