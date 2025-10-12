@@ -30,7 +30,7 @@ def default_config() -> config_dict.ConfigDict:
       early_termination=True,
       action_repeat=1,
       action_scale=0.5,
-      dof_vel_scale=1,
+      dof_vel_scale=0.05,
       history_len=1,
       noise_config=config_dict.create(
           level=0.6,
@@ -518,7 +518,7 @@ class Joystick(hunter_base.HunterEnv):
         * self._config.noise_config.scales.joint_pos
     )
 
-    joint_vel = data.qvel[6:]
+    joint_vel = data.qvel[6:] 
     info["rng"], noise_rng = jax.random.split(info["rng"])
     noisy_joint_vel = (
         joint_vel
@@ -565,7 +565,7 @@ class Joystick(hunter_base.HunterEnv):
         linvel,  # 3
         global_angvel,  # 3
         joint_angles - self._default_pose,
-        joint_vel,
+        joint_vel * self._config.dof_vel_scale,
         root_height,  # 1
         data.actuator_force,  # 29
         contact,  # 2
