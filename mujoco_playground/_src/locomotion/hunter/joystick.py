@@ -58,7 +58,7 @@ def default_config() -> config_dict.ConfigDict:
 
               # Costs.
               ang_vel_xy=-0.15,
-              lin_vel_z=-0.0,
+              lin_vel_z=-0.1,
               orientation=-2.0,
               pose=-1.0,
               stand_still=+0.0,
