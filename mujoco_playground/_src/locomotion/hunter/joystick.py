@@ -129,7 +129,7 @@ def default_config() -> config_dict.ConfigDict:
       # gaits=["walk"],
       gaits=["walk"],
       # gaits=["walk","stand","run"],
-      foot_height=[0.1, 0.1],
+      foot_height=0.12,
       impl="jax",
       nconmax=8 * 1024,
       njmax=10 + 8 * 4,
@@ -241,7 +241,7 @@ class Joystick(hunter_base.HunterEnv):
     return cmd
   
   def reset(self, rng: Optional[Union[int, jp.ndarray]] = None):
-    rng, noise_rng, gait_freq_rng, gait_rng, foot_height_rng, cmd_rng = (  # pylint: disable=redefined-outer-name
+    rng, noise_rng, gait_freq_rng, gait_rng, cmd_rng = (  # pylint: disable=redefined-outer-name
         jax.random.split(rng, 6)
     )
 
@@ -296,11 +296,6 @@ class Joystick(hunter_base.HunterEnv):
         gait_rng, minval=0, maxval=len(self._config.gaits), shape=()
     )
     phase = jp.array(_PHASES)[gait]
-    foot_height = jax.random.uniform(
-        foot_height_rng,
-        minval=self._config.foot_height[0],
-        maxval=self._config.foot_height[1],
-    )
 
     # Sample push interval.
     rng, push_rng = jax.random.split(rng)
@@ -338,7 +333,7 @@ class Joystick(hunter_base.HunterEnv):
         "gait": gait,
         "phase": phase,
         "phase_dt": phase_dt,
-        "foot_height": foot_height,
+        "foot_height": self._config.foot_height,
         # Push related.
         "push": jp.array([0.0, 0.0]),
         "push_step": 0,
