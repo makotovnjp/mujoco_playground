@@ -141,7 +141,7 @@
               <geom size="0.034 0.034 0.035" pos="-0.011 0.012 -0.079" quat="0.707388 0.706825 0 0"
                 type="box" rgba="0.75294 0.75294 0.75294 1" />
               <body name="leg_l5_link" pos="0.005 0 -0.23995">
-                <inertial pos="0.012435 0 -0.015511" mass="0.30265"
+                <inertial pos="0.012435 0 -0.015511" mass="0.030265"
                   diaginertia="0.0008 0.0008 0.0008" />
                 <joint name="leg_l5_joint" pos="0 0 0" axis="0 1 0" limited="true" range="-0.52 0.52"
                   frictionloss="0.2" />
@@ -189,7 +189,7 @@
               <geom size="0.034 0.034 0.035" pos="-0.011 -0.012 -0.079" quat="0.707388 0.706825 0 0"
                 type="box" rgba="0.75294 0.75294 0.75294 1" />
               <body name="leg_r5_link" pos="0.005 0 -0.23995">
-                <inertial pos="0.012435 -0.0005 -0.015511" mass="0.30265"
+                <inertial pos="0.012435 -0.0005 -0.015511" mass="0.030265"
                   diaginertia="0.0008 0.0008 0.0008" />
                 <joint name="leg_r5_joint" pos="0 0 0" axis="0 1 0" limited="true" range="-0.52 0.52"
                   frictionloss="0.2" />
