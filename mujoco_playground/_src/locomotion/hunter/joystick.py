@@ -32,13 +32,14 @@ def default_config() -> config_dict.ConfigDict:
       action_scale=0.5,
       dof_vel_scale=1,
       history_len=1,
-      obs_noise=config_dict.create(
+      noise_config=config_dict.create(
           level=0.6,
           # level=0.8,
           scales=config_dict.create(
               joint_pos=0.01,
               joint_vel=1.5,
               gyro=0.2,
+              linvel=0.1,
               gravity=0.05,
           ),
       ),
