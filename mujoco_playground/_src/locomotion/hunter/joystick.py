@@ -114,9 +114,7 @@ def default_config() -> config_dict.ConfigDict:
       command_config=config_dict.create(
           lin_vel_x=[-1.0, 1.0],
           lin_vel_y=[-1.0, 1.0],
-          ang_vel_yaw=[-1.0, 1.0],
-          lin_vel_threshold=0.1,
-          ang_vel_threshold=0.1,
+          ang_vel_yaw=[-1.0, 1.0]
       ),
       push_config=config_dict.create(
           enable=True,
@@ -215,7 +213,7 @@ class Joystick(hunter_base.HunterEnv):
    
   def sample_command(self, rng: jax.Array) -> jax.Array:
     """Samples a random command with a 10% chance of being zero."""
-    _, rng1, rng2, rng3 = jax.random.split(rng, 4)
+    rng1, rng2, rng3, rng4 = jax.random.split(rng, 4)
     cmd_config = self._config.command_config
     lin_vel_x = jax.random.uniform(
         rng1, minval=cmd_config.lin_vel_x[0], maxval=cmd_config.lin_vel_x[1]
@@ -225,18 +223,16 @@ class Joystick(hunter_base.HunterEnv):
     )
     ang_vel_yaw = jax.random.uniform(
         rng3,
-        minval=cmd_config.ang_vel_yaw[0],
-        maxval=cmd_config.ang_vel_yaw[1],
+        minval=self._config.ang_vel_yaw[0],
+        maxval=self._config.ang_vel_yaw[1],
+    )    
+    # With 10% chance, set everything to zero.
+    return jp.where(
+        jax.random.bernoulli(rng4, p=0.1),
+        jp.zeros(3),
+        jp.hstack([lin_vel_x, lin_vel_y, ang_vel_yaw]),
     )
-    lin_vel_x = jp.where(
-        jp.abs(lin_vel_x) < cmd_config.lin_vel_threshold, 0, lin_vel_x
-    )
-    lin_vel_y = jp.where(
-        jp.abs(lin_vel_y) < cmd_config.lin_vel_threshold, 0, lin_vel_y
-    )
-    ang_vel_yaw = jp.where(
-        jp.abs(ang_vel_yaw) < cmd_config.ang_vel_threshold, 0, ang_vel_yaw
-    )
+
     cmd = jp.hstack([lin_vel_x, lin_vel_y, ang_vel_yaw])
     return cmd
   
