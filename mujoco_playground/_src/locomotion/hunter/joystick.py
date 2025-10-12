@@ -522,18 +522,19 @@ class Joystick(hunter_base.HunterEnv):
     linvel = self.get_local_linvel(data)
     info["rng"], noise_rng = jax.random.split(info["rng"])
     # TODO: Disable linvel noise for now as it causes instability
-    # noisy_linvel = (
-    #     linvel
-    #     + (2 * jax.random.uniform(noise_rng, shape=linvel.shape) - 1)
-    #     * self._config.noise_config.level
-    #     * self._config.noise_config.scales.linvel
-    # )
+    noisy_linvel = (
+        linvel
+        + (2 * jax.random.uniform(noise_rng, shape=linvel.shape) - 1)
+        * self._config.noise_config.level
+        * self._config.noise_config.scales.linvel
+    )
 
     cos = jp.cos(info["phase"])
     sin = jp.sin(info["phase"])
     phase = jp.concatenate([cos, sin])
 
     state = jp.concatenate([
+        noisy_linvel,  # 3
         noisy_gyro,    # 3
         noisy_gravity,        # 3
         noisy_joint_angles - self._default_pose,  # 10
@@ -541,7 +542,7 @@ class Joystick(hunter_base.HunterEnv):
         info["last_act"],  # 10
         info["command"],  # 3
         phase  # 3
-        # total: 43
+        # total: 46
     ])
 
     accelerometer = self.get_accelerometer(data)
