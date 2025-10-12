@@ -96,11 +96,11 @@ def default_config() -> config_dict.ConfigDict:
               feet_clearance=-1.0,
 
               # Costs.
-              ang_vel_xy=-0.0,
+              ang_vel_xy=-0.15,  # previous: -0.0
               # lin_vel_z=-0.0,
               lin_vel_z=-0.0,  # previous: -5.0
               orientation=-2.0,
-              pose=-0.1,
+              pose=-1.0,  # previous: -0.1
               stand_still=0.0,  # previous: +4.0
               # stand_still=+0.0,
               termination=-1.0,
@@ -124,7 +124,7 @@ def default_config() -> config_dict.ConfigDict:
       ),
       # gait_frequency=[0.25, 2.0],
       # gait_frequency=[0.0, 0.5],
-      gait_frequency=[1.25, 1.5],
+      gait_frequency=[1.5, 1.5],
       # gaits=["walk"],
       gaits=["walk"],
       # gaits=["walk","stand","run"],
