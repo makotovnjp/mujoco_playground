@@ -477,7 +477,7 @@ class Joystick(hunter_base.HunterEnv):
     joint_limit_exceed = jp.any(joint_angles < self._lowers)
     joint_limit_exceed |= jp.any(joint_angles > self._uppers)
     # fall_termination = self.get_gravity(data)[-1] < 0.59
-    fall_termination = self.get_gravity(data)[-1] < 0.49
+    fall_termination = self.get_gravity(data)[-1] < 0.0
 
     return jp.where(
         self._config.early_termination,
