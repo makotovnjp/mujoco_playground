@@ -112,9 +112,9 @@ def default_config() -> config_dict.ConfigDict:
           tracking_sigma=0.5,
       ),
       command_config=config_dict.create(
-          lin_vel_x=[-0.0, 0.0],
-          lin_vel_y=[-0.0, 0.0],
-          ang_vel_yaw=[-0.0, 0.0],
+          lin_vel_x=[-1.0, 1.0],
+          lin_vel_y=[-1.0, 1.0],
+          ang_vel_yaw=[-1.0, 1.0],
           lin_vel_threshold=0.1,
           ang_vel_threshold=0.1,
       ),
