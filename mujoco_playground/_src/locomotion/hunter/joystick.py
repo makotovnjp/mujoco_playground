@@ -223,8 +223,8 @@ class Joystick(hunter_base.HunterEnv):
     )
     ang_vel_yaw = jax.random.uniform(
         rng3,
-        minval=self._config.ang_vel_yaw[0],
-        maxval=self._config.ang_vel_yaw[1],
+        minval=cmd_config.ang_vel_yaw[0],
+        maxval=cmd_config.ang_vel_yaw[1],
     )    
     # With 10% chance, set everything to zero.
     return jp.where(
