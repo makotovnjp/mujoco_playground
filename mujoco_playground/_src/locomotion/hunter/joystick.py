@@ -754,7 +754,7 @@ class Joystick(hunter_base.HunterEnv):
     vel_norm = jp.sqrt(jp.linalg.norm(vel_xy, axis=-1))
     foot_pos = data.site_xpos[self._feet_site_id]
     foot_z = foot_pos[..., -1]
-    delta = (foot_z - self._config.foot_height[1]) ** 2
+    delta = (foot_z - self._config.foot_height) ** 2
     return jp.sum(delta * vel_norm)
 
   def _cost_feet_distance(
