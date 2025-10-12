@@ -472,17 +472,9 @@ class Joystick(hunter_base.HunterEnv):
     return state
 
   def _get_termination(self, data: mjx.Data) -> jax.Array:
-    # Terminates if joint limits are exceeded or the robot falls.
-    joint_angles = data.qpos[7:]
-    joint_limit_exceed = jp.any(joint_angles < self._lowers)
-    joint_limit_exceed |= jp.any(joint_angles > self._uppers)
-    # fall_termination = self.get_gravity(data)[-1] < 0.59
-    fall_termination = self.get_gravity(data)[-1] < 0.49
-
-    return jp.where(
-        self._config.early_termination,
-        joint_limit_exceed | fall_termination,
-        joint_limit_exceed,
+    fall_termination = self.get_gravity(data)[-1] < 0.0
+    return (
+        fall_termination | jp.isnan(data.qpos).any() | jp.isnan(data.qvel).any()
     )
 
   def _get_obs(
