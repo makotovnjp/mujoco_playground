@@ -125,7 +125,7 @@ def default_config() -> config_dict.ConfigDict:
       # gait_frequency=[0.0, 0.5],
       gait_frequency=[1.5, 1.5],
       # gaits=["walk"],
-      gaits=["walk"],
+      gaits=["walk", "stand"],
       # gaits=["walk","stand","run"],
       foot_height=[0.1, 0.1],
       impl="jax",
@@ -537,7 +537,8 @@ class Joystick(hunter_base.HunterEnv):
         noisy_joint_vel * self._config.dof_vel_scale,  # 10
         info["last_act"],  # 10
         info["command"],  # 3
-        phase  # 3
+        phase,  # 3,
+        info["gait"]   #1
         # total: 46
     ])
 
