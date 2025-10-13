@@ -239,7 +239,7 @@ class Joystick(hunter_base.HunterEnv):
   
   def reset(self, rng: Optional[Union[int, jp.ndarray]] = None):
     rng, gait_freq_rng, gait_rng, foot_height_rng, cmd_rng = (  # pylint: disable=redefined-outer-name
-        jax.random.split(rng, 4)
+        jax.random.split(rng, 5)
     )
 
     qpos = self._init_q
