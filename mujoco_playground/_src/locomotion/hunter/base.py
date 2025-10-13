@@ -30,6 +30,7 @@ def get_assets() -> Dict[str, bytes]:
   assets = {}
   mjx_env.update_assets(assets, consts.ROOT_PATH, "*.xml")
   mjx_env.update_assets(assets, consts.ROOT_PATH / "meshes", "*.STL")
+  mjx_env.update_assets(assets, consts.ROOT_PATH / "assets")
   return assets
 
 

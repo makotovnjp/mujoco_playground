@@ -123,11 +123,11 @@ def default_config() -> config_dict.ConfigDict:
       ),
       # gait_frequency=[0.25, 2.0],
       # gait_frequency=[0.0, 0.5],
-      gait_frequency=[1.5, 1.5],
+      gait_frequency=[0.5, 4.0],
       # gaits=["walk"],
-      gaits=["walk"],
+      gaits=["walk", "stand"],
       # gaits=["walk","stand","run"],
-      foot_height=0.1,
+      foot_height=[0.08, 0.4],
       impl="jax",
       nconmax=8 * 1024,
       njmax=10 + 8 * 4,
@@ -138,15 +138,19 @@ class Joystick(hunter_base.HunterEnv):
 
   def __init__(
         self,
+        task: str = "flat_terrain",
         config: config_dict.ConfigDict = default_config(),
         config_overrides: Optional[
             Dict[str, Union[str, int, list[Any]]]
         ] = None,
     ):
+        if task.startswith("rough"):
+          config.nconmax = 100 * 8192
+          config.njmax = 12 + 100 * 4
         super().__init__(
-            hunter_constants.HUNTER_XML.as_posix(), 
-            config, 
-            config_overrides
+            xml_path=hunter_constants.task_to_xml(task).as_posix(),
+            config=config,
+            config_overrides=config_overrides,
         )
         self._post_init()
   
@@ -234,8 +238,8 @@ class Joystick(hunter_base.HunterEnv):
     )
   
   def reset(self, rng: Optional[Union[int, jp.ndarray]] = None):
-    rng, gait_freq_rng, gait_rng, cmd_rng = (  # pylint: disable=redefined-outer-name
-        jax.random.split(rng, 4)
+    rng, gait_freq_rng, gait_rng, foot_height_rng, cmd_rng = (  # pylint: disable=redefined-outer-name
+        jax.random.split(rng, 5)
     )
 
     qpos = self._init_q
@@ -290,6 +294,12 @@ class Joystick(hunter_base.HunterEnv):
     )
     phase = jp.array(_PHASES)[gait]
 
+    foot_height = jax.random.uniform(
+        foot_height_rng,
+        minval=self._config.foot_height[0],
+        maxval=self._config.foot_height[1],
+    )
+
     # Sample push interval.
     rng, push_rng = jax.random.split(rng)
     push_interval = jax.random.uniform(
@@ -326,7 +336,7 @@ class Joystick(hunter_base.HunterEnv):
         "gait": gait,
         "phase": phase,
         "phase_dt": phase_dt,
-        "foot_height": self._config.foot_height,
+        "foot_height": foot_height,
         # Push related.
         "push": jp.array([0.0, 0.0]),
         "push_step": 0,
@@ -532,6 +542,15 @@ class Joystick(hunter_base.HunterEnv):
         # total: 43
     ])
 
+    state = jp.hstack(
+      [
+        state,
+        info["gait"],  # 1
+        info["gait_freq"],  # 1
+        info["foot_height"],  # 1
+      ]
+    )  # total: 46
+
     accelerometer = self.get_accelerometer(data)
     global_angvel = self.get_global_angvel(data)
     feet_vel = data.sensordata[self._foot_linvel_sensor_adr].ravel()
@@ -615,7 +634,7 @@ class Joystick(hunter_base.HunterEnv):
             info["last_act"], info["last_last_act"], action
         ),
         "termination": self._cost_termination(done),
-        "feet_clearance": self._cost_feet_clearance(data),
+        "feet_clearance": self._cost_feet_clearance(data, info),
         "feet_distance": self._cost_feet_distance(data),
     }
     return pos, neg
@@ -741,13 +760,13 @@ class Joystick(hunter_base.HunterEnv):
     )
     return jp.sum(vel_xy_norm_sq * feet_contact)
 
-  def _cost_feet_clearance(self, data: mjx.Data) -> jax.Array:
+  def _cost_feet_clearance(self, data: mjx.Data, info) -> jax.Array:
     feet_vel = data.sensordata[self._foot_linvel_sensor_adr]
     vel_xy = feet_vel[..., :2]
     vel_norm = jp.sqrt(jp.linalg.norm(vel_xy, axis=-1))
     foot_pos = data.site_xpos[self._feet_site_id]
     foot_z = foot_pos[..., -1]
-    delta = (foot_z - self._config.foot_height) ** 2
+    delta = (foot_z - info["foot_height"]) ** 2
     return jp.sum(delta * vel_norm)
 
   def _cost_feet_distance(
