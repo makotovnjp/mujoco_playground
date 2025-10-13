@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 """Hunter constants."""
-import epath
+from etils import epath
 from mujoco_playground._src import mjx_env
 
 def task_to_xml(task_name: str) -> epath.Path:
