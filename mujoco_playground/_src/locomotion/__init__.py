@@ -91,7 +91,12 @@ _envs = {
         t1_joystick.Joystick, task="rough_terrain"
     ),
     "HunterStand": hunter_stand.Stand,
-    "HunterJoystick": hunter_joystick.Joystick, 
+    "HunterJoystick": functools.partial(
+        hunter_joystick.Joystick, task="flat_terrain"
+    ),
+    "HunterJoystickRoughTerrain": functools.partial(
+        hunter_joystick.Joystick, task="rough_terrain"
+    ),
     "HunterJoystickStair":hunter_joystick_stair.Joystick,
 }
 
@@ -122,6 +127,7 @@ _cfgs = {
     "T1JoystickRoughTerrain": t1_joystick.default_config,
     "HunterStand": hunter_stand.default_config,
     "HunterJoystick": hunter_joystick.default_config,
+    "HunterJoystickRoughTerrain": hunter_joystick.default_config,
     "HunterJoystickStair": hunter_joystick_stair.default_config,
 }
 

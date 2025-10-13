@@ -138,15 +138,19 @@ class Joystick(hunter_base.HunterEnv):
 
   def __init__(
         self,
+        task: str = "flat_terrain",
         config: config_dict.ConfigDict = default_config(),
         config_overrides: Optional[
             Dict[str, Union[str, int, list[Any]]]
         ] = None,
     ):
+        if task.startswith("rough"):
+          config.nconmax = 100 * 8192
+          config.njmax = 12 + 100 * 4
         super().__init__(
-            hunter_constants.HUNTER_XML.as_posix(), 
-            config, 
-            config_overrides
+            xml_path=hunter_constants.task_to_xml(task).as_posix(),
+            config=config,
+            config_overrides=config_overrides,
         )
         self._post_init()
   
