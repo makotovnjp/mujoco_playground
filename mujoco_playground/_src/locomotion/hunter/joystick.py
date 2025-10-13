@@ -17,7 +17,7 @@ from mujoco_playground._src.locomotion.hunter import base as hunter_base
 from mujoco_playground._src.locomotion.hunter import hunter_constants
 
 _PHASES = np.array([
-    [0, 0.5*np.pi],  # walk
+    [0, np.pi],  # walk
     [0.0, 0.0], # stand
     # [0, np.pi], # run
 ])
@@ -29,15 +29,17 @@ def default_config() -> config_dict.ConfigDict:
       episode_length=1000,
       early_termination=True,
       action_repeat=1,
-      action_scale=1.0,
+      action_scale=0.5,
+      dof_vel_scale=0.05,
       history_len=1,
-      obs_noise=config_dict.create(
+      noise_config=config_dict.create(
           level=0.6,
           # level=0.8,
           scales=config_dict.create(
               joint_pos=0.01,
               joint_vel=1.5,
               gyro=0.2,
+              linvel=0.1,
               gravity=0.05,
           ),
       ),
@@ -88,45 +90,44 @@ def default_config() -> config_dict.ConfigDict:
               # tracking_lin_vel=0.0,
               # tracking_ang_vel=0.0,
               feet_air_time=2.0,
-              feet_contact=0.5,
+              feet_contact=0.0,
               # feet_air_time=0.0,
               # feet_contact=0.0,
           
               feet_clearance=-1.0,
 
               # Costs.
-              ang_vel_xy=-0.0,
+              ang_vel_xy=-0.15,  # previous: -0.0
               # lin_vel_z=-0.0,
-              lin_vel_z=-5.0,
+              lin_vel_z=-0.0,  # previous: -5.0
               orientation=-2.0,
-              pose=-1.0,
-              stand_still=+4.0,
+              pose=-1.0,  # previous: -0.1
+              stand_still=0.0,  # previous: +4.0
               # stand_still=+0.0,
+              termination=-1.0,
               foot_slip=-0.1,
-              action_rate=-0.5,
+              action_rate=-0.01,  # previous: -0.5
               feet_distance=-0.3,
           ),
           tracking_sigma=0.5,
       ),
       command_config=config_dict.create(
-          lin_vel_x=[-0.0, 0.0],
-          lin_vel_y=[-0.0, 0.0],
-          ang_vel_yaw=[-0.0, 0.0],
-          lin_vel_threshold=0.1,
-          ang_vel_threshold=0.1,
+          lin_vel_x=[-1.0, 1.0],
+          lin_vel_y=[-1.0, 1.0],
+          ang_vel_yaw=[-1.0, 1.0],
       ),
       push_config=config_dict.create(
           enable=True,
           interval_range=[5.0, 10.0],
-          magnitude_range=[0.1, 1.0],
+          magnitude_range=[0.1, 2.0],
       ),
       # gait_frequency=[0.25, 2.0],
       # gait_frequency=[0.0, 0.5],
-      gait_frequency=[0.0, 0.5],
+      gait_frequency=[1.5, 1.5],
       # gaits=["walk"],
-      gaits=["walk","stand"],
+      gaits=["walk"],
       # gaits=["walk","stand","run"],
-      foot_height=[0.15, 0.6],
+      foot_height=0.1,
       impl="jax",
       nconmax=8 * 1024,
       njmax=10 + 8 * 4,
@@ -180,8 +181,8 @@ class Joystick(hunter_base.HunterEnv):
         5, 6, 7, 8, 9,  # right leg
     ])  # fmt: skip
     self._weights = jp.array([
-        1.0, 100.0, 0.01, 0.01, 1.0,
-        1.0, 100.0, 0.01, 0.01, 1.0,
+        1.0, 1.0, 0.01, 0.01, 1.0,
+        1.0, 1.0, 0.01, 0.01, 1.0,
     ])  # fmt: skip
 
     self._hx_default_pose = self._default_pose[self._hx_idxs]
@@ -212,7 +213,7 @@ class Joystick(hunter_base.HunterEnv):
    
   def sample_command(self, rng: jax.Array) -> jax.Array:
     """Samples a random command with a 10% chance of being zero."""
-    _, rng1, rng2, rng3 = jax.random.split(rng, 4)
+    rng1, rng2, rng3, rng4 = jax.random.split(rng, 4)
     cmd_config = self._config.command_config
     lin_vel_x = jax.random.uniform(
         rng1, minval=cmd_config.lin_vel_x[0], maxval=cmd_config.lin_vel_x[1]
@@ -225,27 +226,48 @@ class Joystick(hunter_base.HunterEnv):
         minval=cmd_config.ang_vel_yaw[0],
         maxval=cmd_config.ang_vel_yaw[1],
     )
-    lin_vel_x = jp.where(
-        jp.abs(lin_vel_x) < cmd_config.lin_vel_threshold, 0, lin_vel_x
+    # With 10% chance, set everything to zero.
+    return jp.where(
+        jax.random.bernoulli(rng4, p=0.1),
+        jp.zeros(3),
+        jp.hstack([lin_vel_x, lin_vel_y, ang_vel_yaw]),
     )
-    lin_vel_y = jp.where(
-        jp.abs(lin_vel_y) < cmd_config.lin_vel_threshold, 0, lin_vel_y
-    )
-    ang_vel_yaw = jp.where(
-        jp.abs(ang_vel_yaw) < cmd_config.ang_vel_threshold, 0, ang_vel_yaw
-    )
-    cmd = jp.hstack([lin_vel_x, lin_vel_y, ang_vel_yaw])
-    return cmd
   
   def reset(self, rng: Optional[Union[int, jp.ndarray]] = None):
-    rng, noise_rng, gait_freq_rng, gait_rng, foot_height_rng, cmd_rng = (  # pylint: disable=redefined-outer-name
-        jax.random.split(rng, 6)
+    rng, gait_freq_rng, gait_rng, cmd_rng = (  # pylint: disable=redefined-outer-name
+        jax.random.split(rng, 4)
+    )
+
+    qpos = self._init_q
+    qvel = jp.zeros(self.mjx_model.nv)
+
+    # x=+U(-0.5, 0.5), y=+U(-0.5, 0.5), yaw=U(-3.14, 3.14).
+    rng, key = jax.random.split(rng)
+    dxy = jax.random.uniform(key, (2,), minval=-0.5, maxval=0.5)
+    qpos = qpos.at[0:2].set(qpos[0:2] + dxy)
+    rng, key = jax.random.split(rng)
+    yaw = jax.random.uniform(key, (1,), minval=-3.14, maxval=3.14)
+    quat = math.axis_angle_to_quat(jp.array([0, 0, 1]), yaw)
+    new_quat = math.quat_mul(qpos[3:7], quat)
+    qpos = qpos.at[3:7].set(new_quat)
+
+    # qpos[7:]=*U(0.5, 1.5)
+    rng, key = jax.random.split(rng)
+    qpos = qpos.at[7:].set(
+        qpos[7:] * jax.random.uniform(key, (10,), minval=0.5, maxval=1.5)
+    )
+
+    # d(xyzrpy)=U(-0.5, 0.5)
+    rng, key = jax.random.split(rng)
+    qvel = qvel.at[0:6].set(
+        jax.random.uniform(key, (6,), minval=-0.5, maxval=0.5)
     )
 
     data = mjx_env.make_data(
         self.mj_model,
-        qpos=self._init_q,
-        qvel=jp.zeros(self.mjx_model.nv),
+        qpos=qpos,
+        qvel=qvel,
+        ctrl=qpos[7:],
         impl=self.mjx_model.impl.value,
         nconmax=self._config.nconmax,
         njmax=self._config.njmax,
@@ -267,11 +289,6 @@ class Joystick(hunter_base.HunterEnv):
         gait_rng, minval=0, maxval=len(self._config.gaits), shape=()
     )
     phase = jp.array(_PHASES)[gait]
-    foot_height = jax.random.uniform(
-        foot_height_rng,
-        minval=self._config.foot_height[0],
-        maxval=self._config.foot_height[1],
-    )
 
     # Sample push interval.
     rng, push_rng = jax.random.split(rng)
@@ -309,7 +326,7 @@ class Joystick(hunter_base.HunterEnv):
         "gait": gait,
         "phase": phase,
         "phase_dt": phase_dt,
-        "foot_height": foot_height,
+        "foot_height": self._config.foot_height,
         # Push related.
         "push": jp.array([0.0, 0.0]),
         "push_step": 0,
@@ -330,10 +347,7 @@ class Joystick(hunter_base.HunterEnv):
     ])
     contact = jp.hstack([jp.any(left_feet_contact), jp.any(right_feet_contact)])
 
-    # obs_history = jp.zeros(15 * 42)  # 15 steps of history.
-    # obs = self._get_obs(data, info, obs_history, noise_rng)
-    # reward, done = jp.zeros(2)
-    obs = self._get_obs(data, info, noise_rng, contact)
+    obs = self._get_obs(data, info, contact)
     reward, done = jp.zeros(2)
     return mjx_env.State(data, obs, reward, done, metrics, info)
 
@@ -387,7 +401,7 @@ class Joystick(hunter_base.HunterEnv):
     state.info["swing_peak"] = jp.maximum(state.info["swing_peak"], p_fz)
 
     # obs = self._get_obs(data, state.info, state.obs, noise_rng)
-    obs = self._get_obs(data, state.info, noise_rng, contact)
+    obs = self._get_obs(data, state.info, contact)
     done = self._get_termination(data)
 
     # joint_angles = data.qpos[7:]
@@ -446,98 +460,103 @@ class Joystick(hunter_base.HunterEnv):
     return state
 
   def _get_termination(self, data: mjx.Data) -> jax.Array:
-    # Terminates if joint limits are exceeded or the robot falls.
-    joint_angles = data.qpos[7:]
-    joint_limit_exceed = jp.any(joint_angles < self._lowers)
-    joint_limit_exceed |= jp.any(joint_angles > self._uppers)
-    # fall_termination = self.get_gravity(data)[-1] < 0.59
-    fall_termination = self.get_gravity(data)[-1] < 0.49
-
-    return jp.where(
-        self._config.early_termination,
-        joint_limit_exceed | fall_termination,
-        joint_limit_exceed,
+    fall_termination = self.get_gravity(data)[-1] < 0.0
+    return (
+        fall_termination | jp.isnan(data.qpos).any() | jp.isnan(data.qvel).any()
     )
 
   def _get_obs(
       self,
       data: mjx.Data,
       info: dict[str, Any],
-      rng: jax.Array,
       contact: jax.Array,
   ) -> jp.ndarray:
     # IMU data: Gravity vector in base frame (3)
     gravity = self.get_gravity(data)
-    linear_accel = self.get_accelerometer(data)
-    angular_vel = self.get_gyro(data)
-
-    # Current joint action (10) 
-    joint_torques = info["last_act"]
-
-    obs = jp.concatenate([
-        angular_vel,    # 3
-        gravity,        # 3
-        data.qpos[7:] - self._default_pose,  # 10
-        data.qvel[6:],  # 10
-        info["last_act"],  # 10
-        info["command"],  # 3
-        # total: 39
-    ])
-
-    # # Add noise if specified
-    # if self._config.obs_noise > 0.0:
-    #     noise = self._config.obs_noise * jax.random.normal(
-    #         rng, obs.shape
-    #     )
-    #     obs = jp.clip(obs, -100.0, 100.0) + noise
-
-    # Add noise.
-    noise_vec = jp.zeros_like(obs)
-    noise_vec = noise_vec.at[:3].set(
-        self._config.obs_noise.level * self._config.obs_noise.scales.gyro
+    info["rng"], noise_rng = jax.random.split(info["rng"])
+    noisy_gravity = (
+        gravity
+        + (2 * jax.random.uniform(noise_rng, shape=gravity.shape) - 1)
+        * self._config.noise_config.level
+        * self._config.noise_config.scales.gravity
     )
-    noise_vec = noise_vec.at[3:6].set(
-        self._config.obs_noise.level * self._config.obs_noise.scales.gravity
+    gyro = self.get_gyro(data)
+    info["rng"], noise_rng = jax.random.split(info["rng"])
+    noisy_gyro = (
+        gyro
+        + (2 * jax.random.uniform(noise_rng, shape=gyro.shape) - 1)
+        * self._config.noise_config.level
+        * self._config.noise_config.scales.gyro
     )
-    noise_vec = noise_vec.at[6:16].set(
-        self._config.obs_noise.level * self._config.obs_noise.scales.joint_pos
-    )
-    noise_vec = noise_vec.at[16:26].set(
-        self._config.obs_noise.level * self._config.obs_noise.scales.joint_vel
-    )
-    obs = obs + (2 * jax.random.uniform(rng, shape=obs.shape) - 1) * noise_vec
-    # obs = obs + (2 * jax.random.normal(rng, shape=obs.shape) - 1) * noise_vec
 
-    # Update history.
-    qvel_history = jp.roll(info["qvel_history"], 10).at[:10].set(data.qvel[6:])
-    qpos_error_history = (
-        jp.roll(info["qpos_error_history"], 10)
-        .at[:10]
-        .set(data.qpos[7:] - info["motor_targets"])
+    joint_angles = data.qpos[7:]
+    info["rng"], noise_rng = jax.random.split(info["rng"])
+    noisy_joint_angles = (
+        joint_angles
+        + (2 * jax.random.uniform(noise_rng, shape=joint_angles.shape) - 1)
+        * self._config.noise_config.level
+        * self._config.noise_config.scales.joint_pos
     )
-    info["qvel_history"] = qvel_history
-    info["qpos_error_history"] = qpos_error_history
+
+    joint_vel = data.qvel[6:] 
+    info["rng"], noise_rng = jax.random.split(info["rng"])
+    noisy_joint_vel = (
+        joint_vel
+        + (2 * jax.random.uniform(noise_rng, shape=joint_vel.shape) - 1)
+        * self._config.noise_config.level
+        * self._config.noise_config.scales.joint_vel
+    )
+
+    linvel = self.get_local_linvel(data)
+    info["rng"], noise_rng = jax.random.split(info["rng"])
+    # TODO: Disable linvel noise for now as it causes instability
+    # noisy_linvel = (
+    #     linvel
+    #     + (2 * jax.random.uniform(noise_rng, shape=linvel.shape) - 1)
+    #     * self._config.noise_config.level
+    #     * self._config.noise_config.scales.linvel
+    # )
 
     cos = jp.cos(info["phase"])
     sin = jp.sin(info["phase"])
     phase = jp.concatenate([cos, sin])
 
-    # obs = jp.roll(obs_history, obs.size).at[: obs.size].set(obs)  
-    # Concatenate final observation.
-    obs = jp.hstack(
-        [
-            obs, #39
-            # qvel_history, #10
-            # qpos_error_history, #10
-            # contact, #2
-            # phase, #4
-            info["gait_freq"], #1
-            info["gait"], #1
-            # info["foot_height"], #1
-        ],
-    )
+    state = jp.concatenate([
+        noisy_gyro,    # 3
+        noisy_gravity,        # 3
+        noisy_joint_angles - self._default_pose,  # 10
+        noisy_joint_vel * self._config.dof_vel_scale,  # 10
+        info["last_act"],  # 10
+        info["command"],  # 3
+        phase  # 3
+        # total: 43
+    ])
 
-    return obs
+    accelerometer = self.get_accelerometer(data)
+    global_angvel = self.get_global_angvel(data)
+    feet_vel = data.sensordata[self._foot_linvel_sensor_adr].ravel()
+    root_height = data.qpos[2]
+
+    privileged_state = jp.hstack([
+        state,
+        gyro,  # 3
+        accelerometer,  # 3
+        gravity,  # 3
+        linvel,  # 3
+        global_angvel,  # 3
+        joint_angles - self._default_pose,
+        joint_vel * self._config.dof_vel_scale,
+        root_height,  # 1
+        data.actuator_force,  # 29
+        contact,  # 2
+        feet_vel,  # 4*3
+        info["feet_air_time"],  # 2
+    ])
+
+    return {
+        "state": state,
+        "privileged_state": privileged_state,
+    }
 
   def _get_local_angvel(self, data: mjx.Data) -> jax.Array:
     return self.get_gyro(data)
@@ -567,7 +586,7 @@ class Joystick(hunter_base.HunterEnv):
       first_contact: jax.Array,
       contact: jax.Array,
   ) -> tuple[dict[str, jax.Array], dict[str, jax.Array]]:
-    del done, metrics  # Unused.
+    del metrics  # Unused.
     pos = {
         "tracking_lin_vel": self._reward_tracking_lin_vel(
             info["command"], self.get_local_linvel(data)
@@ -595,6 +614,7 @@ class Joystick(hunter_base.HunterEnv):
         "action_rate": self._cost_action_rate(
             info["last_act"], info["last_last_act"], action
         ),
+        "termination": self._cost_termination(done),
         "feet_clearance": self._cost_feet_clearance(data),
         "feet_distance": self._cost_feet_distance(data),
     }
@@ -701,8 +721,8 @@ class Joystick(hunter_base.HunterEnv):
         unit_cmd[1] < 0.1
     )
 
-  def _cost_termination(self, done: jax.Array, step: jax.Array) -> jax.Array:
-    return done & (step < 500)
+  def _cost_termination(self, done: jax.Array) -> jax.Array:
+    return done
 
   def _cost_feet_slip(self, data: mjx.Data) -> jax.Array:
     feet_vel = data.sensordata[self._foot_linvel_sensor_adr]
@@ -727,7 +747,7 @@ class Joystick(hunter_base.HunterEnv):
     vel_norm = jp.sqrt(jp.linalg.norm(vel_xy, axis=-1))
     foot_pos = data.site_xpos[self._feet_site_id]
     foot_z = foot_pos[..., -1]
-    delta = (foot_z - self._config.foot_height[1]) ** 2
+    delta = (foot_z - self._config.foot_height) ** 2
     return jp.sum(delta * vel_norm)
 
   def _cost_feet_distance(
