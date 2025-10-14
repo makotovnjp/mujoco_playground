@@ -42,11 +42,24 @@ act_size = env.action_size
 print(obs_size, act_size)
 
 _PLAY_ONLY = True
-_LOAD_CHECKPOINT_PATH = "/home/sandbox/Work/mujoco_playground/learning/notebooks/logs/HunterJoystick-20250929-133124/checkpoints/"
-
+_LOAD_CHECKPOINT_PATH = "/home/sandbox/Work/mujoco_playground/learning/notebooks/logs/HunterJoystick-20251011-094343/checkpoints"
+# stand_202510112057
+_LOAD_CHECKPOINT_PATH = "/home/sandbox/Work/mujoco_playground/learning/notebooks/logs/HunterJoystick-20251012-005302/checkpoints"
+# stand_202510121205
+_LOAD_CHECKPOINT_PATH = "/home/sandbox/Work/mujoco_playground/learning/notebooks/logs/HunterJoystick-20251012-062655/checkpoints"
+# stand_202510121731
+_LOAD_CHECKPOINT_PATH = "/home/sandbox/Work/mujoco_playground/learning/notebooks/logs/HunterJoystick-20251012-075632/checkpoints"
+# stand_202510122234
+_LOAD_CHECKPOINT_PATH = "/home/sandbox/Work/mujoco_playground/learning/notebooks/logs/HunterJoystick-20251012-151331/checkpoints"
+# stand_202510130137
+_LOAD_CHECKPOINT_PATH = "/home/sandbox/Work/mujoco_playground/learning/notebooks/logs/HunterJoystick-20251012-234301/checkpoints"
+# stand_202510131126
+_LOAD_CHECKPOINT_PATH = "/home/sandbox/Work/mujoco_playground/learning/notebooks/logs/HunterJoystick-20251013-040454/checkpoints"
+# stand_202510131635
 env = registry.load(env_name)
 env_cfg = registry.get_default_config(env_name)
 ppo_params = locomotion_params.brax_ppo_config(env_name)
+has_privileged = True if type(env.observation_size) is dict else False
 
 ## For inference
 if _PLAY_ONLY:
@@ -213,8 +226,13 @@ def make_policy_network(
         mean_std=mean_std,
     )
     return policy_network
-mean = params[0].mean
-std = params[0].std
+
+if has_privileged: 
+    mean = params[0].mean["state"]
+    std = params[0].std["state"]
+else:
+    mean = params[0].mean
+    std = params[0].std
 
 # Convert mean/std jax arrays to tf tensors.
 mean_std = (tf.convert_to_tensor(mean), tf.convert_to_tensor(std))
@@ -226,7 +244,10 @@ tf_policy_network = make_policy_network(
     activation=tf.nn.swish,
 )
 
-example_input = tf.zeros((1, obs_size))
+if has_privileged:
+    example_input = tf.zeros((1, obs_size["state"][0]))
+else:
+    example_input = tf.zeros((1, obs_size))
 example_output = tf_policy_network(example_input)
 print(example_output.shape)
 
@@ -276,10 +297,16 @@ def transfer_weights(jax_params, tf_model):
 transfer_weights(params[1]['params'], tf_policy_network)
 
 # Example inputs for the model
-test_input = [np.ones((1, obs_size), dtype=np.float32)]
+if has_privileged:
+    test_input = [np.ones((1, obs_size["state"][0]), dtype=np.float32)]
+else:
+    test_input = [np.ones((1, obs_size), dtype=np.float32)]
 
 # Define the TensorFlow input signature
-spec = [tf.TensorSpec(shape=(1, obs_size), dtype=tf.float32, name="obs")]
+if has_privileged:
+    spec = [tf.TensorSpec(shape=(1, obs_size['state'][0]), dtype=tf.float32, name="obs")]
+else:
+    spec = [tf.TensorSpec(shape=(1, obs_size), dtype=tf.float32, name="obs")]
 
 tensorflow_pred = tf_policy_network(test_input)[0]
 # Build the model by calling it with example data
@@ -295,14 +322,26 @@ output_names = ['continuous_actions']
 providers = ['CPUExecutionProvider']
 m = rt.InferenceSession(output_path, providers=providers)
 
-onnx_input = {
-  'obs': np.ones((1, obs_size), dtype=np.float32)
-}
+if has_privileged:
+    onnx_input = {
+        'obs': np.ones((1, obs_size['state'][0]), dtype=np.float32)
+    }
+else:
+    onnx_input = {
+    'obs': np.ones((1, obs_size), dtype=np.float32)
+    }
 # Prepare inputs for ONNX Runtime
 onnx_pred = m.run(output_names, onnx_input)[0][0]
 
 print("ONNX prediction:", onnx_pred)
 
-test_input = jp.ones(obs_size)
+if has_privileged:
+    test_input = {
+        'state': jp.ones(obs_size['state']),
+        'privileged_state': jp.zeros(obs_size['privileged_state'])
+    }
+else:
+    test_input = jp.ones(obs_size)
+
 jax_pred, _ = inference_fn(test_input, jax.random.PRNGKey(0))
 print(jax_pred)
