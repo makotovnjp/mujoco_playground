@@ -147,27 +147,40 @@ def brax_ppo_config(env_name: str) -> config_dict.ConfigDict:
       value_obs_key="privileged_state",
     )
 
-  elif env_name == "HunterStand":
-    rl_config.num_timesteps = 10
+  elif env_name in ("HunterStand"):
+    rl_config.num_timesteps = 20000
     rl_config.num_evals = 10
-    rl_config.episode_length = 10
-    rl_config.num_envs = 4096
+    rl_config.episode_length = 100
     rl_config.network_factory = config_dict.create(
-        policy_hidden_layer_sizes=(64, 64),
-        value_hidden_layer_sizes=(64, 64),
+        policy_hidden_layer_sizes=(128, 64),
+        value_hidden_layer_sizes=(128, 64),
         policy_obs_key="state",
         value_obs_key="state",
     )
+  elif env_name in ("HunterJoystick"):
+    rl_config.num_evals = 20
+    rl_config.clipping_epsilon = 0.2
+    rl_config.num_resets_per_eval = 1
+    rl_config.entropy_cost = 0.005
+    rl_config.network_factory = config_dict.create(
+        policy_hidden_layer_sizes=(512, 256, 128),
+        value_hidden_layer_sizes=(512, 256, 128),
+        policy_obs_key="state",
+        value_obs_key="privileged_state",
+    )
+  # elif env_name in ("HunterJoystickStair"):
+  #   rl_config.num_envs=4096
 
   elif env_name in (
       "BarkourJoystick",
       "H1InplaceGaitTracking",
       "H1JoystickGaitTracking",
+      "H1Joystick",
       "Op3Joystick",
       "SpotFlatTerrainJoystick",
       "SpotGetup",
       "SpotJoystickGaitTracking",
-      "Hunter",
+      "HunterJoystick"
   ):
     pass  # use default config
   else:

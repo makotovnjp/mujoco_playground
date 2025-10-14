@@ -34,6 +34,7 @@ from mujoco_playground._src.locomotion.go1 import joystick as go1_joystick
 from mujoco_playground._src.locomotion.go1 import randomize as go1_randomize
 from mujoco_playground._src.locomotion.h1 import inplace_gait_tracking as h1_inplace_gait_tracking
 from mujoco_playground._src.locomotion.h1 import joystick_gait_tracking as h1_joystick_gait_tracking
+from mujoco_playground._src.locomotion.h1 import joystick as h1_joystick    
 from mujoco_playground._src.locomotion.op3 import joystick as op3_joystick
 from mujoco_playground._src.locomotion.spot import getup as spot_getup
 from mujoco_playground._src.locomotion.spot import joystick as spot_joystick
@@ -41,7 +42,8 @@ from mujoco_playground._src.locomotion.spot import joystick_gait_tracking as spo
 from mujoco_playground._src.locomotion.t1 import joystick as t1_joystick
 from mujoco_playground._src.locomotion.t1 import randomize as t1_randomize
 from mujoco_playground._src.locomotion.hunter import stand as hunter_stand
-
+from mujoco_playground._src.locomotion.hunter import joystick as hunter_joystick
+from mujoco_playground._src.locomotion.hunter import joystick_stair as hunter_joystick_stair
 
 mjx_env.ensure_menagerie_exists()  # Ensure menagerie exists when module is imported.
 
@@ -73,6 +75,7 @@ _envs = {
     "Go1Footstand": go1_handstand.Footstand,
     "H1InplaceGaitTracking": h1_inplace_gait_tracking.InplaceGaitTracking,
     "H1JoystickGaitTracking": h1_joystick_gait_tracking.JoystickGaitTracking,
+    "H1Joystick": h1_joystick.Joystick,
     "Op3Joystick": op3_joystick.Joystick,
     "SpotFlatTerrainJoystick": functools.partial(
         spot_joystick.Joystick, task="flat_terrain"
@@ -88,6 +91,8 @@ _envs = {
         t1_joystick.Joystick, task="rough_terrain"
     ),
     "HunterStand": hunter_stand.Stand,
+    "HunterJoystick": hunter_joystick.Joystick, 
+    "HunterJoystickStair":hunter_joystick_stair.Joystick,
 }
 
 _cfgs = {
@@ -108,6 +113,7 @@ _cfgs = {
     "Go1Footstand": go1_handstand.default_config,
     "H1InplaceGaitTracking": h1_inplace_gait_tracking.default_config,
     "H1JoystickGaitTracking": h1_joystick_gait_tracking.default_config,
+    "H1Joystick": h1_joystick.default_config,
     "Op3Joystick": op3_joystick.default_config,
     "SpotFlatTerrainJoystick": spot_joystick.default_config,
     "SpotGetup": spot_getup.default_config,
@@ -115,6 +121,8 @@ _cfgs = {
     "T1JoystickFlatTerrain": t1_joystick.default_config,
     "T1JoystickRoughTerrain": t1_joystick.default_config,
     "HunterStand": hunter_stand.default_config,
+    "HunterJoystick": hunter_joystick.default_config,
+    "HunterJoystickStair": hunter_joystick_stair.default_config,
 }
 
 _randomizer = {

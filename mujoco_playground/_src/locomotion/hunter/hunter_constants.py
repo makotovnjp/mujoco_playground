@@ -18,6 +18,8 @@ from mujoco_playground._src import mjx_env
 
 ROOT_PATH = mjx_env.ROOT_PATH / "locomotion" / "hunter" / "xmls"
 HUNTER_XML = ROOT_PATH / "pdd_mjx.xml"
+# HUNTER_XML = ROOT_PATH / "pdd_mjx_with_stair.xml"
+
 
 # Feet sites and geoms for foot standing tasks
 FEET_SITES = [
@@ -26,19 +28,23 @@ FEET_SITES = [
 ]
 
 LEFT_FEET_GEOMS = [
-    "leg_l5_link",  # Left foot end effector
+    # "leg_l5_link",  # Left foot end effector
+    "left_foot1",
+    "left_foot2"
 ]
 RIGHT_FEET_GEOMS = [
-    "leg_r5_link",  # Right foot end effector
+    # "leg_r5_link",  # Right foot end effector
+    "right_foot1",
+    "right_foot2"
 ]
 
 # Robot body names based on pdd.xml
 ROOT_BODY = "base_link"
 
 # Sensor names from pdd.xml
-GRAVITY_SENSOR = "orientation"  # framequat sensor
-GLOBAL_LINVEL_SENSOR = "linear-velocity"  # velocimeter sensor
-GLOBAL_ANGVEL_SENSOR = "angular-velocity"  # gyro sensor
-LOCAL_LINVEL_SENSOR = "linear-velocity"  # velocimeter sensor
-ACCELEROMETER_SENSOR = "linear-acceleration"  # accelerometer sensor
-GYRO_SENSOR = "angular-velocity"  # gyro sensor
+GRAVITY_SENSOR = "upvector"
+GLOBAL_LINVEL_SENSOR = "global_linvel"
+GLOBAL_ANGVEL_SENSOR = "global_angvel"
+LOCAL_LINVEL_SENSOR = "local_linvel"
+ACCELEROMETER_SENSOR = "accelerometer"
+GYRO_SENSOR = "gyro"

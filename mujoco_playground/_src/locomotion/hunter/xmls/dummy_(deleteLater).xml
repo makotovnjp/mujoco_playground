@@ -88,8 +88,8 @@
     <light directional="true" diffuse=".4 .4 .4" specular="0.1 0.1 0.1" pos="0 0 5.0" dir="0 0 -1"
       castshadow="false" />
     <light directional="true" diffuse=".6 .6 .6" specular="0.2 0.2 0.2" pos="0 0 4" dir="0 0 -1" />
-    <geom name="ground" type="plane" size="0 0 0.01" pos="0.001 0 0" quat="1 0 0 0" material="matplane"
-      condim="3" conaffinity='0' friction="0.6" contype="1"/>
+    <geom name="ground" type="plane" size="0 0 1" pos="0.001 0 0" quat="1 0 0 0" material="matplane"
+      condim="3" conaffinity='2' friction="0.6"/>
 
     <body name="base_link" pos="0.0 0.0 0.7">
       <geom type="mesh" mesh="base_link" group="1" class="visualgeom" />
@@ -101,7 +101,6 @@
       <joint type='slide' axis='0 0 1' limited='false' />
       <joint type='ball' limited='false' />
       <camera name="track" pos="1.248 -0.947 0.3" xyaxes="0.628 0.779 -0.000 -0.274 0.221 0.936" mode="trackcom"/>
-
       <site name='imu' size='0.01' pos='0.0 0 0.0' />
 
       <geom type="mesh" contype="0" conaffinity="0" group="1" density="0"
@@ -125,7 +124,7 @@
             <inertial pos="0.003163 -0.022552 -0.027258"
               quat="0.678041 0.0230005 -0.0875592 0.729428"
               mass="1.39047" diaginertia="0.00722081 0.00694653 0.00181065" />
-            <joint name="leg_l3_joint" pos="0 0 0" axis="0 1 0" limited="true" range="-1.5 0.2"
+            <joint name="leg_l3_joint" pos="0 0 0" axis="0 1 0" limited="true" range="-1.2 0.2"
               frictionloss="0.2" />
             <geom size="0.03 0.125 0.025" pos="0.015 0.02 -0.1" quat="0.707388 0.706825 0 0"
               type="box" rgba="0.75294 0.75294 0.75294 1" />
@@ -141,9 +140,9 @@
               <geom size="0.034 0.034 0.035" pos="-0.011 0.012 -0.079" quat="0.707388 0.706825 0 0"
                 type="box" rgba="0.75294 0.75294 0.75294 1" />
               <body name="leg_l5_link" pos="0.005 0 -0.23995">
-                <inertial pos="0.012435 0 -0.015511" mass="0.030265"
+                <inertial pos="0.012435 0 -0.015511" mass="0.30265"
                   diaginertia="0.0008 0.0008 0.0008" />
-                <joint name="leg_l5_joint" pos="0 0 0" axis="0 1 0" limited="true" range="-0.52 0.52"
+                <joint name="leg_l5_joint" pos="0 0 0" axis="0 1 0" limited="true" range="-0.32 0.52"
                   frictionloss="0.2" />
                 <geom size="0.05005 0.01725 0.00875" pos="0.01503 0 -0.0102"
                   quat="0.707388 0.706825 0 0" type="box" rgba="0.75294 0.75294 0.75294 1" />
@@ -173,7 +172,7 @@
           <body name="leg_r3_link" pos="0 0.01633 -0.0575">
             <inertial pos="0.003311 0.02265 -0.027271" quat="0.734236 -0.0877978 0.023126 0.672795"
               mass="1.38862" diaginertia="0.00722344 0.00694292 0.00180965" />
-            <joint name="leg_r3_joint" pos="0 0 0" axis="0 1 0" limited="true" range="-1.5 0.2"
+            <joint name="leg_r3_joint" pos="0 0 0" axis="0 1 0" limited="true" range="-1.2 0.2"
               frictionloss="0.2" />
             <geom size="0.03 0.125 0.025" pos="0.015 -0.02 -0.1" quat="0.707388 0.706825 0 0"
               type="box" rgba="0.75294 0.75294 0.75294 1" />
@@ -189,9 +188,9 @@
               <geom size="0.034 0.034 0.035" pos="-0.011 -0.012 -0.079" quat="0.707388 0.706825 0 0"
                 type="box" rgba="0.75294 0.75294 0.75294 1" />
               <body name="leg_r5_link" pos="0.005 0 -0.23995">
-                <inertial pos="0.012435 -0.0005 -0.015511" mass="0.030265"
+                <inertial pos="0.012435 -0.0005 -0.015511" mass="0.30265"
                   diaginertia="0.0008 0.0008 0.0008" />
-                <joint name="leg_r5_joint" pos="0 0 0" axis="0 1 0" limited="true" range="-0.52 0.52"
+                <joint name="leg_r5_joint" pos="0 0 0" axis="0 1 0" limited="true" range="-0.32 0.52"
                   frictionloss="0.2" />
                 <geom size="0.05005 0.01725 0.00875" pos="0.01503 0 -0.0102"
                   quat="0.707388 0.706825 0 0" type="box" rgba="0.75294 0.75294 0.75294 1" />
@@ -208,17 +207,27 @@
   </worldbody>
   
   <actuator>
-    <position class="hunter" name="leg_l1_joint" joint="leg_l1_joint" forcerange="-36 36" kp="15" kv="1.0"/>
-    <position class="hunter" name="leg_l2_joint" joint="leg_l2_joint" forcerange="-36 36" kp="5" kv="0.5"/>
-    <position class="hunter" name="leg_l3_joint" joint="leg_l3_joint" forcerange="-60 60" kp="15" kv="1.5"/>
-    <position class="hunter" name="leg_l4_joint" joint="leg_l4_joint" forcerange="-60 60" kp="25" kv="2.5"/>
-    <position class="hunter" name="leg_l5_joint" joint="leg_l5_joint" forcerange="-36 36" kp="5" kv="0.1"/>
+    <!-- <motor name="leg_l1_joint" joint="leg_l1_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
+    <motor name="leg_l2_joint" joint="leg_l2_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
+    <motor name="leg_l3_joint" joint="leg_l3_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
+    <motor name="leg_l4_joint" joint="leg_l4_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
+    <motor name="leg_l5_joint" joint="leg_l5_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
+    <motor name="leg_r1_joint" joint="leg_r1_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
+    <motor name="leg_r2_joint" joint="leg_r2_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
+    <motor name="leg_r3_joint" joint="leg_r3_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
+    <motor name="leg_r4_joint" joint="leg_r4_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
+    <motor name="leg_r5_joint" joint="leg_r5_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" /> -->
+    <position class="hunter" name="leg_l1_joint" joint="leg_l1_joint" forcerange="-100 100" kp="100" kv="3"/>
+    <position class="hunter" name="leg_l2_joint" joint="leg_l2_joint" forcerange="-100 100" kp="100" kv="3"/>
+    <position class="hunter" name="leg_l3_joint" joint="leg_l3_joint" forcerange="-100 100" kp="100" kv="3"/>
+    <position class="hunter" name="leg_l4_joint" joint="leg_l4_joint" forcerange="-200 200" kp="100" kv="3"/>
+    <position class="hunter" name="leg_l5_joint" joint="leg_l5_joint" forcerange="-10 10" kp="100" kv="3"/>
 
-    <position class="hunter" name="leg_r1_joint" joint="leg_r1_joint" forcerange="-36 36" kp="15" kv="1.0"/>
-    <position class="hunter" name="leg_r2_joint" joint="leg_r2_joint" forcerange="-36 36" kp="5" kv="0.5"/>
-    <position class="hunter" name="leg_r3_joint" joint="leg_r3_joint" forcerange="-60 60" kp="15" kv="1.5"/>
-    <position class="hunter" name="leg_r4_joint" joint="leg_r4_joint" forcerange="-60 60" kp="25" kv="2.5"/>
-    <position class="hunter" name="leg_r5_joint" joint="leg_r5_joint" forcerange="-36 36" kp="5" kv="0.1"/>
+    <position class="hunter" name="leg_r1_joint" joint="leg_r1_joint" forcerange="-100 100" kp="100" kv="3"/>
+    <position class="hunter" name="leg_r2_joint" joint="leg_r2_joint" forcerange="-100 100" kp="100" kv="3"/>
+    <position class="hunter" name="leg_r3_joint" joint="leg_r3_joint" forcerange="-100 100" kp="100" kv="3"/>
+    <position class="hunter" name="leg_r4_joint" joint="leg_r4_joint" forcerange="-200 200" kp="100" kv="3"/>
+    <position class="hunter" name="leg_r5_joint" joint="leg_r5_joint" forcerange="-10 10" kp="100" kv="3"/>
   </actuator>
   
   <sensor>
