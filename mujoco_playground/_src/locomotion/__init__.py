@@ -43,6 +43,7 @@ from mujoco_playground._src.locomotion.t1 import joystick as t1_joystick
 from mujoco_playground._src.locomotion.t1 import randomize as t1_randomize
 from mujoco_playground._src.locomotion.hunter import stand as hunter_stand
 from mujoco_playground._src.locomotion.hunter import joystick as hunter_joystick
+from mujoco_playground._src.locomotion.hunter import randomize as hunter_randomize
 from mujoco_playground._src.locomotion.hunter import joystick_stair as hunter_joystick_stair
 
 mjx_env.ensure_menagerie_exists()  # Ensure menagerie exists when module is imported.
@@ -92,6 +93,9 @@ _envs = {
     ),
     "HunterStand": hunter_stand.Stand,
     "HunterJoystick": hunter_joystick.Joystick, 
+    "HunterJoystickRoughTerrain": functools.partial(
+        hunter_joystick.Joystick, task="rough_terrain"
+    ),
     "HunterJoystickStair":hunter_joystick_stair.Joystick,
 }
 
@@ -122,6 +126,7 @@ _cfgs = {
     "T1JoystickRoughTerrain": t1_joystick.default_config,
     "HunterStand": hunter_stand.default_config,
     "HunterJoystick": hunter_joystick.default_config,
+    "HunterJoystickRoughTerrain": hunter_joystick.default_config,
     "HunterJoystickStair": hunter_joystick_stair.default_config,
 }
 
@@ -141,6 +146,8 @@ _randomizer = {
     "Go1Footstand": go1_randomize.domain_randomize,
     "T1JoystickFlatTerrain": t1_randomize.domain_randomize,
     "T1JoystickRoughTerrain": t1_randomize.domain_randomize,
+    "HunterJoystick": hunter_randomize.domain_randomize,
+    "HunterJoystickRoughTerrain": hunter_randomize.domain_randomize
 }
 
 
