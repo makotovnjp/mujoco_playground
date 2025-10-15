@@ -113,14 +113,13 @@ def default_config() -> config_dict.ConfigDict:
           tracking_sigma=0.5,
       ),
       command_config=config_dict.create(
-          lin_vel_x=[-1.0, 1.0],
+          lin_vel_x=[-1.5, 1.5],
           lin_vel_y=[-1.0, 1.0],
-          ang_vel_yaw=[-1.0, 1.0]
-        #   ang_vel_yaw=[-2*np.pi, 2*np.pi]
-
+        #   ang_vel_yaw=[-1.2, 1.2]
+          ang_vel_yaw=[-2*np.pi, 2*np.pi]
       ),
       push_config=config_dict.create(
-          enable=True,
+          enable=False,
           interval_range=[5.0, 10.0],
           magnitude_range=[0.1, 2.0],
       ),
@@ -140,18 +139,20 @@ class Joystick(hunter_base.HunterEnv):
   """Hunter environment with joystick control."""
 
   def __init__(
-        self,
-        config: config_dict.ConfigDict = default_config(),
-        config_overrides: Optional[
-            Dict[str, Union[str, int, list[Any]]]
-        ] = None,
-    ):
-        super().__init__(
-            hunter_constants.HUNTER_XML.as_posix(), 
-            config, 
-            config_overrides
-        )
-        self._post_init()
+      self,
+      task: str = "flat_terrain",
+      config: config_dict.ConfigDict = default_config(),
+      config_overrides: Optional[Dict[str, Union[str, int, list[Any]]]] = None,
+  ):
+    if task.startswith("rough"):
+      config.nconmax = 100 * 8192
+      config.njmax = 12 + 100 * 4
+    super().__init__(
+        hunter_constants.task_to_xml(task).as_posix(),
+        config, 
+        config_overrides
+    )
+    self._post_init()
   
   def _post_init(self):
     # Default standing pose with slightly bent knees
@@ -549,9 +550,9 @@ class Joystick(hunter_base.HunterEnv):
       [
         state,  # 42
         phase,  # 4
-        info["gait"],   #1
-        info["gait_freq"],   #1
-        info["foot_height"]   #1
+        #info["gait"],   #1
+        #info["gait_freq"],   #1
+        #info["foot_height"]   #1
         # total: 49
       ],
     )
@@ -575,6 +576,9 @@ class Joystick(hunter_base.HunterEnv):
         contact,  # 2
         feet_vel,  # 4*3
         info["feet_air_time"],  # 2
+        info["gait"],   #1
+        info["gait_freq"],   #1
+        info["foot_height"]   #1
     ])
 
     return {
