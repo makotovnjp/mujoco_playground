@@ -149,7 +149,8 @@
                   quat="0.707388 0.706825 0 0" type="box" rgba="0.75294 0.75294 0.75294 1" />
                 
                 <geom name="left_foot1" class="foot1"/>
-                <geom name="left_foot2" class="foot2"/>  
+                <geom name="left_foot2" class="foot2"/> 
+                <geom name="left_foot" class="foot"/> 
                 <site name="left_foot" pos="0 0 0" />
               </body>
             </body>
@@ -198,6 +199,7 @@
                 
                 <geom name="right_foot1" class="foot1"/>
                 <geom name="right_foot2" class="foot2"/> 
+                <geom name="right_foot" class="foot"/>
                 <site name ="right_foot" pos="0 0 0" />
               </body>
             </body>
