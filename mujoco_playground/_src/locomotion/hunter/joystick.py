@@ -107,7 +107,7 @@ def default_config() -> config_dict.ConfigDict:
               termination=-1.0,
               foot_slip=-0.1,
               action_rate=-0.01,  # previous: -0.5
-              feet_distance=-0.3,
+              feet_distance=-0.0,
               collision=-1.0,
           ),
           tracking_sigma=0.5,
@@ -115,8 +115,8 @@ def default_config() -> config_dict.ConfigDict:
       command_config=config_dict.create(
           lin_vel_x=[-1.0, 1.0],
           lin_vel_y=[-1.0, 1.0],
-        #   ang_vel_yaw=[-1.0, 1.0]
-          ang_vel_yaw=[-2*np.pi, 2*np.pi]
+          ang_vel_yaw=[-1.0, 1.0]
+        #   ang_vel_yaw=[-2*np.pi, 2*np.pi]
 
       ),
       push_config=config_dict.create(
