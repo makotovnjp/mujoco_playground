@@ -108,7 +108,7 @@ def default_config() -> config_dict.ConfigDict:
               foot_slip=-0.1,
               action_rate=-0.01,  # previous: -0.5
               feet_distance=-0.3,
-              collision=-1.0,
+              collision=-0.0,
           ),
           tracking_sigma=0.5,
       ),
@@ -549,9 +549,9 @@ class Joystick(hunter_base.HunterEnv):
       [
         state,  # 42
         phase,  # 4
-        info["gait"],   #1
-        info["gait_freq"],   #1
-        info["foot_height"]   #1
+        #info["gait"],   #1
+        #info["gait_freq"],   #1
+        #info["foot_height"]   #1
         # total: 49
       ],
     )
@@ -575,6 +575,9 @@ class Joystick(hunter_base.HunterEnv):
         contact,  # 2
         feet_vel,  # 4*3
         info["feet_air_time"],  # 2
+        info["gait"],   #1
+        info["gait_freq"],   #1
+        info["foot_height"]   #1
     ])
 
     return {
