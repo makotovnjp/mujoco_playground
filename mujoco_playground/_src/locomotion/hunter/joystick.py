@@ -155,26 +155,28 @@ class Joystick(hunter_base.HunterEnv):
     self._post_init()
   
   def _post_init(self):
-    # Default standing pose with slightly bent knees
-    self._init_q = jp.zeros(self._mjx_model.nq)
-    self._init_q = self._init_q.at[3:7].set(jp.array([1, 0, 0, 0]))  # quat
+    # # Default standing pose with slightly bent knees
+    # self._init_q = jp.zeros(self._mjx_model.nq)
+    # self._init_q = self._init_q.at[3:7].set(jp.array([1, 0, 0, 0]))  # quat
     
-    # Set joint positions for stable standing
-    # Set floating base position (x, y, z, quat)
-    # self._init_q = self._init_q.at[2].set(-0.014)   # z position - proper standing height
-    # joint_init = jp.array([0.0, 0.0, -0.2, 0.5, -0.3, 0.0, 0.0, -0.2, 0.5, -0.3])   # 10 joints
+    # # Set joint positions for stable standing
+    # # Set floating base position (x, y, z, quat)
+    # # self._init_q = self._init_q.at[2].set(-0.014)   # z position - proper standing height
+    # # joint_init = jp.array([0.0, 0.0, -0.2, 0.5, -0.3, 0.0, 0.0, -0.2, 0.5, -0.3])   # 10 joints
 
-    # SAME AS ROS1
-    # self._init_q = self._init_q.at[2].set(-0.05)  # z position - proper standing height
-    # joint_init = jp.array([0.1, 0.0, -0.4, 0.93, -0.53, -0.1, 0.0, -0.4, 0.93, -0.53]) 
+    # # SAME AS ROS1
+    # # self._init_q = self._init_q.at[2].set(-0.05)  # z position - proper standing height
+    # # joint_init = jp.array([0.1, 0.0, -0.4, 0.93, -0.53, -0.1, 0.0, -0.4, 0.93, -0.53]) 
 
-    # SAME AS CUSTOMER DOC
-    self._init_q = self._init_q.at[2].set(-0.029)  # z position - proper standing height
-    joint_init = jp.array([0.0, 0.0, -0.36, 0.72, -0.36, 0.0, -0.05, -0.36, 0.72, -0.36]) 
+    # # SAME AS CUSTOMER DOC
+    # self._init_q = self._init_q.at[2].set(-0.029)  # z position - proper standing height
+    # joint_init = jp.array([0.0, 0.0, -0.36, 0.72, -0.36, 0.0, -0.05, -0.36, 0.72, -0.36]) 
 
-    self._init_q = self._init_q.at[7:].set(joint_init)
+    # self._init_q = self._init_q.at[7:].set(joint_init)
 
-    self._default_pose = joint_init
+    # self._default_pose = joint_init
+    self._init_q = jp.array(self._mj_model.keyframe("home").qpos)
+    self._default_pose = jp.array(self._mj_model.keyframe("home").qpos[7:])
 
     # Set joint limits
     self._lowers = self._mj_model.actuator_ctrlrange[:, 0]
