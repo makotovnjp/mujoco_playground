@@ -81,12 +81,12 @@ def default_config() -> config_dict.ConfigDict:
       reward_config=config_dict.create(
           scales=config_dict.create(
               # Rewards.
-              feet_phase=5.0,
+              # feet_phase=5.0,
               tracking_lin_vel=3.5,
               tracking_ang_vel=0.75,
               # feet_air_time=2.0,
 
-              # feet_phase=3.0,
+              feet_phase=3.0,
               # tracking_lin_vel=0.0,
               # tracking_ang_vel=0.0,
               feet_air_time=2.0,
@@ -115,19 +115,19 @@ def default_config() -> config_dict.ConfigDict:
       command_config=config_dict.create(
           lin_vel_x=[-1.5, 1.5],
           lin_vel_y=[-1.0, 1.0],
-          # ang_vel_yaw=[-1.2, 1.2]
-          ang_vel_yaw=[-2*np.pi, 2*np.pi]
+          ang_vel_yaw=[-1.2, 1.2]
+          # ang_vel_yaw=[-2*np.pi, 2*np.pi]
       ),
       push_config=config_dict.create(
           enable=True,
           interval_range=[5.0, 10.0],
           magnitude_range=[0.1, 2.0],
       ),
-      gait_frequency=[1.25, 2.0],
+      # gait_frequency=[1.25, 2.0],
       # gait_frequency=[0.0, 0.5],
-      # gait_frequency=[0.5, 4.0],
-      gaits=["walk"],
-      #gaits=["walk", "stand"],
+      gait_frequency=[0.5, 4.0],
+      # gaits=["walk"],
+      gaits=["walk", "stand"],
       # gaits=["walk","stand","run"],
       foot_height=[0.08, 0.4],
       impl="jax",
@@ -257,6 +257,11 @@ class Joystick(hunter_base.HunterEnv):
     rng, key = jax.random.split(rng)
     dxy = jax.random.uniform(key, (2,), minval=-0.5, maxval=0.5)
     qpos = qpos.at[0:2].set(qpos[0:2] + dxy)
+
+    # Randomize height
+    dz = jax.random.uniform(key, (1,), minval=0.0, maxval=0.1)
+    qpos = qpos.at[2:3].set(qpos[2:3] + dz)
+    
     rng, key = jax.random.split(rng)
     yaw = jax.random.uniform(key, (1,), minval=-3.14, maxval=3.14)
     quat = math.axis_angle_to_quat(jp.array([0, 0, 1]), yaw)
