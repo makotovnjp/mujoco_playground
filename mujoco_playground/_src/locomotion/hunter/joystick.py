@@ -89,8 +89,8 @@ def default_config() -> config_dict.ConfigDict:
               feet_phase=3.0,
               # tracking_lin_vel=0.0,
               # tracking_ang_vel=0.0,
-              feet_air_time=2.0,
-              feet_contact=0.5,
+              feet_air_time=1.0,
+              feet_contact=0.0,
               # feet_air_time=0.0,
               # feet_contact=0.0,
           
