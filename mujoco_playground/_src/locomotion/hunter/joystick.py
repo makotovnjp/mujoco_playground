@@ -89,7 +89,7 @@ def default_config() -> config_dict.ConfigDict:
               feet_phase=3.0,
               # tracking_lin_vel=0.0,
               # tracking_ang_vel=0.0,
-              feet_air_time=1.0,
+              feet_air_time=2.0,
               feet_contact=0.0,
               # feet_air_time=0.0,
               # feet_contact=0.0,
@@ -102,12 +102,12 @@ def default_config() -> config_dict.ConfigDict:
               lin_vel_z=-0.0,  # previous: -5.0
               orientation=-2.0,
               pose=-1.0,  # previous: -0.1
-              stand_still=0.0,  # previous: +4.0
+              stand_still=1.0,  # previous: +4.0
               # stand_still=+0.0,
               termination=-1.0,
               foot_slip=-0.1,
               action_rate=-0.01,  # previous: -0.5
-              feet_distance=-1.0,
+              feet_distance=-0.3,
               collision=-1.0,
           ),
           tracking_sigma=0.5,
@@ -115,8 +115,8 @@ def default_config() -> config_dict.ConfigDict:
       command_config=config_dict.create(
           lin_vel_x=[-1.5, 1.5],
           lin_vel_y=[-1.5, 1.5],
-        #   ang_vel_yaw=[-1.2, 1.2]
-          ang_vel_yaw=[-2*np.pi, 2*np.pi]
+          ang_vel_yaw=[-1.2, 1.2]
+        #   ang_vel_yaw=[-2*np.pi, 2*np.pi]
       ),
       push_config=config_dict.create(
           enable=True,
@@ -792,7 +792,7 @@ class Joystick(hunter_base.HunterEnv):
         jp.cos(base_yaw) * (left_foot_pos[1] - right_foot_pos[1])
         - jp.sin(base_yaw) * (left_foot_pos[0] - right_foot_pos[0])
     )
-    return jp.clip(0.17 - feet_distance, min=0.0, max=0.1)
+    return jp.clip(0.2 - feet_distance, min=0.0, max=0.1)
 
   def _cost_collision(self, data: mjx.Data) -> jax.Array:
     return collision.geoms_colliding(
