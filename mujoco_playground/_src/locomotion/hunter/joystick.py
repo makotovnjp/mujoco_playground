@@ -94,7 +94,7 @@ def default_config() -> config_dict.ConfigDict:
               # feet_air_time=0.0,
               # feet_contact=0.0,
           
-              feet_clearance=-1.0,
+              feet_clearance=-2.0,
 
               # Costs.
               ang_vel_xy=-0.15,  # previous: -0.0
@@ -115,8 +115,8 @@ def default_config() -> config_dict.ConfigDict:
       command_config=config_dict.create(
           lin_vel_x=[-1.5, 1.5],
           lin_vel_y=[-1.5, 1.5],
-        #   ang_vel_yaw=[-1.2, 1.2]
-          ang_vel_yaw=[-2*np.pi, 2*np.pi]
+          ang_vel_yaw=[-1.2, 1.2]
+          # ang_vel_yaw=[-2*np.pi, 2*np.pi]
       ),
       push_config=config_dict.create(
           enable=True,
