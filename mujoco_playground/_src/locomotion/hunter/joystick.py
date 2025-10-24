@@ -33,7 +33,7 @@ def default_config() -> config_dict.ConfigDict:
       dof_vel_scale=0.05,
       history_len=1,
       noise_config=config_dict.create(
-          level=0.6,
+          level=1.0,
           # level=0.8,
           scales=config_dict.create(
               joint_pos=0.01,
@@ -117,7 +117,7 @@ def default_config() -> config_dict.ConfigDict:
           ang_vel_yaw=[-1.2, 1.2]
       ),
       push_config=config_dict.create(
-          enable=False,
+          enable=True,
           interval_range=[5.0, 10.0],
           magnitude_range=[0.1, 2.0],
       ),
@@ -539,18 +539,9 @@ class Joystick(hunter_base.HunterEnv):
         noisy_joint_vel * self._config.dof_vel_scale,  # 10
         info["last_act"],  # 10
         info["command"],  # 3
-        # total: 42
-    ])
-    state = jp.hstack(
-      [
-        state,  # 42
         phase,  # 4
-        info["gait"],   #1
-        info["gait_freq"],   #1
-        info["foot_height"]   #1
-        # total: 49
-      ],
-    )
+        # total: 46
+    ])
 
     accelerometer = self.get_accelerometer(data)
     global_angvel = self.get_global_angvel(data)
@@ -566,6 +557,9 @@ class Joystick(hunter_base.HunterEnv):
         global_angvel,  # 3
         joint_angles - self._default_pose,
         joint_vel * self._config.dof_vel_scale,
+        info["gait"],
+        info["gait_freq"],
+        info["foot_height"],
         root_height,  # 1
         data.actuator_force,  # 29
         contact,  # 2
