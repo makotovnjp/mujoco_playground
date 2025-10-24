@@ -94,7 +94,7 @@ def default_config() -> config_dict.ConfigDict:
               # feet_air_time=0.0,
               # feet_contact=0.0,
           
-              feet_clearance=-1.0,
+              feet_clearance=-2.0,
 
               # Costs.
               ang_vel_xy=-0.15,  # previous: -0.0
