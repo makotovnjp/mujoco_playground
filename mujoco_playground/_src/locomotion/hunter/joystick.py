@@ -108,6 +108,7 @@ def default_config() -> config_dict.ConfigDict:
               foot_slip=-0.1,
               action_rate=-0.01,  # previous: -0.5
               feet_distance=-0.3,
+              collision=-1.0,
           ),
           tracking_sigma=0.5,
       ),
@@ -212,6 +213,9 @@ class Joystick(hunter_base.HunterEnv):
           list(range(sensor_adr, sensor_adr + sensor_dim))
       )
     self._foot_linvel_sensor_adr = jp.array(foot_linvel_sensor_adr)
+
+    self._left_foot_box_geom_id = self._mj_model.geom("left_foot").id
+    self._right_foot_box_geom_id = self._mj_model.geom("right_foot").id
    
   def sample_command(self, rng: jax.Array) -> jax.Array:
     """Samples a random command with a 10% chance of being zero."""
@@ -631,6 +635,7 @@ class Joystick(hunter_base.HunterEnv):
         "termination": self._cost_termination(done),
         "feet_clearance": self._cost_feet_clearance(data),
         "feet_distance": self._cost_feet_distance(data),
+        "collision": self._cost_collision(data)
     }
     return pos, neg
 
@@ -776,4 +781,8 @@ class Joystick(hunter_base.HunterEnv):
         - jp.sin(base_yaw) * (left_foot_pos[0] - right_foot_pos[0])
     )
     return jp.clip(0.2 - feet_distance, min=0.0, max=0.1)
-    
+
+  def _cost_collision(self, data: mjx.Data) -> jax.Array:
+    return collision.geoms_colliding(
+        data, self._left_foot_box_geom_id, self._right_foot_box_geom_id
+    )
