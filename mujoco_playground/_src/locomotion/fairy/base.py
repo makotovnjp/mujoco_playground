@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Hunter base classes."""
+"""Fairy base classes."""
 
 from typing import Any, Dict, Optional, Union
 
@@ -34,8 +34,8 @@ def get_assets() -> Dict[str, bytes]:
   return assets
 
 
-class HunterEnv(mjx_env.MjxEnv):
-  """Base class for Hunter environments."""
+class FairyEnv(mjx_env.MjxEnv):
+  """Base class for Fairy environments."""
 
   def __init__(
       self,
