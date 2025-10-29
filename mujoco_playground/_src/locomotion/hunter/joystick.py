@@ -31,6 +31,7 @@ def default_config() -> config_dict.ConfigDict:
       action_repeat=1,
       action_scale=0.5,
       dof_vel_scale=0.05,
+      lin_vel_scale=2.0,
       history_len=1,
       noise_config=config_dict.create(
           level=1.0,
@@ -541,7 +542,7 @@ class Joystick(hunter_base.HunterEnv):
     phase = jp.concatenate([cos, sin])
 
     state = jp.concatenate([
-        noisy_linvel,  # 3
+        noisy_linvel * self._config.lin_vel_scale,  # 3
         noisy_gyro,    # 3
         noisy_gravity,        # 3
         noisy_joint_angles - self._default_pose,  # 10
@@ -562,7 +563,7 @@ class Joystick(hunter_base.HunterEnv):
         gyro,  # 3
         accelerometer,  # 3
         gravity,  # 3
-        linvel,  # 3
+        linvel * self._config.lin_vel_scale,  # 3
         global_angvel,  # 3
         joint_angles - self._default_pose,
         joint_vel * self._config.dof_vel_scale,
