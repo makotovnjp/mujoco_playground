@@ -81,10 +81,14 @@
       condim="3" conaffinity='0' friction="0.6" contype="1"/>
     <!-- Base link (floating) -->
     <!-- Initial position matches keyframe "crouch" for consistency -->
-    <body name="base_link" pos="0 0 0.45" quat="1 0 0 0">
-      <freejoint/>
+    <body name="base_link" pos="0 0 0.65" quat="1 0 0 0">
       <inertial pos="0 0 -0.00474" mass="12.72349"
-                diaginertia="0.1 0.1 0.1"/>
+                diaginertia="0.10262343540700387 0.08280262602395334 0.13248785583145192"/>
+      <joint type='slide' axis='1 0 0' limited='false' />
+      <joint type='slide' axis='0 1 0' limited='false' />
+      <joint type='slide' axis='0 0 1' limited='false' />
+      <joint type='ball' limited='false' />
+      <camera name="track" pos="1.248 -0.947 0.3" xyaxes="0.628 0.779 -0.000 -0.274 0.221 0.936" mode="trackcom"/>
       <!-- Visual mesh (no collision) -->
       <geom type="mesh" mesh="base" rgba="1 1 1 1" contype="0" conaffinity="0"/>
       <!-- Collision box -->
@@ -96,39 +100,39 @@
       <!-- Right leg (Motor ID 1-4) -->
       <body name="R_FOOT" pos="0 -0.08 0">
         <body name="R1" pos="0 0 0">
-          <joint name="motor_1" type="hinge" axis="1 0 0"
+          <joint name="leg_r1_joint" type="hinge" axis="1 0 0"
                  range="-2.094 2.094" damping="0.5"/>
-          <inertial pos="0 0 0" mass="1.23047" diaginertia="0.1 0.1 0.1"/>
+          <inertial pos="0 0 0" mass="1.23047" diaginertia="0.0018303633358577802 0.0039401153269064335 0.0035094898580769786"/>
           <!-- Visual mesh (no collision) -->
           <geom type="mesh" mesh="rhip" rgba="1 1 1 1" contype="0" conaffinity="0"/>
           <!-- Collision capsule -->
           <geom type="capsule" fromto="0 0 0 0 -0.065 0" size="0.03" rgba="0.5 0.5 0.5 0.3"/>
 
           <body name="R2" pos="0 -0.065 0">
-            <joint name="motor_2" type="hinge" axis="0 1 0"
+            <joint name="leg_r2_joint" type="hinge" axis="0 1 0"
                    range="-3.14 3.14" damping="0.5"/>
             <inertial pos="0.00006 0 -0.05962" mass="2.06632"
-                      diaginertia="0.1 0.1 0.1"/>
+                      diaginertia="0.028423839552622263 0.027088604867877116 0.006885361957140555"/>
             <!-- Visual mesh (no collision) -->
             <geom type="mesh" mesh="ruleg" rgba="1 1 1 1" contype="0" conaffinity="0"/>
             <!-- Collision capsule for upper leg -->
             <geom type="capsule" fromto="0 0 0 0 0 -0.26" size="0.035" rgba="0.5 0.5 0.5 0.3"/>
 
             <body name="R3" pos="0 0 -0.26">
-              <joint name="motor_3" type="hinge" axis="0 1 0"
+              <joint name="leg_r3_joint" type="hinge" axis="0 1 0"
                      range="-2.094 3.142" damping="0.5"/>
               <inertial pos="0 0 -0.19822" mass="0.41492"
-                        diaginertia="0.1 0.1 0.1"/>
+                        diaginertia="0.004368293950062158 0.0043649330449301435 0.0007692542542232213"/>
               <!-- Visual mesh (no collision) -->
               <geom type="mesh" mesh="rlleg" rgba="1 1 1 1" contype="0" conaffinity="0"/>
               <!-- Collision capsule for lower leg -->
               <geom type="capsule" fromto="0 0 0 0 0 -0.30056" size="0.025" rgba="0.5 0.5 0.5 0.3"/>
 
               <body name="R4" pos="0 0 -0.30056">
-                <joint name="motor_4" type="hinge" axis="0 1 0"
+                <joint name="leg_r4_joint" type="hinge" axis="0 1 0"
                        range="-0.785 1.571" damping="0.5"/>
                 <inertial pos="0 0 -0.04246" mass="0.001"
-                          diaginertia="0.1 0.1 0.1"/>
+                          diaginertia="1.2205313151995394e-06 1.8259135943500075e-06 2.3427844456505955e-06"/>
                 <!-- Visual mesh (no collision) -->
                 <geom type="mesh" mesh="rtoe" rgba="1 1 1 1" contype="0" conaffinity="0"/>
                 <!-- Collision box for toe (1.5x size for stability) -->
@@ -137,8 +141,7 @@
                 <!-- Foot contact -->
                 <body name="R_TIP" pos="0 0 -0.035">
                   <inertial pos="0 0 0" mass="0.001"
-                            diaginertia="0.0001 0.0001 0.0001"/>
-                </body>
+                            diaginertia="1e-6 1e-6 1e-6"/>                </body>
               </body>
             </body>
           </body>
@@ -148,39 +151,39 @@
       <!-- Left leg (Motor ID 5-8) -->
       <body name="L_FOOT" pos="0 0.08 0">
         <body name="L1" pos="0 0 0">
-          <joint name="motor_5" type="hinge" axis="1 0 0"
+          <joint name="leg_l1_joint" type="hinge" axis="1 0 0"
                  range="-2.094 2.094" damping="0.5"/>
-          <inertial pos="0 0 0" mass="1.23047" diaginertia="0.1 0.1 0.1"/>
+          <inertial pos="0 0 0" mass="1.23047" diaginertia="0.0018233989548339167 0.003940115487341474 0.003502525316618075"/>
           <!-- Visual mesh (no collision) -->
           <geom type="mesh" mesh="lhip" rgba="1 1 1 1" contype="0" conaffinity="0"/>
           <!-- Collision capsule -->
           <geom type="capsule" fromto="0 0 0 0 0.065 0" size="0.03" rgba="0.5 0.5 0.5 0.3"/>
 
           <body name="L2" pos="0 0.065 0">
-            <joint name="motor_6" type="hinge" axis="0 1 0"
+            <joint name="leg_l2_joint" type="hinge" axis="0 1 0"
                    range="-3.14 3.14" damping="0.5"/>
             <inertial pos="0.00006 0 -0.05962" mass="2.06632"
-                      diaginertia="0.1 0.1 0.1"/>
+                      diaginertia="0.028423839552622263 0.027088604867877116 0.006885361957140555"/>
             <!-- Visual mesh (no collision) -->
             <geom type="mesh" mesh="luleg" rgba="1 1 1 1" contype="0" conaffinity="0"/>
             <!-- Collision capsule for upper leg -->
             <geom type="capsule" fromto="0 0 0 0 0 -0.26" size="0.035" rgba="0.5 0.5 0.5 0.3"/>
 
             <body name="L3" pos="0 0 -0.26">
-              <joint name="motor_7" type="hinge" axis="0 1 0"
+              <joint name="leg_l3_joint" type="hinge" axis="0 1 0"
                      range="-2.094 3.142" damping="0.5"/>
               <inertial pos="0 0 -0.19822" mass="0.41492"
-                        diaginertia="0.1 0.1 0.1"/>
+                        diaginertia="0.004368293950062158 0.0043649330449301435 0.0007692542542232213"/>
               <!-- Visual mesh (no collision) -->
               <geom type="mesh" mesh="llleg" rgba="1 1 1 1" contype="0" conaffinity="0"/>
               <!-- Collision capsule for lower leg -->
               <geom type="capsule" fromto="0 0 0 0 0 -0.30056" size="0.025" rgba="0.5 0.5 0.5 0.3"/>
 
               <body name="L4" pos="0 0 -0.30056">
-                <joint name="motor_8" type="hinge" axis="0 1 0"
+                <joint name="leg_l4_joint" type="hinge" axis="0 1 0"
                        range="-0.785 1.571" damping="0.5"/>
                 <inertial pos="0 0 -0.04246" mass="0.001"
-                          diaginertia="0.1 0.1 0.1"/>
+                          diaginertia="1.2205313151995394e-06 1.8259135943500075e-06 2.3427844456505955e-06"/>
                 <!-- Visual mesh (no collision) -->
                 <geom type="mesh" mesh="ltoe" rgba="1 1 1 1" contype="0" conaffinity="0"/>
                 <!-- Collision box for toe (1.5x size for stability) -->
@@ -189,7 +192,7 @@
                 <!-- Foot contact -->
                 <body name="L_TIP" pos="0 0 -0.035">
                   <inertial pos="0 0 0" mass="0.001"
-                            diaginertia="0.0001 0.0001 0.0001"/>
+                            diaginertia="1e-6 1e-6 1e-6"/>
                 </body>
               </body>
             </body>
@@ -200,36 +203,42 @@
   </worldbody>
 
   <actuator>
-    <!-- Motor ID based actuators -->
-    <motor name="motor_1_actuator" joint="motor_1" gear="1"/>
-    <motor name="motor_2_actuator" joint="motor_2" gear="1"/>
-    <motor name="motor_3_actuator" joint="motor_3" gear="1"/>
-    <motor name="motor_4_actuator" joint="motor_4" gear="1"/>
-    <motor name="motor_5_actuator" joint="motor_5" gear="1"/>
-    <motor name="motor_6_actuator" joint="motor_6" gear="1"/>
-    <motor name="motor_7_actuator" joint="motor_7" gear="1"/>
-    <motor name="motor_8_actuator" joint="motor_8" gear="1"/>
+    <position class="fairy_motor" name="leg_l1_joint" joint="leg_l1_joint" forcerange="-36 36" kp="15" kv="1.0"/>
+    <position class="fairy_motor" name="leg_l2_joint" joint="leg_l2_joint" forcerange="-36 36" kp="5" kv="0.5"/>
+    <position class="fairy_motor" name="leg_l3_joint" joint="leg_l3_joint" forcerange="-60 60" kp="15" kv="1.5"/>
+    <position class="fairy_motor" name="leg_l4_joint" joint="leg_l4_joint" forcerange="-60 60" kp="25" kv="2.5"/>
+
+    <position class="fairy_motor" name="leg_r1_joint" joint="leg_r1_joint" forcerange="-36 36" kp="15" kv="1.0"/>
+    <position class="fairy_motor" name="leg_r2_joint" joint="leg_r2_joint" forcerange="-36 36" kp="5" kv="0.5"/>
+    <position class="fairy_motor" name="leg_r3_joint" joint="leg_r3_joint" forcerange="-60 60" kp="15" kv="1.5"/>
+    <position class="fairy_motor" name="leg_r4_joint" joint="leg_r4_joint" forcerange="-60 60" kp="25" kv="2.5"/>
   </actuator>
 
   <sensor>
     <!-- IMU sensor -->
-    <accelerometer name="imu_accel" site="imu"/>
-    <gyro name="imu_gyro" site="imu"/>
-    <framequat name="imu_quat" objtype="site" objname="imu"/>
+    <gyro site="imu" name="gyro"/>
+    <velocimeter site="imu" name="local_linvel"/>
+    <accelerometer site="imu" name="accelerometer"/>
+    <framepos objtype="site" objname="imu" name="position"/>
+    <framezaxis objtype="site" objname="imu" name="upvector"/>
+    <framexaxis objtype="site" objname="imu" name="forwardvector"/>
+    <framelinvel objtype="site" objname="imu" name="global_linvel"/>
+    <frameangvel objtype="site" objname="imu" name="global_angvel"/>
+    <framequat objtype="site" objname="imu" name="orientation"/>
   </sensor>
 
   <keyframe>
     <!-- Initial crouch pose (pose_Z): [0, -145, 158.9, -43, 0, -145, 158.9, -43] degrees -->
     <!-- This is used for Backspace reset -->
-    <key name="crouch"
-         qpos="0 0 0.45 1 0 0 0
+    <!-- <key name="crouch"
+         qpos="0 0 0.7 1 0 0 0
                0 -2.531 2.774 -0.750
-               0 -2.531 2.774 -0.750"/>
+               0 -2.531 2.774 -0.750"/> -->
 
     <!-- Default starting pose (same as crouch for consistency) -->
-    <key name="home"
-         qpos="0 0 0.45 1 0 0 0
+    <!-- <key name="home"
+         qpos="0 0 0.7 1 0 0 0
                0 -2.531 2.774 -0.750
-               0 -2.531 2.774 -0.750"/>
+               0 -2.531 2.774 -0.750"/> -->
   </keyframe>
 </mujoco>
