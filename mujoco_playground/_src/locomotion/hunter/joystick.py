@@ -81,12 +81,12 @@ def default_config() -> config_dict.ConfigDict:
       reward_config=config_dict.create(
           scales=config_dict.create(
               # Rewards.
-              feet_phase=5.0,
+            #   feet_phase=5.0,
               tracking_lin_vel=3.5,
               tracking_ang_vel=0.75,
               # feet_air_time=2.0,
 
-              # feet_phase=3.0,
+              feet_phase=3.0,
               # tracking_lin_vel=0.0,
               # tracking_ang_vel=0.0,
               feet_air_time=2.0,
@@ -94,7 +94,7 @@ def default_config() -> config_dict.ConfigDict:
               # feet_air_time=0.0,
               # feet_contact=0.0,
           
-              feet_clearance=-1.0,
+              feet_clearance=-2.0,
 
               # Costs.
               ang_vel_xy=-0.15,  # previous: -0.0
@@ -107,7 +107,7 @@ def default_config() -> config_dict.ConfigDict:
               termination=-1.0,
               foot_slip=-0.1,
               action_rate=-0.01,  # previous: -0.5
-              feet_distance=-0.0,
+              feet_distance=-0.3,
               collision=-1.0,
           ),
           tracking_sigma=0.5,
@@ -115,21 +115,21 @@ def default_config() -> config_dict.ConfigDict:
       command_config=config_dict.create(
           lin_vel_x=[-1.5, 1.5],
           lin_vel_y=[-1.0, 1.0],
-          # ang_vel_yaw=[-1.2, 1.2]
-          ang_vel_yaw=[-2*np.pi, 2*np.pi]
+          ang_vel_yaw=[-1.2, 1.2]
+          # ang_vel_yaw=[-2*np.pi, 2*np.pi]
       ),
       push_config=config_dict.create(
           enable=True,
           interval_range=[5.0, 10.0],
           magnitude_range=[0.1, 2.0],
       ),
-      gait_frequency=[1.25, 2.0],
+    #   gait_frequency=[1.25, 2.0],
       # gait_frequency=[0.0, 0.5],
-      # gait_frequency=[0.5, 4.0],
-      gaits=["walk"],
-      #gaits=["walk", "stand"],
+      gait_frequency=[0.5, 4.0],
+    #   gaits=["walk"],
+      gaits=["walk", "stand"],
       # gaits=["walk","stand","run"],
-      foot_height=[0.08, 0.4],
+      foot_height=[0.08, 0.12],
       impl="jax",
       nconmax=8 * 1024,
       njmax=10 + 8 * 4,
@@ -155,26 +155,28 @@ class Joystick(hunter_base.HunterEnv):
     self._post_init()
   
   def _post_init(self):
-    # Default standing pose with slightly bent knees
+    # # Default standing pose with slightly bent knees
     self._init_q = jp.zeros(self._mjx_model.nq)
     self._init_q = self._init_q.at[3:7].set(jp.array([1, 0, 0, 0]))  # quat
     
-    # Set joint positions for stable standing
-    # Set floating base position (x, y, z, quat)
-    # self._init_q = self._init_q.at[2].set(-0.014)   # z position - proper standing height
-    # joint_init = jp.array([0.0, 0.0, -0.2, 0.5, -0.3, 0.0, 0.0, -0.2, 0.5, -0.3])   # 10 joints
+    # # Set joint positions for stable standing
+    # # Set floating base position (x, y, z, quat)
+    # # self._init_q = self._init_q.at[2].set(-0.014)   # z position - proper standing height
+    # # joint_init = jp.array([0.0, 0.0, -0.2, 0.5, -0.3, 0.0, 0.0, -0.2, 0.5, -0.3])   # 10 joints
 
-    # SAME AS ROS1
-    # self._init_q = self._init_q.at[2].set(-0.05)  # z position - proper standing height
-    # joint_init = jp.array([0.1, 0.0, -0.4, 0.93, -0.53, -0.1, 0.0, -0.4, 0.93, -0.53]) 
+    # # SAME AS ROS1
+    # # self._init_q = self._init_q.at[2].set(-0.05)  # z position - proper standing height
+    # # joint_init = jp.array([0.1, 0.0, -0.4, 0.93, -0.53, -0.1, 0.0, -0.4, 0.93, -0.53]) 
 
-    # SAME AS CUSTOMER DOC
+    # # SAME AS CUSTOMER DOC
     self._init_q = self._init_q.at[2].set(-0.029)  # z position - proper standing height
     joint_init = jp.array([0.0, 0.0, -0.36, 0.72, -0.36, 0.0, -0.05, -0.36, 0.72, -0.36]) 
 
     self._init_q = self._init_q.at[7:].set(joint_init)
 
     self._default_pose = joint_init
+    # self._init_q = jp.array(self._mj_model.keyframe("home").qpos)
+    # self._default_pose = jp.array(self._mj_model.keyframe("home").qpos[7:])
 
     # Set joint limits
     self._lowers = self._mj_model.actuator_ctrlrange[:, 0]
@@ -790,7 +792,7 @@ class Joystick(hunter_base.HunterEnv):
         jp.cos(base_yaw) * (left_foot_pos[1] - right_foot_pos[1])
         - jp.sin(base_yaw) * (left_foot_pos[0] - right_foot_pos[0])
     )
-    return jp.clip(0.2 - feet_distance, min=0.0, max=0.1)
+    return jp.clip(0.17 - feet_distance, min=0.0, max=0.1)
 
   def _cost_collision(self, data: mjx.Data) -> jax.Array:
     return collision.geoms_colliding(

@@ -1,8 +1,9 @@
 <mujoco model="pdd_mjx">
   <compiler angle="radian" meshdir="meshes/"/>
-  <option timestep='0.002' iterations='50' solver='CG' gravity='0 0 -9.81'>
-    <!-- <flag sensornoise="enable" frictionloss="enable" /> -->
+  <option iterations="1" ls_iterations="5" timestep="0.002">
+    <flag eulerdamp="disable"/>
   </option>
+  
   <size njmax="500" nconmax="100" />
 
   <visual>
@@ -78,7 +79,7 @@
       	diaginertia="0.0355096 0.0296524 0.0283549"/>
       <freejoint/>
       <geom class="visual" mesh="base_link"/>
-      <geom class="collision" size="0.092 0.075 0.1" pos="-0.01 0 -0.006" type="box"/>
+      <!-- <geom class="collision" size="0.092 0.075 0.1" pos="-0.01 0 -0.006" type="box"/> -->
       <!-- <body name="imu_link">
         <inertial pos="0 0 0" mass="0.01" diaginertia="1e-06 1e-06 1e-06"/>
         <geom size="0.0075 0.0075 0.002" type="box" contype="0" conaffinity="0" group="1" density="0"/>
@@ -89,7 +90,7 @@
           diaginertia="0.000163063 0.000147076 8.18618e-05"/>
         <joint name="leg_l1_joint" pos="0 0 0" axis="1 0 0" range="-0.2 0.5" frictionloss="0.2"/>
         <geom class="visual" mesh="leg_l1_link"/>
-        <geom class="collision" type="box" size="0.03 0.035 0.0775" pos="-0.019 -0.001 0" quat="0.500398 0.5 0.499602 0.5"/>
+        <!-- <geom class="collision" type="box" size="0.03 0.035 0.0775" pos="-0.019 -0.001 0" quat="0.500398 0.5 0.499602 0.5"/> -->
         <body name="leg_l2_link" pos="0 -0.00016972 -0.0325">
           <inertial pos="-0.000273 0.043826 -0.058639" quat="0.7074 0.0648812 -0.0612384 0.70116" mass="0.925998" 
             diaginertia="0.00166463 0.00123897 0.0010754"/>
@@ -124,6 +125,12 @@
                   <geom class="foot2"/>
                   <site name="leg_l_f2_site" pos="0 0 0"/>
                 </body>
+      
+                <geom name="left_foot1" class="foot1"/>
+                <geom name="left_foot2" class="foot2"/>
+                <geom name="left_foot" class="foot"/> 
+                <site name="left_foot" pos="0 0 0"/>
+
               </body>
             </body>
           </body>
@@ -167,6 +174,12 @@
                   <geom class="foot2"/>
                   <site name="leg_r_f2_site" pos="0 0 0"/>
                 </body>
+                
+                <geom name="right_foot1" class="foot1"/>
+                <geom name="right_foot2" class="foot2"/>
+                <geom name="right_foot" class="foot"/>
+                <site name="right_foot" pos="0 0 0"/>
+                
               </body>
             </body>
           </body>
@@ -176,27 +189,17 @@
   </worldbody>
   
   <actuator>
-    <!-- <motor name="leg_l1_joint" joint="leg_l1_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
-    <motor name="leg_l2_joint" joint="leg_l2_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
-    <motor name="leg_l3_joint" joint="leg_l3_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
-    <motor name="leg_l4_joint" joint="leg_l4_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
-    <motor name="leg_l5_joint" joint="leg_l5_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
-    <motor name="leg_r1_joint" joint="leg_r1_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
-    <motor name="leg_r2_joint" joint="leg_r2_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
-    <motor name="leg_r3_joint" joint="leg_r3_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
-    <motor name="leg_r4_joint" joint="leg_r4_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" />
-    <motor name="leg_r5_joint" joint="leg_r5_joint" gear="1" ctrllimited="true" ctrlrange="-100 100" /> -->
-    <position class="hunter" name="leg_l1_joint" joint="leg_l1_joint" forcerange="-40 40" kp="100" kv="3"/>
-    <position class="hunter" name="leg_l2_joint" joint="leg_l2_joint" forcerange="-100 100" kp="100" kv="3"/>
-    <position class="hunter" name="leg_l3_joint" joint="leg_l3_joint" forcerange="-100 100" kp="100" kv="3"/>
-    <position class="hunter" name="leg_l4_joint" joint="leg_l4_joint" forcerange="-40 40" kp="100" kv="3"/>
-    <position class="hunter" name="leg_l5_joint" joint="leg_l5_joint" forcerange="-20 20" kp="100" kv="3"/>
+    <position class="hunter" name="leg_l1_joint" joint="leg_l1_joint" forcerange="-36 36" kp="15" kv="1.0"/>
+    <position class="hunter" name="leg_l2_joint" joint="leg_l2_joint" forcerange="-36 36" kp="5" kv="0.5"/>
+    <position class="hunter" name="leg_l3_joint" joint="leg_l3_joint" forcerange="-60 60" kp="15" kv="1.5"/>
+    <position class="hunter" name="leg_l4_joint" joint="leg_l4_joint" forcerange="-60 60" kp="25" kv="2.5"/>
+    <position class="hunter" name="leg_l5_joint" joint="leg_l5_joint" forcerange="-36 36" kp="5" kv="0.1"/>
 
-    <position class="hunter" name="leg_r1_joint" joint="leg_r1_joint" forcerange="-40 40" kp="100" kv="3"/>
-    <position class="hunter" name="leg_r2_joint" joint="leg_r2_joint" forcerange="-100 100" kp="100" kv="3"/>
-    <position class="hunter" name="leg_r3_joint" joint="leg_r3_joint" forcerange="-100 100" kp="100" kv="3"/>
-    <position class="hunter" name="leg_r4_joint" joint="leg_r4_joint" forcerange="-40 40" kp="100" kv="3"/>
-    <position class="hunter" name="leg_r5_joint" joint="leg_r5_joint" forcerange="-20 20" kp="100" kv="3"/>
+    <position class="hunter" name="leg_r1_joint" joint="leg_r1_joint" forcerange="-36 36" kp="15" kv="1.0"/>
+    <position class="hunter" name="leg_r2_joint" joint="leg_r2_joint" forcerange="-36 36" kp="5" kv="0.5"/>
+    <position class="hunter" name="leg_r3_joint" joint="leg_r3_joint" forcerange="-60 60" kp="15" kv="1.5"/>
+    <position class="hunter" name="leg_r4_joint" joint="leg_r4_joint" forcerange="-60 60" kp="25" kv="2.5"/>
+    <position class="hunter" name="leg_r5_joint" joint="leg_r5_joint" forcerange="-36 36" kp="5" kv="0.1"/>
   </actuator>
   
   <sensor>
@@ -243,6 +246,9 @@
     <framelinvel objtype="site" objname="imu" name="global_linvel"/>
     <frameangvel objtype="site" objname="imu" name="global_angvel"/>
     <framequat objtype="site" objname="imu" name="orientation"/>
+
+    <framelinvel objtype="site" objname="right_foot" name="right_foot_global_linvel"/>
+    <framelinvel objtype="site" objname="left_foot" name="left_foot_global_linvel"/>
 
   </sensor>
 </mujoco>
