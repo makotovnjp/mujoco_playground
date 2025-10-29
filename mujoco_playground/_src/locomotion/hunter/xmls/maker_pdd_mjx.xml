@@ -17,6 +17,9 @@
       <default class="visual">
         <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.75294 0.75294 0.75294 1"/>
       </default>
+      <default class='visualgeom'>
+        <geom material='visualgeom' condim='1' contype='0' conaffinity='0' />
+      </default>
       <default class="collision">
         <geom group="3" mass="0" density="0"/>
         <default class="foot">
@@ -75,22 +78,22 @@
       condim="1" conaffinity='15' />
 
     <body name="base_link" pos="0 0 0.7" childclass="hunter">
-      <inertial pos="-0.010856 -6.8e-05 -0.007128" quat="0.979606 0.00882716 0.200723 -0.00231074" mass="5.67363" 
-      	diaginertia="0.0355096 0.0296524 0.0283549"/>
-      <freejoint/>
-      <geom class="visual" mesh="base_link"/>
+      <geom type="mesh" mesh="base_link" group="1" class="visualgeom" />
+
+      <inertial pos="-0.010856 -6.8e-05 -0.007128" mass="5.67363"  
+      	diaginertia="0.0355096 0.0296524 0.0283549" />
       <joint type='slide' axis='1 0 0' limited='false' />
       <joint type='slide' axis='0 1 0' limited='false' />
       <joint type='slide' axis='0 0 1' limited='false' />
       <joint type='ball' limited='false' />
       <camera name="track" pos="1.248 -0.947 0.3" xyaxes="0.628 0.779 -0.000 -0.274 0.221 0.936" mode="trackcom"/>
 
-      <geom class="collision" size="0.092 0.075 0.1" pos="-0.01 0 -0.006" type="box"/>
-      <!-- <body name="imu_link">
-        <inertial pos="0 0 0" mass="0.01" diaginertia="1e-06 1e-06 1e-06"/>
-        <geom size="0.0075 0.0075 0.002" type="box" contype="0" conaffinity="0" group="1" density="0"/>
-      </body> -->
       <site name='imu' size='0.01' pos='0.0 0 0.0' />
+
+      <geom type="mesh" contype="0" conaffinity="0" group="1" density="0"
+        rgba="0.75294 0.75294 0.75294 1" mesh="base_link" />
+      <geom type="mesh" rgba="0.75294 0.75294 0.75294 1" mesh="base_link" class="visualgeom" />
+      
 
       <body name="leg_l1_link" pos="-0.002 0.09 -0.1035">
         <inertial pos="0.002501 5.3e-05 -0.002722" quat="0.472677 0.527005 0.495251 0.503556" mass="0.453728" 
