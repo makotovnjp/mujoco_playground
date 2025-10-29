@@ -1,0 +1,235 @@
+<mujoco model="fairy">
+  <compiler angle="radian" meshdir="meshes" autolimits="true"/>
+
+  <option iterations="3" ls_iterations="5" timestep="0.002" integrator="Euler">
+    <flag eulerdamp="disable"/>
+  </option>
+
+  <default>
+    <joint limited='true' />
+    <motor ctrllimited='true' />
+    <geom condim='4' contype="1" conaffinity="15" solref='0.001 2' friction='0.9 0.2 0.2' />
+    <equality solref='0.001 2' />
+    <default class='visualgeom'>
+      <geom material='visualgeom' condim='1' contype='0' conaffinity='0' />
+    </default>
+    <default class='visualgeom2'>
+      <geom material='visualgeom2' condim='1' contype='0' conaffinity='0' />
+    </default>
+    <default class='obstacle'>
+      <geom material='obstacle' condim='3' contype='1' conaffinity='15' />
+    </default>
+    
+    <default class='joint_param'>
+      <joint damping="1" frictionloss="1" armature="0.01" />
+    </default>
+
+    <default class="collision">
+        <geom group="3" mass="0" density="0"/>
+        <default class="foot">
+          <geom type="sphere" size=".001"/>
+          <default class="foot1">
+            <geom size="0.001" contype="0" conaffinity="0" density="0"/>
+          </default>
+          <default class="foot2">
+            <geom size="0.001"/>
+          </default>
+        </default>
+    </default>
+
+    <default class="fairy_motor">
+      <geom contype="0" conaffinity="0"/>
+      <position inheritrange="1" dampratio="1"/>
+      <joint damping="0.00" frictionloss="0.2"/>
+    </default>
+  </default>
+
+  <asset>
+    <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0" width="512"
+      height="512" />
+    <texture name="texplane" type="2d" builtin="checker" rgb1=".2 .3 .4" rgb2=".1 0.15 0.2"
+      width="512" height="512" mark="cross" markrgb=".8 .8 .8" />
+    <texture name="texplane2" type="2d" builtin="checker" rgb1="1 0.3137 0.1843"
+      rgb2="0.0 0.30196 0.38039"
+      width="512" height="512" mark="cross" markrgb=".8 .8 .8" />
+    <material name="matplane" reflectance="0." texture="texplane" texrepeat="1 1" texuniform="true" />
+    <material name="matplane2" reflectance="0.1" texture="texplane2" texrepeat="1 1"
+      texuniform="true" />
+
+    <material name='obstacle' rgba='0.9 0.6 0.2 1' />
+    <material name='visualgeom' rgba='0.5 0.9 0.2 1' />
+    <material name='visualgeom2' rgba='0.5 0.9 0.2 1' />
+
+    <mesh name="base" file="BASE.STL"/>
+    <mesh name="lhip" file="LHIP.STL"/>
+    <mesh name="luleg" file="LULEG.STL"/>
+    <mesh name="llleg" file="LLLEG.STL"/>
+    <mesh name="ltoe" file="LTOE.STL"/>
+    <mesh name="rhip" file="RHIP.STL"/>
+    <mesh name="ruleg" file="RULEG.STL"/>
+    <mesh name="rlleg" file="RLLEG.STL"/>
+    <mesh name="rtoe" file="RTOE.STL"/>
+  </asset>
+
+  <worldbody>
+    <!-- Light source -->
+    <light directional="true" diffuse=".4 .4 .4" specular="0.1 0.1 0.1" pos="0 0 5.0" dir="0 0 -1"
+      castshadow="false" />
+    <light directional="true" diffuse=".6 .6 .6" specular="0.2 0.2 0.2" pos="0 0 4" dir="0 0 -1" />
+    <!-- Ground plane -->
+    <geom name="ground" type="plane" size="0 0 0.01" pos="0.001 0 0" quat="1 0 0 0" material="matplane"
+      condim="3" conaffinity='0' friction="0.6" contype="1"/>
+    <!-- Base link (floating) -->
+    <!-- Initial position matches keyframe "crouch" for consistency -->
+    <body name="base_link" pos="0 0 0.45" quat="1 0 0 0">
+      <freejoint/>
+      <inertial pos="0 0 -0.00474" mass="12.72349"
+                diaginertia="0.1 0.1 0.1"/>
+      <!-- Visual mesh (no collision) -->
+      <geom type="mesh" mesh="base" rgba="1 1 1 1" contype="0" conaffinity="0"/>
+      <!-- Collision box -->
+      <geom type="box" size="0.12 0.08 0.04" pos="0 0 -0.005" rgba="0.5 0.5 0.5 0.3"/>
+
+      <!-- IMU sensor -->
+      <site name="imu" pos="0 0 0" size="0.01"/>
+
+      <!-- Right leg (Motor ID 1-4) -->
+      <body name="R_FOOT" pos="0 -0.08 0">
+        <body name="R1" pos="0 0 0">
+          <joint name="motor_1" type="hinge" axis="1 0 0"
+                 range="-2.094 2.094" damping="0.5"/>
+          <inertial pos="0 0 0" mass="1.23047" diaginertia="0.1 0.1 0.1"/>
+          <!-- Visual mesh (no collision) -->
+          <geom type="mesh" mesh="rhip" rgba="1 1 1 1" contype="0" conaffinity="0"/>
+          <!-- Collision capsule -->
+          <geom type="capsule" fromto="0 0 0 0 -0.065 0" size="0.03" rgba="0.5 0.5 0.5 0.3"/>
+
+          <body name="R2" pos="0 -0.065 0">
+            <joint name="motor_2" type="hinge" axis="0 1 0"
+                   range="-3.14 3.14" damping="0.5"/>
+            <inertial pos="0.00006 0 -0.05962" mass="2.06632"
+                      diaginertia="0.1 0.1 0.1"/>
+            <!-- Visual mesh (no collision) -->
+            <geom type="mesh" mesh="ruleg" rgba="1 1 1 1" contype="0" conaffinity="0"/>
+            <!-- Collision capsule for upper leg -->
+            <geom type="capsule" fromto="0 0 0 0 0 -0.26" size="0.035" rgba="0.5 0.5 0.5 0.3"/>
+
+            <body name="R3" pos="0 0 -0.26">
+              <joint name="motor_3" type="hinge" axis="0 1 0"
+                     range="-2.094 3.142" damping="0.5"/>
+              <inertial pos="0 0 -0.19822" mass="0.41492"
+                        diaginertia="0.1 0.1 0.1"/>
+              <!-- Visual mesh (no collision) -->
+              <geom type="mesh" mesh="rlleg" rgba="1 1 1 1" contype="0" conaffinity="0"/>
+              <!-- Collision capsule for lower leg -->
+              <geom type="capsule" fromto="0 0 0 0 0 -0.30056" size="0.025" rgba="0.5 0.5 0.5 0.3"/>
+
+              <body name="R4" pos="0 0 -0.30056">
+                <joint name="motor_4" type="hinge" axis="0 1 0"
+                       range="-0.785 1.571" damping="0.5"/>
+                <inertial pos="0 0 -0.04246" mass="0.001"
+                          diaginertia="0.1 0.1 0.1"/>
+                <!-- Visual mesh (no collision) -->
+                <geom type="mesh" mesh="rtoe" rgba="1 1 1 1" contype="0" conaffinity="0"/>
+                <!-- Collision box for toe (1.5x size for stability) -->
+                <geom type="box" size="0.06 0.045 0.03" pos="0.01 0 -0.02" rgba="0.5 0.5 0.5 0.3"/>
+
+                <!-- Foot contact -->
+                <body name="R_TIP" pos="0 0 -0.035">
+                  <inertial pos="0 0 0" mass="0.001"
+                            diaginertia="0.0001 0.0001 0.0001"/>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+
+      <!-- Left leg (Motor ID 5-8) -->
+      <body name="L_FOOT" pos="0 0.08 0">
+        <body name="L1" pos="0 0 0">
+          <joint name="motor_5" type="hinge" axis="1 0 0"
+                 range="-2.094 2.094" damping="0.5"/>
+          <inertial pos="0 0 0" mass="1.23047" diaginertia="0.1 0.1 0.1"/>
+          <!-- Visual mesh (no collision) -->
+          <geom type="mesh" mesh="lhip" rgba="1 1 1 1" contype="0" conaffinity="0"/>
+          <!-- Collision capsule -->
+          <geom type="capsule" fromto="0 0 0 0 0.065 0" size="0.03" rgba="0.5 0.5 0.5 0.3"/>
+
+          <body name="L2" pos="0 0.065 0">
+            <joint name="motor_6" type="hinge" axis="0 1 0"
+                   range="-3.14 3.14" damping="0.5"/>
+            <inertial pos="0.00006 0 -0.05962" mass="2.06632"
+                      diaginertia="0.1 0.1 0.1"/>
+            <!-- Visual mesh (no collision) -->
+            <geom type="mesh" mesh="luleg" rgba="1 1 1 1" contype="0" conaffinity="0"/>
+            <!-- Collision capsule for upper leg -->
+            <geom type="capsule" fromto="0 0 0 0 0 -0.26" size="0.035" rgba="0.5 0.5 0.5 0.3"/>
+
+            <body name="L3" pos="0 0 -0.26">
+              <joint name="motor_7" type="hinge" axis="0 1 0"
+                     range="-2.094 3.142" damping="0.5"/>
+              <inertial pos="0 0 -0.19822" mass="0.41492"
+                        diaginertia="0.1 0.1 0.1"/>
+              <!-- Visual mesh (no collision) -->
+              <geom type="mesh" mesh="llleg" rgba="1 1 1 1" contype="0" conaffinity="0"/>
+              <!-- Collision capsule for lower leg -->
+              <geom type="capsule" fromto="0 0 0 0 0 -0.30056" size="0.025" rgba="0.5 0.5 0.5 0.3"/>
+
+              <body name="L4" pos="0 0 -0.30056">
+                <joint name="motor_8" type="hinge" axis="0 1 0"
+                       range="-0.785 1.571" damping="0.5"/>
+                <inertial pos="0 0 -0.04246" mass="0.001"
+                          diaginertia="0.1 0.1 0.1"/>
+                <!-- Visual mesh (no collision) -->
+                <geom type="mesh" mesh="ltoe" rgba="1 1 1 1" contype="0" conaffinity="0"/>
+                <!-- Collision box for toe (1.5x size for stability) -->
+                <geom type="box" size="0.06 0.045 0.03" pos="0.01 0 -0.02" rgba="0.5 0.5 0.5 0.3"/>
+
+                <!-- Foot contact -->
+                <body name="L_TIP" pos="0 0 -0.035">
+                  <inertial pos="0 0 0" mass="0.001"
+                            diaginertia="0.0001 0.0001 0.0001"/>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+
+  <actuator>
+    <!-- Motor ID based actuators -->
+    <motor name="motor_1_actuator" joint="motor_1" gear="1"/>
+    <motor name="motor_2_actuator" joint="motor_2" gear="1"/>
+    <motor name="motor_3_actuator" joint="motor_3" gear="1"/>
+    <motor name="motor_4_actuator" joint="motor_4" gear="1"/>
+    <motor name="motor_5_actuator" joint="motor_5" gear="1"/>
+    <motor name="motor_6_actuator" joint="motor_6" gear="1"/>
+    <motor name="motor_7_actuator" joint="motor_7" gear="1"/>
+    <motor name="motor_8_actuator" joint="motor_8" gear="1"/>
+  </actuator>
+
+  <sensor>
+    <!-- IMU sensor -->
+    <accelerometer name="imu_accel" site="imu"/>
+    <gyro name="imu_gyro" site="imu"/>
+    <framequat name="imu_quat" objtype="site" objname="imu"/>
+  </sensor>
+
+  <keyframe>
+    <!-- Initial crouch pose (pose_Z): [0, -145, 158.9, -43, 0, -145, 158.9, -43] degrees -->
+    <!-- This is used for Backspace reset -->
+    <key name="crouch"
+         qpos="0 0 0.45 1 0 0 0
+               0 -2.531 2.774 -0.750
+               0 -2.531 2.774 -0.750"/>
+
+    <!-- Default starting pose (same as crouch for consistency) -->
+    <key name="home"
+         qpos="0 0 0.45 1 0 0 0
+               0 -2.531 2.774 -0.750
+               0 -2.531 2.774 -0.750"/>
+  </keyframe>
+</mujoco>

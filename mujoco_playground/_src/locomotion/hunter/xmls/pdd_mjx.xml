@@ -146,7 +146,12 @@
                   frictionloss="0.2" />
                 <geom size="0.05005 0.01725 0.00875" pos="0.01503 0 -0.0102"
                   quat="0.707388 0.706825 0 0" type="box" rgba="0.75294 0.75294 0.75294 1" />
-                
+                <body name="leg_l_f1_link" pos="0.06 0 -0.007">
+                  <inertial pos="0 0 0" mass="0.01" diaginertia="1e-06 1e-06 1e-06"/>
+                </body>
+                <body name="leg_l_f2_link" pos="-0.03 0 -0.007">
+                  <inertial pos="0 0 0" mass="0.01" diaginertia="1e-06 1e-06 1e-06"/>
+                </body>
                 <geom name="left_foot1" class="foot1"/>
                 <geom name="left_foot2" class="foot2"/> 
                 <geom name="left_foot" class="foot"/> 
@@ -194,7 +199,12 @@
                   frictionloss="0.2" />
                 <geom size="0.05005 0.01725 0.00875" pos="0.01503 0 -0.0102"
                   quat="0.707388 0.706825 0 0" type="box" rgba="0.75294 0.75294 0.75294 1" />
-                
+                <body name="leg_r_f1_link" pos="0.06 0 -0.007">
+                  <inertial pos="0 0 0" mass="0.01" diaginertia="1e-06 1e-06 1e-06"/>
+                </body>
+                <body name="leg_r_f2_link" pos="-0.03 0 -0.007">
+                  <inertial pos="0 0 0" mass="0.01" diaginertia="1e-06 1e-06 1e-06"/>
+                </body>
                 <geom name="right_foot1" class="foot1"/>
                 <geom name="right_foot2" class="foot2"/> 
                 <geom name="right_foot" class="foot"/>
