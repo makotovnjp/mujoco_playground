@@ -34,8 +34,8 @@ def default_config() -> config_dict.ConfigDict:
       lin_vel_scale=2.0,
       history_len=1,
       noise_config=config_dict.create(
-          level=1.0,
-          # level=0.8,
+          # level=1.0,
+          level=0.6,
           scales=config_dict.create(
               joint_pos=0.01,
               joint_vel=1.5,
@@ -87,7 +87,7 @@ def default_config() -> config_dict.ConfigDict:
               tracking_ang_vel=0.75,
               # feet_air_time=2.0,
 
-              feet_phase=1.0,
+              feet_phase=2.0,
               # tracking_lin_vel=0.0,
               # tracking_ang_vel=0.0,
               feet_air_time=2.0,
@@ -101,25 +101,25 @@ def default_config() -> config_dict.ConfigDict:
               ang_vel_xy=-0.15,  # previous: -0.0
               # lin_vel_z=-0.0,
               lin_vel_z=-0.0,  # previous: -5.0
-              orientation=-1.0,
+              orientation=-2.0,
               joint_deviation_knee=-0.1,
               joint_deviation_hip=-0.5,
-              pose=-2.0,  # previous: -0.1
+              pose=-1.0,  # previous: -0.1
               stand_still=0.0,  # previous: +4.0
               # stand_still=+0.0,
               termination=-1.0,
-              foot_slip=-0.1,
+              foot_slip=-0.25,
               action_rate=-0.01,  # previous: -0.5
-              feet_distance=-0.0,
-              collision=-1.0,
+              feet_distance=-0.3,
+              collision=-0.1,
           ),
           tracking_sigma=0.5,
       ),
       command_config=config_dict.create(
           lin_vel_x=[-1.5, 1.5],
           lin_vel_y=[-1.0, 1.0],
-        #   ang_vel_yaw=[-1.2, 1.2]
-          ang_vel_yaw=[-2*np.pi, 2*np.pi]
+          ang_vel_yaw=[-1.2, 1.2]
+          # ang_vel_yaw=[-2*np.pi, 2*np.pi]
       ),
       push_config=config_dict.create(
           enable=True,
@@ -128,11 +128,11 @@ def default_config() -> config_dict.ConfigDict:
       ),
       # gait_frequency=[0.25, 2.0],
       # gait_frequency=[0.0, 0.5],
-      gait_frequency=[1.25, 1.5],
+      gait_frequency=[0.5, 2.0],
       # gaits=["walk"],
       gaits=["walk", "stand"],
       # gaits=["walk","stand","run"],
-      foot_height=[0.1, 0.1,],
+      foot_height=[0.08, 0.12],
       impl="jax",
       nconmax=8 * 1024,
       njmax=10 + 8 * 4,
@@ -579,9 +579,6 @@ class Joystick(hunter_base.HunterEnv):
         contact,  # 2
         feet_vel,  # 4*3
         info["feet_air_time"],  # 2
-        info["gait"],   #1
-        info["gait_freq"],   #1
-        info["foot_height"]   #1
     ])
 
     return {
