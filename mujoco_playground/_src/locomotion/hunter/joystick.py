@@ -24,7 +24,7 @@ _PHASES = np.array([
 
 def default_config() -> config_dict.ConfigDict:
   return config_dict.create(
-      ctrl_dt=0.02,
+      ctrl_dt=0.01,
       sim_dt=0.002,
       episode_length=1000,
       early_termination=True,
@@ -102,13 +102,13 @@ def default_config() -> config_dict.ConfigDict:
               lin_vel_z=-0.0,  # previous: -5.0
               orientation=-2.0,
               pose=-1.0,  # previous: -0.1
-              stand_still=0.0,  # previous: +4.0
+              stand_still=1.0,  # previous: +4.0
               # stand_still=+0.0,
               termination=-1.0,
               foot_slip=-0.1,
               action_rate=-0.01,  # previous: -0.5
               feet_distance=-0.3,
-              collision=-1.0,
+              # collision=-1.0,
           ),
           tracking_sigma=0.5,
       ),
@@ -217,8 +217,8 @@ class Joystick(hunter_base.HunterEnv):
       )
     self._foot_linvel_sensor_adr = jp.array(foot_linvel_sensor_adr)
 
-    self._left_foot_box_geom_id = self._mj_model.geom("left_foot").id
-    self._right_foot_box_geom_id = self._mj_model.geom("right_foot").id
+    # self._left_foot_box_geom_id = self._mj_model.geom("left_foot").id
+    # self._right_foot_box_geom_id = self._mj_model.geom("right_foot").id
    
   def sample_command(self, rng: jax.Array) -> jax.Array:
     """Samples a random command with a 10% chance of being zero."""
@@ -647,7 +647,7 @@ class Joystick(hunter_base.HunterEnv):
         "termination": self._cost_termination(done),
         "feet_clearance": self._cost_feet_clearance(data),
         "feet_distance": self._cost_feet_distance(data),
-        "collision": self._cost_collision(data)
+        # "collision": self._cost_collision(data)
     }
     return pos, neg
 
@@ -794,7 +794,7 @@ class Joystick(hunter_base.HunterEnv):
     )
     return jp.clip(0.17 - feet_distance, min=0.0, max=0.1)
 
-  def _cost_collision(self, data: mjx.Data) -> jax.Array:
-    return collision.geoms_colliding(
-        data, self._left_foot_box_geom_id, self._right_foot_box_geom_id
-    )
+  # def _cost_collision(self, data: mjx.Data) -> jax.Array:
+  #   return collision.geoms_colliding(
+  #       data, self._left_foot_box_geom_id, self._right_foot_box_geom_id
+  #   )

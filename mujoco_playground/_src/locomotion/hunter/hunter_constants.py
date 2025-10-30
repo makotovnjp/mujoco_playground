@@ -35,13 +35,17 @@ FEET_SITES = [
 
 LEFT_FEET_GEOMS = [
     # "leg_l5_link",  # Left foot end effector
-    "left_foot1",
-    "left_foot2"
+    "leg_l_f1_foot1",
+    "leg_l_f1_foot2",
+    "leg_l_f2_foot1",
+    "leg_l_f2_foot2",
 ]
 RIGHT_FEET_GEOMS = [
     # "leg_r5_link",  # Right foot end effector
-    "right_foot1",
-    "right_foot2"
+    "leg_r_f1_foot1",
+    "leg_r_f1_foot2",
+    "leg_r_f2_foot1",
+    "leg_r_f2_foot2",
 ]
 
 # Robot body names based on pdd.xml
