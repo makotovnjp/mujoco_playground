@@ -56,6 +56,46 @@ _LOAD_CHECKPOINT_PATH = "/home/sandbox/Work/mujoco_playground/learning/notebooks
 # stand_202510131126
 _LOAD_CHECKPOINT_PATH = "/home/sandbox/Work/mujoco_playground/learning/notebooks/logs/HunterJoystick-20251013-040454/checkpoints"
 # stand_202510131635
+_LOAD_CHECKPOINT_PATH = "/home/sandbox/Work/mujoco_playground/learning/notebooks/logs/HunterJoystickRoughTerrain-20251014-180113/checkpoints"
+# stand_202510141920
+_LOAD_CHECKPOINT_PATH = "/home/sandbox/Work/mujoco_playground/learning/notebooks/logs/HunterJoystickRoughTerrain-20251015-150843/checkpoints"
+# stand_202510151615 with 46 obs with rough terrain
+_LOAD_CHECKPOINT_PATH = "/home/sandbox/Work/mujoco_playground/learning/notebooks/logs/HunterJoystick-20251015-051615/checkpoints"
+# stand_202510170105 with 46 obs without rough terrain
+_LOAD_CHECKPOINT_PATH = "/home/sandbox/Work/mujoco_playground/learning/notebooks/logs/HunterJoystick-20251014-163743/checkpoints"
+# stand_202510170233 with 49 obs without rough terrain
+_LOAD_CHECKPOINT_PATH = "/home/sandbox/Work/mujoco_playground/learning/notebooks/logs/HunterJoystick-20251021-013556/checkpoints"
+# stand_202510232119 with 46 obs
+_LOAD_CHECKPOINT_PATH = "/home/sandbox/Work/mujoco_playground/learning/notebooks/logs/HunterJoystick-20251020-161119/checkpoints"
+# stand_202510232246 with 46 obs
+_LOAD_CHECKPOINT_PATH = "/home/sandbox/Work/mujoco_playground/learning/notebooks/logs/HunterJoystick-20251024-132059/checkpoints"
+# stand_202510241414 with 46 obs
+_LOAD_CHECKPOINT_PATH = "/home/sandbox/Work/mujoco_playground/learning/notebooks/logs/HunterJoystick-20251024-232222/checkpoints"
+# stand_202510250218 with 46 obs
+_LOAD_CHECKPOINT_PATH = "/home/sandbox/Work/mujoco_playground/learning/notebooks/logs/HunterJoystick-20251025-100854/checkpoints"
+# stand_202510251315 with 46 obs
+_LOAD_CHECKPOINT_PATH = "/home/sandbox/Work/mujoco_playground/learning/notebooks/logs/HunterJoystick-20251025-132811/checkpoints"
+# stand_202510251556 with 46 obs
+_LOAD_CHECKPOINT_PATH = "/home/sandbox/Work/mujoco_playground/learning/notebooks/logs/HunterJoystick-20251025-212656/checkpoints"
+# stand_202510261056 with 46 obs
+_LOAD_CHECKPOINT_PATH = "/home/sandbox/Work/mujoco_playground/learning/notebooks/logs/HunterJoystick-20251026-122356/checkpoints"
+# stand_202510261818 with 46 obs
+_LOAD_CHECKPOINT_PATH = "/home/sandbox/Work/mujoco_playground/learning/notebooks/logs/HunterJoystick-20251026-170453/checkpoints"
+# stand_202510262050 with 46 obs
+_LOAD_CHECKPOINT_PATH = "/home/sandbox/Work/mujoco_playground/learning/notebooks/logs/HunterJoystick-20251026-205431/checkpoints"
+# stand_202510270153 with 46 obs
+_LOAD_CHECKPOINT_PATH = "/home/sandbox/Work/mujoco_playground/learning/notebooks/logs/HunterJoystick-20251027-011717/checkpoints"
+# # stand_202510270400 with 46 obs
+_LOAD_CHECKPOINT_PATH = "/home/sandbox/Work/mujoco_playground/learning/notebooks/logs/HunterJoystick-20251027-073713/checkpoints"
+# stand_202510271101 with 46 obs
+_LOAD_CHECKPOINT_PATH = "/home/sandbox/Work/mujoco_playground/learning/notebooks/logs/HunterJoystick-20251027-152746/checkpoints"
+# stand_202510271827 with 46 obs
+_LOAD_CHECKPOINT_PATH = "/home/sandbox/Work/mujoco_playground/learning/notebooks/logs/HunterJoystick-20251027-182204/checkpoints"
+# stand_202510272353 with 46 obs
+_LOAD_CHECKPOINT_PATH = "/home/sandbox/Work/mujoco_playground/learning/notebooks/logs/HunterJoystick-20251028-103212/checkpoints"
+# stand_202510281655 with 46 obs
+_LOAD_CHECKPOINT_PATH = "/home/sandbox/Work/mujoco_playground/learning/notebooks/logs/HunterJoystick-20251028-174412/checkpoints"
+# stand_202510290900 with 46 obs
 env = registry.load(env_name)
 env_cfg = registry.get_default_config(env_name)
 ppo_params = locomotion_params.brax_ppo_config(env_name)

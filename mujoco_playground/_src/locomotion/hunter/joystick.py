@@ -31,9 +31,10 @@ def default_config() -> config_dict.ConfigDict:
       action_repeat=1,
       action_scale=0.5,
       dof_vel_scale=0.05,
+      lin_vel_scale=2.0,
       history_len=1,
       noise_config=config_dict.create(
-          level=0.6,
+          level=1.0,
           # level=0.8,
           scales=config_dict.create(
               joint_pos=0.01,
@@ -82,11 +83,11 @@ def default_config() -> config_dict.ConfigDict:
           scales=config_dict.create(
               # Rewards.
               # feet_phase=5.0,
-              tracking_lin_vel=3.5,
+              tracking_lin_vel=1.0,
               tracking_ang_vel=0.75,
               # feet_air_time=2.0,
 
-              feet_phase=3.0,
+              feet_phase=1.0,
               # tracking_lin_vel=0.0,
               # tracking_ang_vel=0.0,
               feet_air_time=2.0,
@@ -94,14 +95,16 @@ def default_config() -> config_dict.ConfigDict:
               # feet_air_time=0.0,
               # feet_contact=0.0,
           
-              feet_clearance=-1.0,
+              feet_clearance=0.0,
 
               # Costs.
               ang_vel_xy=-0.15,  # previous: -0.0
               # lin_vel_z=-0.0,
               lin_vel_z=-0.0,  # previous: -5.0
-              orientation=-2.0,
-              pose=-1.0,  # previous: -0.1
+              orientation=-1.0,
+              joint_deviation_knee=-0.1,
+              joint_deviation_hip=-0.5,
+              pose=-2.0,  # previous: -0.1
               stand_still=0.0,  # previous: +4.0
               # stand_still=+0.0,
               termination=-1.0,
@@ -119,17 +122,17 @@ def default_config() -> config_dict.ConfigDict:
           ang_vel_yaw=[-2*np.pi, 2*np.pi]
       ),
       push_config=config_dict.create(
-          enable=False,
+          enable=True,
           interval_range=[5.0, 10.0],
           magnitude_range=[0.1, 2.0],
       ),
       # gait_frequency=[0.25, 2.0],
       # gait_frequency=[0.0, 0.5],
-      gait_frequency=[0.5, 4.0],
+      gait_frequency=[1.25, 1.5],
       # gaits=["walk"],
       gaits=["walk", "stand"],
       # gaits=["walk","stand","run"],
-      foot_height=[0.08, 0.4],
+      foot_height=[0.1, 0.1,],
       impl="jax",
       nconmax=8 * 1024,
       njmax=10 + 8 * 4,
@@ -184,6 +187,8 @@ class Joystick(hunter_base.HunterEnv):
         0, 1, 2, 3, 4,  # left leg
         5, 6, 7, 8, 9,  # right leg
     ])  # fmt: skip
+    self._hip_indices = jp.array([0, 1, 5, 6])
+    self._knee_indices = jp.array([3, 8])
     self._weights = jp.array([
         1.0, 1.0, 0.01, 0.01, 1.0,
         1.0, 1.0, 0.01, 0.01, 1.0,
@@ -537,18 +542,13 @@ class Joystick(hunter_base.HunterEnv):
     phase = jp.concatenate([cos, sin])
 
     state = jp.concatenate([
-        noisy_linvel,  # 3
+        noisy_linvel * self._config.lin_vel_scale,  # 3
         noisy_gyro,    # 3
         noisy_gravity,        # 3
         noisy_joint_angles - self._default_pose,  # 10
         noisy_joint_vel * self._config.dof_vel_scale,  # 10
         info["last_act"],  # 10
         info["command"],  # 3
-        # total: 42
-    ])
-    state = jp.hstack(
-      [
-        state,  # 42
         phase,  # 4
         #info["gait"],   #1
         #info["gait_freq"],   #1
@@ -567,10 +567,13 @@ class Joystick(hunter_base.HunterEnv):
         gyro,  # 3
         accelerometer,  # 3
         gravity,  # 3
-        linvel,  # 3
+        linvel * self._config.lin_vel_scale,  # 3
         global_angvel,  # 3
         joint_angles - self._default_pose,
         joint_vel * self._config.dof_vel_scale,
+        info["gait"],
+        info["gait_freq"],
+        info["foot_height"],
         root_height,  # 1
         data.actuator_force,  # 29
         contact,  # 2
@@ -636,6 +639,10 @@ class Joystick(hunter_base.HunterEnv):
             self.get_global_linvel(data), info["gait"]
         ),
         "orientation": self._cost_orientation(self.get_gravity(data)),
+        "joint_deviation_hip": self._cost_joint_deviation_hip(
+            data.qpos[7:], info["command"]
+        ),
+        "joint_deviation_knee": self._cost_joint_deviation_knee(data.qpos[7:]),
         "pose": self._cost_pose(data.qpos[7:]),
         "foot_slip": self._cost_feet_slip(data),
         "stand_still": self._cost_stand_still(info["command"], data.qpos[7:]),
@@ -702,6 +709,21 @@ class Joystick(hunter_base.HunterEnv):
     )
     return jp.mean(feet_contact)
 
+  def _cost_joint_deviation_hip(
+      self, qpos: jax.Array, cmd: jax.Array
+  ) -> jax.Array:
+    cost = jp.sum(
+        jp.abs(qpos[self._hip_indices] - self._default_pose[self._hip_indices])
+    )
+    cost *= jp.abs(cmd[1]) > 0.1
+    return cost
+
+  def _cost_joint_deviation_knee(self, qpos: jax.Array) -> jax.Array:
+    return jp.sum(
+        jp.abs(
+            qpos[self._knee_indices] - self._default_pose[self._knee_indices]
+        )
+    )
 
   def _cost_pose(self, joint_angles: jax.Array) -> jax.Array:
     # Penalize deviation from the default pose for certain joints.
@@ -790,7 +812,7 @@ class Joystick(hunter_base.HunterEnv):
         jp.cos(base_yaw) * (left_foot_pos[1] - right_foot_pos[1])
         - jp.sin(base_yaw) * (left_foot_pos[0] - right_foot_pos[0])
     )
-    return jp.clip(0.2 - feet_distance, min=0.0, max=0.1)
+    return jp.clip(0.3 - feet_distance, min=0.0, max=0.1)
 
   def _cost_collision(self, data: mjx.Data) -> jax.Array:
     return collision.geoms_colliding(
