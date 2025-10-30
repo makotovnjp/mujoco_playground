@@ -109,17 +109,17 @@ def default_config() -> config_dict.ConfigDict:
               # stand_still=+0.0,
               termination=-1.0,
               foot_slip=-0.1,
-              action_rate=-0.0,  # previous: -0.5
-              feet_distance=-2.0,
-              collision=-0.0,
+              action_rate=-0.01,  # previous: -0.5
+              feet_distance=-0.0,
+              collision=-1.0,
           ),
           tracking_sigma=0.5,
       ),
       command_config=config_dict.create(
           lin_vel_x=[-1.5, 1.5],
           lin_vel_y=[-1.0, 1.0],
-          ang_vel_yaw=[-1.2, 1.2],
-        #   ang_vel_yaw=[-2*jp.pi, 2*jp.pi]
+        #   ang_vel_yaw=[-1.2, 1.2]
+          ang_vel_yaw=[-2*np.pi, 2*np.pi]
       ),
       push_config=config_dict.create(
           enable=True,
@@ -550,8 +550,12 @@ class Joystick(hunter_base.HunterEnv):
         info["last_act"],  # 10
         info["command"],  # 3
         phase,  # 4
-        # total: 46
-    ])
+        #info["gait"],   #1
+        #info["gait_freq"],   #1
+        #info["foot_height"]   #1
+        # total: 49
+      ],
+    )
 
     accelerometer = self.get_accelerometer(data)
     global_angvel = self.get_global_angvel(data)
@@ -575,6 +579,9 @@ class Joystick(hunter_base.HunterEnv):
         contact,  # 2
         feet_vel,  # 4*3
         info["feet_air_time"],  # 2
+        info["gait"],   #1
+        info["gait_freq"],   #1
+        info["foot_height"]   #1
     ])
 
     return {
