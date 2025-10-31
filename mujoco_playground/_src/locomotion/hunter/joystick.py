@@ -24,7 +24,7 @@ _PHASES = np.array([
 
 def default_config() -> config_dict.ConfigDict:
   return config_dict.create(
-      ctrl_dt=0.02,
+      ctrl_dt=0.01,
       sim_dt=0.002,
       episode_length=1000,
       early_termination=True,
@@ -95,7 +95,7 @@ def default_config() -> config_dict.ConfigDict:
               # feet_air_time=0.0,
               # feet_contact=0.0,
           
-              feet_clearance=0.0,
+              feet_clearance=-0.0,
 
               # Costs.
               ang_vel_xy=-0.15,  # previous: -0.0
@@ -126,13 +126,13 @@ def default_config() -> config_dict.ConfigDict:
           interval_range=[5.0, 10.0],
           magnitude_range=[0.1, 2.0],
       ),
-      # gait_frequency=[0.25, 2.0],
+    #   gait_frequency=[1.25, 2.0],
       # gait_frequency=[0.0, 0.5],
       gait_frequency=[0.5, 2.0],
-      # gaits=["walk"],
+    #   gaits=["walk"],
       gaits=["walk", "stand"],
       # gaits=["walk","stand","run"],
-      foot_height=[0.08, 0.12],
+      foot_height=[0.08, 0.2],
       impl="jax",
       nconmax=8 * 1024,
       njmax=10 + 8 * 4,
@@ -158,26 +158,28 @@ class Joystick(hunter_base.HunterEnv):
     self._post_init()
   
   def _post_init(self):
-    # Default standing pose with slightly bent knees
+    # # Default standing pose with slightly bent knees
     self._init_q = jp.zeros(self._mjx_model.nq)
     self._init_q = self._init_q.at[3:7].set(jp.array([1, 0, 0, 0]))  # quat
     
-    # Set joint positions for stable standing
-    # Set floating base position (x, y, z, quat)
-    # self._init_q = self._init_q.at[2].set(-0.014)   # z position - proper standing height
-    # joint_init = jp.array([0.0, 0.0, -0.2, 0.5, -0.3, 0.0, 0.0, -0.2, 0.5, -0.3])   # 10 joints
+    # # Set joint positions for stable standing
+    # # Set floating base position (x, y, z, quat)
+    # # self._init_q = self._init_q.at[2].set(-0.014)   # z position - proper standing height
+    # # joint_init = jp.array([0.0, 0.0, -0.2, 0.5, -0.3, 0.0, 0.0, -0.2, 0.5, -0.3])   # 10 joints
 
-    # SAME AS ROS1
-    # self._init_q = self._init_q.at[2].set(-0.05)  # z position - proper standing height
-    # joint_init = jp.array([0.1, 0.0, -0.4, 0.93, -0.53, -0.1, 0.0, -0.4, 0.93, -0.53]) 
+    # # SAME AS ROS1
+    # # self._init_q = self._init_q.at[2].set(-0.05)  # z position - proper standing height
+    # # joint_init = jp.array([0.1, 0.0, -0.4, 0.93, -0.53, -0.1, 0.0, -0.4, 0.93, -0.53]) 
 
-    # SAME AS CUSTOMER DOC
+    # # SAME AS CUSTOMER DOC
     self._init_q = self._init_q.at[2].set(-0.029)  # z position - proper standing height
     joint_init = jp.array([0.0, 0.0, -0.36, 0.72, -0.36, 0.0, -0.05, -0.36, 0.72, -0.36]) 
 
     self._init_q = self._init_q.at[7:].set(joint_init)
 
     self._default_pose = joint_init
+    # self._init_q = jp.array(self._mj_model.keyframe("home").qpos)
+    # self._default_pose = jp.array(self._mj_model.keyframe("home").qpos[7:])
 
     # Set joint limits
     self._lowers = self._mj_model.actuator_ctrlrange[:, 0]
