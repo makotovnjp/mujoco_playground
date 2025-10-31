@@ -146,7 +146,7 @@ _randomizer = {
     "Go1Footstand": go1_randomize.domain_randomize,
     "T1JoystickFlatTerrain": t1_randomize.domain_randomize,
     "T1JoystickRoughTerrain": t1_randomize.domain_randomize,
-    "HunterJoystick": hunter_randomize.domain_randomize,
+    # "HunterJoystick": hunter_randomize.domain_randomize,
     "HunterJoystickRoughTerrain": hunter_randomize.domain_randomize
 }
 

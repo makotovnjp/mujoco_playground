@@ -81,20 +81,20 @@ def default_config() -> config_dict.ConfigDict:
       reward_config=config_dict.create(
           scales=config_dict.create(
               # Rewards.
-            #   feet_phase=5.0,
+              feet_phase=5.0,
               tracking_lin_vel=3.5,
               tracking_ang_vel=0.75,
               # feet_air_time=2.0,
 
-              feet_phase=3.0,
+              # feet_phase=3.0,
               # tracking_lin_vel=0.0,
               # tracking_ang_vel=0.0,
-              feet_air_time=2.0,
+              feet_air_time=3.0,
               feet_contact=0.0,
               # feet_air_time=0.0,
               # feet_contact=0.0,
           
-              feet_clearance=-2.0,
+              feet_clearance=-0.0,
 
               # Costs.
               ang_vel_xy=-0.15,  # previous: -0.0
@@ -102,12 +102,12 @@ def default_config() -> config_dict.ConfigDict:
               lin_vel_z=-0.0,  # previous: -5.0
               orientation=-2.0,
               pose=-1.0,  # previous: -0.1
-              stand_still=1.0,  # previous: +4.0
+              stand_still=0.0,  # previous: +4.0
               # stand_still=+0.0,
               termination=-1.0,
               foot_slip=-0.1,
               action_rate=-0.01,  # previous: -0.5
-              feet_distance=-0.3,
+              feet_distance=-0.0,
               # collision=-1.0,
           ),
           tracking_sigma=0.5,
@@ -125,7 +125,7 @@ def default_config() -> config_dict.ConfigDict:
       ),
     #   gait_frequency=[1.25, 2.0],
       # gait_frequency=[0.0, 0.5],
-      gait_frequency=[0.5, 4.0],
+      gait_frequency=[1.25, 2.0],
     #   gaits=["walk"],
       gaits=["walk", "stand"],
       # gaits=["walk","stand","run"],
