@@ -134,6 +134,10 @@
                 <geom type="mesh" mesh="rtoe" rgba="1 1 1 1" contype="0" conaffinity="0"/>
                 <!-- Collision box for toe (1.5x size for stability) -->
                 <geom type="box" size="0.06 0.045 0.03" pos="0.01 0 -0.02" rgba="0.5 0.5 0.5 0.3"/>
+                <geom name="right_foot1" class="foot1"/>
+                <geom name="right_foot2" class="foot2"/> 
+                <geom name="right_foot" class="foot"/>
+                <site name ="right_foot" pos="0 0 0" />
               </body>
             </body>
           </body>
@@ -178,6 +182,10 @@
                 <geom type="mesh" mesh="ltoe" rgba="1 1 1 1" contype="0" conaffinity="0"/>
                 <!-- Collision box for toe (1.5x size for stability) -->
                 <geom type="box" size="0.06 0.045 0.03" pos="0.01 0 -0.02" rgba="0.5 0.5 0.5 0.3"/>
+                <geom name="left_foot1" class="foot1"/>
+                <geom name="left_foot2" class="foot2"/> 
+                <geom name="left_foot" class="foot"/> 
+                <site name="left_foot" pos="0 0 0" />
               </body>
             </body>
           </body>
@@ -236,6 +244,8 @@
     <framelinvel objtype="site" objname="imu" name="global_linvel"/>
     <frameangvel objtype="site" objname="imu" name="global_angvel"/>
     <framequat objtype="site" objname="imu" name="orientation"/>
+    <framelinvel objtype="site" objname="right_foot" name="right_foot_global_linvel"/>
+    <framelinvel objtype="site" objname="left_foot" name="left_foot_global_linvel"/>
   </sensor>
 
   <keyframe>
