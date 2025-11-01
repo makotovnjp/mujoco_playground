@@ -1,7 +1,7 @@
 <mujoco model="fairy">
   <compiler angle="radian" meshdir="meshes" autolimits="true"/>
 
-  <option iterations="3" ls_iterations="5" timestep="0.002" integrator="Euler">
+  <option iterations="3" ls_iterations="5" timestep="0.002">
     <flag eulerdamp="disable"/>
   </option>
 
@@ -77,17 +77,14 @@
       castshadow="false" />
     <light directional="true" diffuse=".6 .6 .6" specular="0.2 0.2 0.2" pos="0 0 4" dir="0 0 -1" />
     <!-- Ground plane -->
-    <geom name="ground" type="plane" size="0 0 0.01" pos="0.001 0 0" quat="1 0 0 0" material="matplane"
-      condim="3" conaffinity='0' friction="0.6" contype="1"/>
+    <geom name="ground" type="plane" size="10 10 0.01" pos="0 0 0" quat="1 0 0 0" material="matplane"
+      condim="3" conaffinity="0" friction="0.6" contype="1"/>
     <!-- Base link (floating) -->
     <!-- Initial position matches keyframe "crouch" for consistency -->
     <body name="base_link" pos="0 0 0.65" quat="1 0 0 0">
+      <freejoint/>
       <inertial pos="0 0 -0.00474" mass="12.72349"
                 diaginertia="0.10262343540700387 0.08280262602395334 0.13248785583145192"/>
-      <joint type='slide' axis='1 0 0' limited='false' />
-      <joint type='slide' axis='0 1 0' limited='false' />
-      <joint type='slide' axis='0 0 1' limited='false' />
-      <joint type='ball' limited='false' />
       <camera name="track" pos="1.248 -0.947 0.3" xyaxes="0.628 0.779 -0.000 -0.274 0.221 0.936" mode="trackcom"/>
       <!-- Visual mesh (no collision) -->
       <geom type="mesh" mesh="base" rgba="1 1 1 1" contype="0" conaffinity="0"/>
@@ -100,8 +97,8 @@
       <!-- Right leg (Motor ID 1-4) -->
       <body name="R_FOOT" pos="0 -0.08 0">
         <body name="R1" pos="0 0 0">
-          <joint name="leg_r1_joint" type="hinge" axis="1 0 0"
-                 range="-2.094 2.094" damping="0.5"/>
+          <joint name="leg_r1_joint" axis="1 0 0"
+                 range="-2.094 2.094" limited="true" frictionloss="0.2"/>
           <inertial pos="0 0 0" mass="1.23047" diaginertia="0.0018303633358577802 0.0039401153269064335 0.0035094898580769786"/>
           <!-- Visual mesh (no collision) -->
           <geom type="mesh" mesh="rhip" rgba="1 1 1 1" contype="0" conaffinity="0"/>
@@ -109,8 +106,8 @@
           <geom type="capsule" fromto="0 0 0 0 -0.065 0" size="0.03" rgba="0.5 0.5 0.5 0.3"/>
 
           <body name="R2" pos="0 -0.065 0">
-            <joint name="leg_r2_joint" type="hinge" axis="0 1 0"
-                   range="-3.14 3.14" damping="0.5"/>
+            <joint name="leg_r2_joint" axis="0 1 0"
+                   range="-3.14 3.14" limited="true" frictionloss="0.2"/>
             <inertial pos="0.00006 0 -0.05962" mass="2.06632"
                       diaginertia="0.028423839552622263 0.027088604867877116 0.006885361957140555"/>
             <!-- Visual mesh (no collision) -->
@@ -119,8 +116,8 @@
             <geom type="capsule" fromto="0 0 0 0 0 -0.26" size="0.035" rgba="0.5 0.5 0.5 0.3"/>
 
             <body name="R3" pos="0 0 -0.26">
-              <joint name="leg_r3_joint" type="hinge" axis="0 1 0"
-                     range="-2.094 3.142" damping="0.5"/>
+              <joint name="leg_r3_joint" axis="0 1 0"
+                     range="-2.094 3.142" limited="true" frictionloss="0.2"/>
               <inertial pos="0 0 -0.19822" mass="0.41492"
                         diaginertia="0.004368293950062158 0.0043649330449301435 0.0007692542542232213"/>
               <!-- Visual mesh (no collision) -->
@@ -129,19 +126,14 @@
               <geom type="capsule" fromto="0 0 0 0 0 -0.30056" size="0.025" rgba="0.5 0.5 0.5 0.3"/>
 
               <body name="R4" pos="0 0 -0.30056">
-                <joint name="leg_r4_joint" type="hinge" axis="0 1 0"
-                       range="-0.785 1.571" damping="0.5"/>
-                <inertial pos="0 0 -0.04246" mass="0.001"
-                          diaginertia="1.2205313151995394e-06 1.8259135943500075e-06 2.3427844456505955e-06"/>
+                <joint name="leg_r4_joint" axis="0 1 0"
+                       range="-0.785 1.571" limited="true" frictionloss="0.2"/>
+                <inertial pos="0 0 -0.04246" mass="0.3"
+                          diaginertia="0.00036615939455986174 0.0005477740783050022 0.0007028353336951787"/>
                 <!-- Visual mesh (no collision) -->
                 <geom type="mesh" mesh="rtoe" rgba="1 1 1 1" contype="0" conaffinity="0"/>
                 <!-- Collision box for toe (1.5x size for stability) -->
                 <geom type="box" size="0.06 0.045 0.03" pos="0.01 0 -0.02" rgba="0.5 0.5 0.5 0.3"/>
-
-                <!-- Foot contact -->
-                <body name="R_TIP" pos="0 0 -0.035">
-                  <inertial pos="0 0 0" mass="0.001"
-                            diaginertia="1e-6 1e-6 1e-6"/>                </body>
               </body>
             </body>
           </body>
@@ -151,8 +143,7 @@
       <!-- Left leg (Motor ID 5-8) -->
       <body name="L_FOOT" pos="0 0.08 0">
         <body name="L1" pos="0 0 0">
-          <joint name="leg_l1_joint" type="hinge" axis="1 0 0"
-                 range="-2.094 2.094" damping="0.5"/>
+          <joint name="leg_l1_joint" axis="1 0 0" range="-2.094 2.094" limited="true" frictionloss="0.2"/>
           <inertial pos="0 0 0" mass="1.23047" diaginertia="0.0018233989548339167 0.003940115487341474 0.003502525316618075"/>
           <!-- Visual mesh (no collision) -->
           <geom type="mesh" mesh="lhip" rgba="1 1 1 1" contype="0" conaffinity="0"/>
@@ -160,8 +151,7 @@
           <geom type="capsule" fromto="0 0 0 0 0.065 0" size="0.03" rgba="0.5 0.5 0.5 0.3"/>
 
           <body name="L2" pos="0 0.065 0">
-            <joint name="leg_l2_joint" type="hinge" axis="0 1 0"
-                   range="-3.14 3.14" damping="0.5"/>
+            <joint name="leg_l2_joint" axis="0 1 0" range="-3.14 3.14"  limited="true" frictionloss="0.2"/>
             <inertial pos="0.00006 0 -0.05962" mass="2.06632"
                       diaginertia="0.028423839552622263 0.027088604867877116 0.006885361957140555"/>
             <!-- Visual mesh (no collision) -->
@@ -170,8 +160,8 @@
             <geom type="capsule" fromto="0 0 0 0 0 -0.26" size="0.035" rgba="0.5 0.5 0.5 0.3"/>
 
             <body name="L3" pos="0 0 -0.26">
-              <joint name="leg_l3_joint" type="hinge" axis="0 1 0"
-                     range="-2.094 3.142" damping="0.5"/>
+              <joint name="leg_l3_joint" axis="0 1 0"
+                     range="-2.094 3.142"  limited="true" frictionloss="0.2"/>
               <inertial pos="0 0 -0.19822" mass="0.41492"
                         diaginertia="0.004368293950062158 0.0043649330449301435 0.0007692542542232213"/>
               <!-- Visual mesh (no collision) -->
@@ -180,20 +170,14 @@
               <geom type="capsule" fromto="0 0 0 0 0 -0.30056" size="0.025" rgba="0.5 0.5 0.5 0.3"/>
 
               <body name="L4" pos="0 0 -0.30056">
-                <joint name="leg_l4_joint" type="hinge" axis="0 1 0"
-                       range="-0.785 1.571" damping="0.5"/>
-                <inertial pos="0 0 -0.04246" mass="0.001"
-                          diaginertia="1.2205313151995394e-06 1.8259135943500075e-06 2.3427844456505955e-06"/>
+                <joint name="leg_l4_joint" axis="0 1 0"
+                       range="-0.785 1.571" limited="true" frictionloss="0.2"/>
+                <inertial pos="0 0 -0.04246" mass="0.3"
+                          diaginertia="0.00036615939455986174 0.0005477740783050022 0.0007028353336951787"/>
                 <!-- Visual mesh (no collision) -->
                 <geom type="mesh" mesh="ltoe" rgba="1 1 1 1" contype="0" conaffinity="0"/>
                 <!-- Collision box for toe (1.5x size for stability) -->
                 <geom type="box" size="0.06 0.045 0.03" pos="0.01 0 -0.02" rgba="0.5 0.5 0.5 0.3"/>
-
-                <!-- Foot contact -->
-                <body name="L_TIP" pos="0 0 -0.035">
-                  <inertial pos="0 0 0" mass="0.001"
-                            diaginertia="1e-6 1e-6 1e-6"/>
-                </body>
               </body>
             </body>
           </body>
@@ -203,18 +187,45 @@
   </worldbody>
 
   <actuator>
-    <position class="fairy_motor" name="leg_l1_joint" joint="leg_l1_joint" forcerange="-36 36" kp="15" kv="1.0"/>
-    <position class="fairy_motor" name="leg_l2_joint" joint="leg_l2_joint" forcerange="-36 36" kp="5" kv="0.5"/>
-    <position class="fairy_motor" name="leg_l3_joint" joint="leg_l3_joint" forcerange="-60 60" kp="15" kv="1.5"/>
-    <position class="fairy_motor" name="leg_l4_joint" joint="leg_l4_joint" forcerange="-60 60" kp="25" kv="2.5"/>
+    <position class="fairy_motor" name="leg_l1_joint" joint="leg_l1_joint" forcerange="-60 60" kp="15" kv="1.0"/>
+    <position class="fairy_motor" name="leg_l2_joint" joint="leg_l2_joint" forcerange="-60 60" kp="15" kv="1.5"/>
+    <position class="fairy_motor" name="leg_l3_joint" joint="leg_l3_joint" forcerange="-60 60" kp="25" kv="2.5"/>
+    <position class="fairy_motor" name="leg_l4_joint" joint="leg_l4_joint" forcerange="-36 36" kp="5" kv="0.1"/>
 
-    <position class="fairy_motor" name="leg_r1_joint" joint="leg_r1_joint" forcerange="-36 36" kp="15" kv="1.0"/>
-    <position class="fairy_motor" name="leg_r2_joint" joint="leg_r2_joint" forcerange="-36 36" kp="5" kv="0.5"/>
-    <position class="fairy_motor" name="leg_r3_joint" joint="leg_r3_joint" forcerange="-60 60" kp="15" kv="1.5"/>
-    <position class="fairy_motor" name="leg_r4_joint" joint="leg_r4_joint" forcerange="-60 60" kp="25" kv="2.5"/>
+    <position class="fairy_motor" name="leg_r1_joint" joint="leg_r1_joint" forcerange="-60 60" kp="15" kv="1.0"/>
+    <position class="fairy_motor" name="leg_r2_joint" joint="leg_r2_joint" forcerange="-60 60" kp="15" kv="1.5"/>
+    <position class="fairy_motor" name="leg_r3_joint" joint="leg_r3_joint" forcerange="-60 60" kp="25" kv="2.5"/>
+    <position class="fairy_motor" name="leg_r4_joint" joint="leg_r4_joint" forcerange="-36 36" kp="5" kv="0.1"/>
   </actuator>
 
   <sensor>
+    <actuatorpos name='leg_l1_joint_p' actuator='leg_l1_joint' user='13' />
+    <actuatorpos name='leg_l2_joint_p' actuator='leg_l2_joint' user='13' />
+    <actuatorpos name='leg_l3_joint_p' actuator='leg_l3_joint' user='13' />
+    <actuatorpos name='leg_l4_joint_p' actuator='leg_l4_joint' user='13' />
+    <actuatorpos name='leg_r1_joint_p' actuator='leg_r1_joint' user='13' />
+    <actuatorpos name='leg_r2_joint_p' actuator='leg_r2_joint' user='13' />
+    <actuatorpos name='leg_r3_joint_p' actuator='leg_r3_joint' user='13' />
+    <actuatorpos name='leg_r4_joint_p' actuator='leg_r4_joint' user='13' />
+
+    <actuatorvel name='leg_l1_joint_v' actuator='leg_l1_joint' user='13' />
+    <actuatorvel name='leg_l2_joint_v' actuator='leg_l2_joint' user='13' />
+    <actuatorvel name='leg_l3_joint_v' actuator='leg_l3_joint' user='13' />
+    <actuatorvel name='leg_l4_joint_v' actuator='leg_l4_joint' user='13' />
+    <actuatorvel name='leg_r1_joint_v' actuator='leg_r1_joint' user='13' />
+    <actuatorvel name='leg_r2_joint_v' actuator='leg_r2_joint' user='13' />
+    <actuatorvel name='leg_r3_joint_v' actuator='leg_r3_joint' user='13' />
+    <actuatorvel name='leg_r4_joint_v' actuator='leg_r4_joint' user='13' />
+
+    <actuatorfrc name='leg_l1_joint_f' actuator='leg_l1_joint' user='13' />
+    <actuatorfrc name='leg_l2_joint_f' actuator='leg_l2_joint' user='13' />
+    <actuatorfrc name='leg_l3_joint_f' actuator='leg_l3_joint' user='13' />
+    <actuatorfrc name='leg_l4_joint_f' actuator='leg_l4_joint' user='13' />
+    <actuatorfrc name='leg_r1_joint_f' actuator='leg_r1_joint' user='13' />
+    <actuatorfrc name='leg_r2_joint_f' actuator='leg_r2_joint' user='13' />
+    <actuatorfrc name='leg_r3_joint_f' actuator='leg_r3_joint' user='13' />
+    <actuatorfrc name='leg_r4_joint_f' actuator='leg_r4_joint' user='13' />
+
     <!-- IMU sensor -->
     <gyro site="imu" name="gyro"/>
     <velocimeter site="imu" name="local_linvel"/>
