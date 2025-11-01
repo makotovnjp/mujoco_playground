@@ -82,7 +82,10 @@
     <!-- Base link (floating) -->
     <!-- Initial position matches keyframe "crouch" for consistency -->
     <body name="base_link" pos="0 0 0.65" quat="1 0 0 0">
-      <freejoint/>
+      <joint type='slide' axis='1 0 0' limited='false' />
+      <joint type='slide' axis='0 1 0' limited='false' />
+      <joint type='slide' axis='0 0 1' limited='false' />
+      <joint type='ball' limited='false' />
       <inertial pos="0 0 -0.00474" mass="12.72349"
                 diaginertia="0.10262343540700387 0.08280262602395334 0.13248785583145192"/>
       <camera name="track" pos="1.248 -0.947 0.3" xyaxes="0.628 0.779 -0.000 -0.274 0.221 0.936" mode="trackcom"/>
