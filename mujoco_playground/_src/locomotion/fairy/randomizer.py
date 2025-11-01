@@ -63,7 +63,7 @@ def domain_randomize(model: mjx.Model, rng: jax.Array):
     qpos0 = model.qpos0
     qpos0 = qpos0.at[7:].set(
         qpos0[7:]
-        + jax.random.uniform(key, shape=(10,), minval=-0.05, maxval=0.05)
+        + jax.random.uniform(key, shape=(8,), minval=-0.05, maxval=0.05)
     )
 
     return (
