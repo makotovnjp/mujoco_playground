@@ -383,7 +383,7 @@ class Joystick(fairy_base.FairyEnv):
     return state
 
   def _get_termination(self, data: mjx.Data) -> jax.Array:
-    fall_termination = self.get_gravity(data)[-1] < 0.0
+    fall_termination = self.get_gravity(data)[-1] < 0.85
     return (
         fall_termination | jp.isnan(data.qpos).any() | jp.isnan(data.qvel).any()
     )
