@@ -58,12 +58,13 @@ def default_config() -> config_dict.ConfigDict:
               orientation=-1.0,
               joint_deviation_knee=-0.1,
               joint_deviation_hip=-0.5,
-              pose=-2.0,
+              pose=-1.0,
               stand_still=0.0,
               termination=-1.0,
-              foot_slip=-0.1,
-              action_rate=-0.0,
-              feet_distance=-2.0,
+              foot_slip=-0.0,
+              feet_slip=-0.25,
+              action_rate=-0.01,
+              feet_distance=-1.0,
               collision=-0.0,
           ),
           tracking_sigma=0.5,
@@ -80,7 +81,7 @@ def default_config() -> config_dict.ConfigDict:
           magnitude_range=[0.1, 2.0],
       ),
       gait_frequency=[1.25, 1.5],
-      gaits=["walk", "stand"],
+      gaits=["walk"],
       foot_height=[0.1, 0.1,],
       impl="jax",
       nconmax=8 * 1024,
@@ -540,7 +541,8 @@ class Joystick(fairy_base.FairyEnv):
         ),
         "joint_deviation_knee": self._cost_joint_deviation_knee(data.qpos[7:]),
         "pose": self._cost_pose(data.qpos[7:]),
-        "foot_slip": self._cost_feet_slip(data),
+        "foot_slip": self._cost_foot_slip(data),
+        "feet_slip": self._cost_feet_slip(data, contact, info),
         "stand_still": self._cost_stand_still(info["command"], data.qpos[7:]),
         "action_rate": self._cost_action_rate(
             info["last_act"], info["last_last_act"], action
@@ -635,11 +637,13 @@ class Joystick(fairy_base.FairyEnv):
     # Penalize xy axes base angular velocity.
     return jp.sum(jp.square(global_angvel[:2]))
   
-  def _cost_foot_slip(self, data: mjx.Data, contact: jax.Array) -> jax.Array:
-    feet_vel = data.sensordata[self._foot_linvel_sensor_adr]
-    vel_xy = feet_vel[..., :2]
-    vel_xy_norm_sq = jp.sum(jp.square(vel_xy), axis=-1)
-    return jp.sum(vel_xy_norm_sq * contact)
+  def _cost_feet_slip(
+      self, data: mjx.Data, contact: jax.Array, info: dict[str, Any]
+  ) -> jax.Array:
+    del info  # Unused.
+    body_vel = self.get_global_linvel(data)[:2]
+    reward = jp.sum(jp.linalg.norm(body_vel, axis=-1) * contact)
+    return reward
 
   def _cost_orientation(self, torso_zaxis: jax.Array) -> jax.Array:
     # Penalize non flat base orientation.
@@ -671,7 +675,7 @@ class Joystick(fairy_base.FairyEnv):
   def _cost_termination(self, done: jax.Array) -> jax.Array:
     return done
 
-  def _cost_feet_slip(self, data: mjx.Data) -> jax.Array:
+  def _cost_foot_slip(self, data: mjx.Data) -> jax.Array:
     feet_vel = data.sensordata[self._foot_linvel_sensor_adr]
     vel_xy = feet_vel[..., :2]
     vel_xy_norm_sq = jp.sum(jp.square(vel_xy), axis=-1)
