@@ -34,8 +34,8 @@ def default_config() -> config_dict.ConfigDict:
       lin_vel_scale=2.0,
       history_len=1,
       noise_config=config_dict.create(
-          level=1.0,
-          # level=0.6,
+          # level=1.0,
+          level=0.6,
           scales=config_dict.create(
               joint_pos=0.01,
               joint_vel=1.5,
