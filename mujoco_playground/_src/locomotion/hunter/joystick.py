@@ -24,7 +24,7 @@ _PHASES = np.array([
 
 def default_config() -> config_dict.ConfigDict:
   return config_dict.create(
-      ctrl_dt=0.01,
+      ctrl_dt=0.02,
       sim_dt=0.002,
       episode_length=1000,
       early_termination=True,
@@ -35,7 +35,7 @@ def default_config() -> config_dict.ConfigDict:
       history_len=1,
       noise_config=config_dict.create(
           level=1.0,
-          # level=0.8,
+          # level=0.6,
           scales=config_dict.create(
               joint_pos=0.01,
               joint_vel=1.5,
@@ -83,11 +83,11 @@ def default_config() -> config_dict.ConfigDict:
           scales=config_dict.create(
               # Rewards.
               # feet_phase=5.0,
-              tracking_lin_vel=1.0,
+              tracking_lin_vel=3.5,
               tracking_ang_vel=0.75,
               # feet_air_time=2.0,
 
-              feet_phase=1.0,
+              feet_phase=3.0,
               # tracking_lin_vel=0.0,
               # tracking_ang_vel=0.0,
               feet_air_time=2.0,
@@ -101,15 +101,16 @@ def default_config() -> config_dict.ConfigDict:
               ang_vel_xy=-0.15,  # previous: -0.0
               # lin_vel_z=-0.0,
               lin_vel_z=-0.0,  # previous: -5.0
-              orientation=-1.0,
+              orientation=-2.0,
               joint_deviation_knee=-0.1,
               joint_deviation_hip=-0.5,
-              pose=-2.0,  # previous: -0.1
+              pose=-1.0,  # previous: -0.1
               stand_still=0.0,  # previous: +4.0
               # stand_still=+0.0,
               termination=-1.0,
               foot_slip=-0.1,
               action_rate=-0.01,  # previous: -0.5
+              # feet_distance=-0.3,
               feet_distance=-0.3,
               collision=-0.1,
           ),
@@ -132,7 +133,7 @@ def default_config() -> config_dict.ConfigDict:
     #   gaits=["walk"],
       gaits=["walk", "stand"],
       # gaits=["walk","stand","run"],
-      foot_height=[0.08, 0.2],
+      foot_height=[0.08, 0.12],
       impl="jax",
       nconmax=8 * 1024,
       njmax=10 + 8 * 4,
@@ -482,7 +483,7 @@ class Joystick(hunter_base.HunterEnv):
     return state
 
   def _get_termination(self, data: mjx.Data) -> jax.Array:
-    fall_termination = self.get_gravity(data)[-1] < 0.0
+    fall_termination = self.get_gravity(data)[-1] < 0.85
     return (
         fall_termination | jp.isnan(data.qpos).any() | jp.isnan(data.qvel).any()
     )
@@ -569,13 +570,10 @@ class Joystick(hunter_base.HunterEnv):
         gyro,  # 3
         accelerometer,  # 3
         gravity,  # 3
-        linvel * self._config.lin_vel_scale,  # 3
+        linvel,  # 3
         global_angvel,  # 3
         joint_angles - self._default_pose,
-        joint_vel * self._config.dof_vel_scale,
-        info["gait"],
-        info["gait_freq"],
-        info["foot_height"],
+        joint_vel,
         root_height,  # 1
         data.actuator_force,  # 29
         contact,  # 2
@@ -814,7 +812,7 @@ class Joystick(hunter_base.HunterEnv):
         jp.cos(base_yaw) * (left_foot_pos[1] - right_foot_pos[1])
         - jp.sin(base_yaw) * (left_foot_pos[0] - right_foot_pos[0])
     )
-    return jp.clip(0.3 - feet_distance, min=0.0, max=0.1)
+    return jp.clip(0.25 - feet_distance, min=0.0, max=0.1)
 
   def _cost_collision(self, data: mjx.Data) -> jax.Array:
     return collision.geoms_colliding(

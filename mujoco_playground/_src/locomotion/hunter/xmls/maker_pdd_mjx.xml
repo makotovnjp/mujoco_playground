@@ -81,7 +81,7 @@
       condim="1" conaffinity='15' />
 
     <body name="base_link" pos="0 0 0.7" childclass="hunter">
-      <inertial pos="-0.010856 -6.8e-05 -0.007128" quat="0 0 0.7071068 0.7071068" mass="5.67363" 
+      <inertial pos="-0.010856 -6.8e-05 -0.007128" quat="0.979606 0.00882716 0.200723 -0.00231074" mass="5.67363" 
       	diaginertia="0.0355096 0.0296524 0.0283549"/>
       <joint type='slide' axis='1 0 0' limited='false' />
       <joint type='slide' axis='0 1 0' limited='false' />
