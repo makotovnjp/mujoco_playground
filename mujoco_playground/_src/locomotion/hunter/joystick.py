@@ -34,8 +34,8 @@ def default_config() -> config_dict.ConfigDict:
       lin_vel_scale=2.0,
       history_len=1,
       noise_config=config_dict.create(
-          # level=1.0,
-          level=0.6,
+          level=1.0,
+          # level=0.6,
           scales=config_dict.create(
               joint_pos=0.01,
               joint_vel=1.5,
@@ -105,13 +105,13 @@ def default_config() -> config_dict.ConfigDict:
               joint_deviation_knee=-0.1,
               joint_deviation_hip=-0.5,
               pose=-1.0,  # previous: -0.1
-              stand_still=0.0,  # previous: +4.0
+              stand_still=0.5,  # previous: +4.0
               # stand_still=+0.0,
               termination=-1.0,
-              foot_slip=-0.1,
-              action_rate=-0.01,  # previous: -0.5
+              foot_slip=-0.25,
+              action_rate=-0.1,  # previous: -0.5
               # feet_distance=-0.3,
-              feet_distance=-0.3,
+              feet_distance=-2.0,
               collision=-0.1,
           ),
           tracking_sigma=0.5,
@@ -119,8 +119,8 @@ def default_config() -> config_dict.ConfigDict:
       command_config=config_dict.create(
           lin_vel_x=[-1.5, 1.5],
           lin_vel_y=[-1.0, 1.0],
-          ang_vel_yaw=[-1.2, 1.2]
-          # ang_vel_yaw=[-2*np.pi, 2*np.pi]
+          # ang_vel_yaw=[-1.2, 1.2]
+          ang_vel_yaw=[-2*np.pi, 2*np.pi]
       ),
       push_config=config_dict.create(
           enable=True,
@@ -129,7 +129,7 @@ def default_config() -> config_dict.ConfigDict:
       ),
     #   gait_frequency=[1.25, 2.0],
       # gait_frequency=[0.0, 0.5],
-      gait_frequency=[0.5, 2.0],
+      gait_frequency=[0.5, 4.0],
     #   gaits=["walk"],
       gaits=["walk", "stand"],
       # gaits=["walk","stand","run"],
