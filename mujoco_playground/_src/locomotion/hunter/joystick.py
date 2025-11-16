@@ -570,10 +570,10 @@ class Joystick(hunter_base.HunterEnv):
         gyro,  # 3
         accelerometer,  # 3
         gravity,  # 3
-        linvel,  # 3
+        linvel * self._config.lin_vel_scale,  # 3
         global_angvel,  # 3
         joint_angles - self._default_pose,
-        joint_vel,
+        joint_vel * self._config.dof_vel_scale,
         root_height,  # 1
         data.actuator_force,  # 29
         contact,  # 2
