@@ -1,5 +1,5 @@
 <mujoco model="hunter rough scene">
-  <include file="maker_pdd_mjx_feet_only.xml"/>
+  <include file="maker_pdd_mjx_feetonly.xml"/>
 
   <statistic center="0 0 0.1" extent="0.8" meansize="0.04"/>
 
@@ -24,7 +24,7 @@
     <camera name="front_view" pos="0 -5 1" xyaxes="1 0 0 0 0 1"/>
 
     <!-- Ground plane for context -->
-    <geom name="floor" type="hfield" hfield="hfield" material="groundplane" contype="1" conaffinity="0" priority="1" friction="1.0"/>
+    <geom name="ground" type="hfield" hfield="hfield" size="0 0 1" pos="0.001 0 0" quat="1 0 0 0" material="groundplane" contype="1" conaffinity="0" priority="1" friction="1.0"/>
 
   </worldbody>
 </mujoco>
