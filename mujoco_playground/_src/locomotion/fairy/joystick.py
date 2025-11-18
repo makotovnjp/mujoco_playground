@@ -110,7 +110,7 @@ class Joystick(fairy_base.FairyEnv):
   def _post_init(self):
     self._init_q = jp.zeros(self._mjx_model.nq)
     self._init_q = self._init_q.at[3:7].set(jp.array([1, 0, 0, 0]))
-    self._init_q = self._init_q.at[2].set(-0.029)
+    self._init_q = self._init_q.at[2].set(-0.08)
     joint_init = jp.array([
       0.0, -0.36, 0.72, -0.36, 0.0, -0.36, 0.72, -0.36])
 

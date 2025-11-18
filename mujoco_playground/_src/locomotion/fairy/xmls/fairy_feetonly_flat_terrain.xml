@@ -1,7 +1,7 @@
 <mujoco model="fairy">
-  <compiler angle="radian" meshdir="meshes" autolimits="true"/>
+  <compiler angle="radian" meshdir="meshes"/>
 
-  <option iterations="3" ls_iterations="5" timestep="0.002">
+  <option iterations="3" ls_iterations="5" timestep="0.002" integrator="implicitfast">
     <flag eulerdamp="disable"/>
   </option>
 
@@ -81,114 +81,119 @@
       condim="3" conaffinity="0" friction="0.6" contype="1"/>
     <!-- Base link (floating) -->
     <!-- Initial position matches keyframe "crouch" for consistency -->
-    <body name="base_link" pos="0 0 0.65" quat="1 0 0 0">
+    <body name="upper_base_link" pos="0 0 0.85" quat="1 0 0 0">
       <joint type='slide' axis='1 0 0' limited='false' />
       <joint type='slide' axis='0 1 0' limited='false' />
       <joint type='slide' axis='0 0 1' limited='false' />
       <joint type='ball' limited='false' />
-      <inertial pos="0 0 -0.00474" mass="12.72349"
-                diaginertia="0.10262343540700387 0.08280262602395334 0.13248785583145192"/>
+      <inertial pos="0 0 0" mass="3.0"
+                  diaginertia="0.0185 0.023125 0.017425"/>
+      <geom size="0.105 0.08 0.11" pos="0 0.0 0.0" quat="1 0 0 0"
+        type="box" rgba="0.75294 0.75294 0.75294 1" />
       <camera name="track" pos="1.248 -0.947 0.3" xyaxes="0.628 0.779 -0.000 -0.274 0.221 0.936" mode="trackcom"/>
-      <!-- Visual mesh (no collision) -->
-      <geom type="mesh" mesh="base" rgba="1 1 1 1" contype="0" conaffinity="0"/>
-      <!-- Collision box -->
-      <geom type="box" size="0.12 0.08 0.04" pos="0 0 -0.005" rgba="0.5 0.5 0.5 0.3"/>
-
       <!-- IMU sensor -->
       <site name="imu" pos="0 0 0" size="0.01"/>
+      <body name="lower_base_link" pos="0 0 -0.19" quat="1 0 0 0">
+        <inertial pos="0 0 -0.00474" mass="9.72349"
+                  diaginertia="0.07842643393798777 0.06327906149316344 0.10124929098058508"/>
+        <!-- Visual mesh (no collision) -->
+        <geom type="mesh" mesh="base" rgba="1 1 1 1" contype="0" conaffinity="0"/>
+        <!-- Collision box -->
+        <geom type="box" size="0.12 0.08 0.04" pos="0 0 -0.005" rgba="0.5 0.5 0.5 0.3"/>
 
-      <!-- Right leg (Motor ID 1-4) -->
-      <body name="R_FOOT" pos="0 -0.08 0">
-        <body name="R1" pos="0 0 0">
-          <joint name="leg_r1_joint" axis="1 0 0"
-                 range="-2.094 2.094" limited="true" frictionloss="0.2"/>
-          <inertial pos="0 0 0" mass="1.23047" diaginertia="0.0018303633358577802 0.0039401153269064335 0.0035094898580769786"/>
-          <!-- Visual mesh (no collision) -->
-          <geom type="mesh" mesh="rhip" rgba="1 1 1 1" contype="0" conaffinity="0"/>
-          <!-- Collision capsule -->
-          <geom type="capsule" fromto="0 0 0 0 -0.065 0" size="0.03" rgba="0.5 0.5 0.5 0.3"/>
-
-          <body name="R2" pos="0 -0.065 0">
-            <joint name="leg_r2_joint" axis="0 1 0"
-                   range="-3.14 3.14" limited="true" frictionloss="0.2"/>
-            <inertial pos="0.00006 0 -0.05962" mass="2.06632"
-                      diaginertia="0.028423839552622263 0.027088604867877116 0.006885361957140555"/>
+        <!-- Right leg (Motor ID 1-4) -->
+        <body name="R_FOOT" pos="0 -0.08 0">
+          <body name="R1" pos="0 0 0">
+            <joint name="leg_r1_joint" axis="1 0 0"
+                  range="-2.094 2.094" limited="true" frictionloss="0.2"/>
+            <inertial pos="0 0 0" mass="1.23047" diaginertia="0.0018303633358577802 0.0039401153269064335 0.0035094898580769786"/>
             <!-- Visual mesh (no collision) -->
-            <geom type="mesh" mesh="ruleg" rgba="1 1 1 1" contype="0" conaffinity="0"/>
-            <!-- Collision capsule for upper leg -->
-            <geom type="capsule" fromto="0 0 0 0 0 -0.26" size="0.035" rgba="0.5 0.5 0.5 0.3"/>
+            <geom type="mesh" mesh="rhip" rgba="1 1 1 1" contype="0" conaffinity="0"/>
+            <!-- Collision capsule -->
+            <geom type="capsule" fromto="0 0 0 0 -0.065 0" size="0.03" rgba="0.5 0.5 0.5 0.3"/>
 
-            <body name="R3" pos="0 0 -0.26">
-              <joint name="leg_r3_joint" axis="0 1 0"
-                     range="-2.094 3.142" limited="true" frictionloss="0.2"/>
-              <inertial pos="0 0 -0.19822" mass="0.41492"
-                        diaginertia="0.004368293950062158 0.0043649330449301435 0.0007692542542232213"/>
+            <body name="R2" pos="0 -0.065 0">
+              <joint name="leg_r2_joint" axis="0 1 0"
+                    range="-3.14 3.14" limited="true" frictionloss="0.2"/>
+              <inertial pos="0.00006 0 -0.05962" mass="2.06632"
+                        diaginertia="0.028423839552622263 0.027088604867877116 0.006885361957140555"/>
               <!-- Visual mesh (no collision) -->
-              <geom type="mesh" mesh="rlleg" rgba="1 1 1 1" contype="0" conaffinity="0"/>
-              <!-- Collision capsule for lower leg -->
-              <geom type="capsule" fromto="0 0 0 0 0 -0.30056" size="0.025" rgba="0.5 0.5 0.5 0.3"/>
+              <geom type="mesh" mesh="ruleg" rgba="1 1 1 1" contype="0" conaffinity="0"/>
+              <!-- Collision capsule for upper leg -->
+              <geom type="capsule" fromto="0 0 0 0 0 -0.26" size="0.035" rgba="0.5 0.5 0.5 0.3"/>
 
-              <body name="R4" pos="0 0 -0.30056">
-                <joint name="leg_r4_joint" axis="0 1 0"
-                       range="-0.785 1.571" limited="true" frictionloss="0.2"/>
-                <inertial pos="0 0 -0.04246" mass="0.3"
-                          diaginertia="0.00036615939455986174 0.0005477740783050022 0.0007028353336951787"/>
+              <body name="R3" pos="0 0 -0.26">
+                <joint name="leg_r3_joint" axis="0 1 0"
+                      range="-2.094 3.142" limited="true" frictionloss="0.2"/>
+                <inertial pos="0 0 -0.19822" mass="0.41492"
+                          diaginertia="0.004368293950062158 0.0043649330449301435 0.0007692542542232213"/>
                 <!-- Visual mesh (no collision) -->
-                <geom type="mesh" mesh="rtoe" rgba="1 1 1 1" contype="0" conaffinity="0"/>
-                <!-- Collision box for toe (1.5x size for stability) -->
-                <geom type="box" size="0.06 0.045 0.03" pos="0.01 0 -0.02" rgba="0.5 0.5 0.5 0.3"/>
-                <geom name="right_foot1" class="foot1"/>
-                <geom name="right_foot2" class="foot2"/> 
-                <geom name="right_foot" class="foot"/>
-                <site name ="right_foot" pos="0 0 0" />
+                <geom type="mesh" mesh="rlleg" rgba="1 1 1 1" contype="0" conaffinity="0"/>
+                <!-- Collision capsule for lower leg -->
+                <geom type="capsule" fromto="0 0 0 0 0 -0.30056" size="0.025" rgba="0.5 0.5 0.5 0.3"/>
+
+                <body name="R4" pos="0 0 -0.30056">
+                  <joint name="leg_r4_joint" axis="0 1 0"
+                        range="-0.785 1.571" limited="true" frictionloss="0.2"/>
+                  <inertial pos="0 0 -0.04246" mass="0.3"
+                            diaginertia="0.00036615939455986174 0.0005477740783050022 0.0007028353336951787"/>
+                  <!-- Visual mesh (no collision) -->
+                  <geom type="mesh" mesh="rtoe" rgba="1 1 1 1" contype="0" conaffinity="0"/>
+                  <!-- Collision box for toe (1.5x size for stability) -->
+                  <geom type="box" size="0.06 0.045 0.03" pos="0.01 0 -0.02" rgba="0.5 0.5 0.5 0.3"/>
+                  <geom name="right_foot1" class="foot1"/>
+                  <geom name="right_foot2" class="foot2"/> 
+                  <geom name="right_foot" class="foot"/>
+                  <site name ="right_foot" pos="0 0 0" />
+                </body>
               </body>
             </body>
           </body>
         </body>
-      </body>
 
-      <!-- Left leg (Motor ID 5-8) -->
-      <body name="L_FOOT" pos="0 0.08 0">
-        <body name="L1" pos="0 0 0">
-          <joint name="leg_l1_joint" axis="1 0 0" range="-2.094 2.094" limited="true" frictionloss="0.2"/>
-          <inertial pos="0 0 0" mass="1.23047" diaginertia="0.0018233989548339167 0.003940115487341474 0.003502525316618075"/>
-          <!-- Visual mesh (no collision) -->
-          <geom type="mesh" mesh="lhip" rgba="1 1 1 1" contype="0" conaffinity="0"/>
-          <!-- Collision capsule -->
-          <geom type="capsule" fromto="0 0 0 0 0.065 0" size="0.03" rgba="0.5 0.5 0.5 0.3"/>
-
-          <body name="L2" pos="0 0.065 0">
-            <joint name="leg_l2_joint" axis="0 1 0" range="-3.14 3.14"  limited="true" frictionloss="0.2"/>
-            <inertial pos="0.00006 0 -0.05962" mass="2.06632"
-                      diaginertia="0.028423839552622263 0.027088604867877116 0.006885361957140555"/>
+        <!-- Left leg (Motor ID 5-8) -->
+        <body name="L_FOOT" pos="0 0.08 0">
+          <body name="L1" pos="0 0 0">
+            <joint name="leg_l1_joint" axis="1 0 0" range="-2.094 2.094" limited="true" frictionloss="0.2"/>
+            <inertial pos="0 0 0" mass="1.23047" diaginertia="0.0018233989548339167 0.003940115487341474 0.003502525316618075"/>
             <!-- Visual mesh (no collision) -->
-            <geom type="mesh" mesh="luleg" rgba="1 1 1 1" contype="0" conaffinity="0"/>
-            <!-- Collision capsule for upper leg -->
-            <geom type="capsule" fromto="0 0 0 0 0 -0.26" size="0.035" rgba="0.5 0.5 0.5 0.3"/>
+            <geom type="mesh" mesh="lhip" rgba="1 1 1 1" contype="0" conaffinity="0"/>
+            <!-- Collision capsule -->
+            <geom type="capsule" fromto="0 0 0 0 0.065 0" size="0.03" rgba="0.5 0.5 0.5 0.3"/>
 
-            <body name="L3" pos="0 0 -0.26">
-              <joint name="leg_l3_joint" axis="0 1 0"
-                     range="-2.094 3.142"  limited="true" frictionloss="0.2"/>
-              <inertial pos="0 0 -0.19822" mass="0.41492"
-                        diaginertia="0.004368293950062158 0.0043649330449301435 0.0007692542542232213"/>
+            <body name="L2" pos="0 0.065 0">
+              <joint name="leg_l2_joint" axis="0 1 0" range="-3.14 3.14"  limited="true" frictionloss="0.2"/>
+              <inertial pos="0.00006 0 -0.05962" mass="2.06632"
+                        diaginertia="0.028423839552622263 0.027088604867877116 0.006885361957140555"/>
               <!-- Visual mesh (no collision) -->
-              <geom type="mesh" mesh="llleg" rgba="1 1 1 1" contype="0" conaffinity="0"/>
-              <!-- Collision capsule for lower leg -->
-              <geom type="capsule" fromto="0 0 0 0 0 -0.30056" size="0.025" rgba="0.5 0.5 0.5 0.3"/>
+              <geom type="mesh" mesh="luleg" rgba="1 1 1 1" contype="0" conaffinity="0"/>
+              <!-- Collision capsule for upper leg -->
+              <geom type="capsule" fromto="0 0 0 0 0 -0.26" size="0.035" rgba="0.5 0.5 0.5 0.3"/>
 
-              <body name="L4" pos="0 0 -0.30056">
-                <joint name="leg_l4_joint" axis="0 1 0"
-                       range="-0.785 1.571" limited="true" frictionloss="0.2"/>
-                <inertial pos="0 0 -0.04246" mass="0.3"
-                          diaginertia="0.00036615939455986174 0.0005477740783050022 0.0007028353336951787"/>
+              <body name="L3" pos="0 0 -0.26">
+                <joint name="leg_l3_joint" axis="0 1 0"
+                      range="-2.094 3.142"  limited="true" frictionloss="0.2"/>
+                <inertial pos="0 0 -0.19822" mass="0.41492"
+                          diaginertia="0.004368293950062158 0.0043649330449301435 0.0007692542542232213"/>
                 <!-- Visual mesh (no collision) -->
-                <geom type="mesh" mesh="ltoe" rgba="1 1 1 1" contype="0" conaffinity="0"/>
-                <!-- Collision box for toe (1.5x size for stability) -->
-                <geom type="box" size="0.06 0.045 0.03" pos="0.01 0 -0.02" rgba="0.5 0.5 0.5 0.3"/>
-                <geom name="left_foot1" class="foot1"/>
-                <geom name="left_foot2" class="foot2"/> 
-                <geom name="left_foot" class="foot"/> 
-                <site name="left_foot" pos="0 0 0" />
+                <geom type="mesh" mesh="llleg" rgba="1 1 1 1" contype="0" conaffinity="0"/>
+                <!-- Collision capsule for lower leg -->
+                <geom type="capsule" fromto="0 0 0 0 0 -0.30056" size="0.025" rgba="0.5 0.5 0.5 0.3"/>
+
+                <body name="L4" pos="0 0 -0.30056">
+                  <joint name="leg_l4_joint" axis="0 1 0"
+                        range="-0.785 1.571" limited="true" frictionloss="0.2"/>
+                  <inertial pos="0 0 -0.04246" mass="0.3"
+                            diaginertia="0.00036615939455986174 0.0005477740783050022 0.0007028353336951787"/>
+                  <!-- Visual mesh (no collision) -->
+                  <geom type="mesh" mesh="ltoe" rgba="1 1 1 1" contype="0" conaffinity="0"/>
+                  <!-- Collision box for toe (1.5x size for stability) -->
+                  <geom type="box" size="0.06 0.045 0.03" pos="0.01 0 -0.02" rgba="0.5 0.5 0.5 0.3"/>
+                  <geom name="left_foot1" class="foot1"/>
+                  <geom name="left_foot2" class="foot2"/> 
+                  <geom name="left_foot" class="foot"/> 
+                  <site name="left_foot" pos="0 0 0" />
+                </body>
               </body>
             </body>
           </body>
