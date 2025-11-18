@@ -46,9 +46,9 @@ def default_config() -> config_dict.ConfigDict:
       reward_config=config_dict.create(
           scales=config_dict.create(
               # Rewards.
-              tracking_lin_vel=1.0,
+              tracking_lin_vel=3.5,
               tracking_ang_vel=0.75,
-              feet_phase=1.0,
+              feet_phase=3.0,
               feet_air_time=2.0,
               feet_contact=0.0,
               feet_clearance=0.0,
@@ -82,7 +82,7 @@ def default_config() -> config_dict.ConfigDict:
       ),
       gait_frequency=[0.5, 4.0],
       gaits=["walk", "stand"],
-      foot_height=[0.1, 0.1,],
+      foot_height=[0.08, 0.12],
       impl="jax",
       nconmax=8 * 1024,
       njmax=10 + 8 * 4,
