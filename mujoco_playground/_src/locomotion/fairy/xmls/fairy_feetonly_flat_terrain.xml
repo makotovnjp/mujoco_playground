@@ -1,30 +1,43 @@
 <mujoco model="fairy">
   <compiler angle="radian" meshdir="meshes"/>
 
-  <option iterations="3" ls_iterations="5" timestep="0.002" integrator="implicitfast">
+  <option iterations="3" ls_iterations="5" timestep="0.002" integrator="Euler">
     <flag eulerdamp="disable"/>
   </option>
 
   <default>
-    <joint limited='true' />
-    <motor ctrllimited='true' />
-    <geom condim='4' contype="1" conaffinity="15" solref='0.001 2' friction='0.9 0.2 0.2' />
-    <equality solref='0.001 2' />
-    <default class='visualgeom'>
-      <geom material='visualgeom' condim='1' contype='0' conaffinity='0' />
-    </default>
-    <default class='visualgeom2'>
-      <geom material='visualgeom2' condim='1' contype='0' conaffinity='0' />
-    </default>
-    <default class='obstacle'>
-      <geom material='obstacle' condim='3' contype='1' conaffinity='15' />
-    </default>
-    
-    <default class='joint_param'>
-      <joint damping="1" frictionloss="1" armature="0.01" />
-    </default>
-
-    <default class="collision">
+    <default class="fairy">
+      <!-- <geom condim="1" contype="0" conaffinity="0"/> -->
+      <site size="0.001" rgba="0.5 0.5 0.5 0.3" group="4"/>
+      <joint damping="1.5" armature="0.005"/>
+      <position inheritrange="1.0"/>
+      <default class="motor1">
+        <joint actuatorfrcrange="-36 36" frictionloss="0.3" damping="1.0"/>
+        <position kp="15"/>
+      </default>
+      <default class="motor2">
+        <joint actuatorfrcrange="-36 36" frictionloss="0.3" damping="0.5"/>
+        <position kp="5"/>
+      </default>
+      <default class="motor3">
+        <joint actuatorfrcrange="-60 60" frictionloss="0.3" damping="1.5"/>
+        <position kp="15"/>
+      </default>
+      <default class="motor4">
+        <joint actuatorfrcrange="-60 60" frictionloss="0.3" damping="2.5"/>
+        <position kp="25"/>
+      </default>
+      <default class="motor5">
+        <joint actuatorfrcrange="-36 36" frictionloss="0.3"  damping="0.1"/>
+        <position kp="5"/>
+      </default>
+      <default class="visual">
+        <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.75294 0.75294 0.75294 1"/>
+      </default>
+      <default class='visualgeom'>
+        <geom material='visualgeom' condim='1' contype='0' conaffinity='0' />
+      </default>
+      <default class="collision">
         <geom group="3" mass="0" density="0"/>
         <default class="foot">
           <geom type="sphere" size=".001"/>
@@ -35,12 +48,7 @@
             <geom size="0.001"/>
           </default>
         </default>
-    </default>
-
-    <default class="fairy_motor">
-      <geom contype="0" conaffinity="0"/>
-      <position inheritrange="1" dampratio="1"/>
-      <joint damping="0.00" frictionloss="0.2"/>
+      </default>
     </default>
   </default>
 
@@ -81,7 +89,7 @@
       condim="3" conaffinity="0" friction="0.6" contype="1"/>
     <!-- Base link (floating) -->
     <!-- Initial position matches keyframe "crouch" for consistency -->
-    <body name="base_link" pos="0 0 0.85" quat="1 0 0 0">
+    <body name="base_link" pos="0 0 0.85" quat="1 0 0 0" childclass="fairy">
       <joint type='slide' axis='1 0 0' limited='false' />
       <joint type='slide' axis='0 1 0' limited='false' />
       <joint type='slide' axis='0 0 1' limited='false' />
@@ -203,15 +211,15 @@
   </worldbody>
 
   <actuator>
-    <position class="fairy_motor" name="leg_l1_joint" joint="leg_l1_joint" forcerange="-60 60" kp="15" kv="1.0"/>
-    <position class="fairy_motor" name="leg_l2_joint" joint="leg_l2_joint" forcerange="-60 60" kp="15" kv="1.5"/>
-    <position class="fairy_motor" name="leg_l3_joint" joint="leg_l3_joint" forcerange="-60 60" kp="25" kv="2.5"/>
-    <position class="fairy_motor" name="leg_l4_joint" joint="leg_l4_joint" forcerange="-36 36" kp="5" kv="0.1"/>
+    <position class="motor3" name="leg_l1_joint" joint="leg_l1_joint"/>
+    <position class="motor3" name="leg_l2_joint" joint="leg_l2_joint"/>
+    <position class="motor4" name="leg_l3_joint" joint="leg_l3_joint"/>
+    <position class="motor5" name="leg_l4_joint" joint="leg_l4_joint"/>
 
-    <position class="fairy_motor" name="leg_r1_joint" joint="leg_r1_joint" forcerange="-60 60" kp="15" kv="1.0"/>
-    <position class="fairy_motor" name="leg_r2_joint" joint="leg_r2_joint" forcerange="-60 60" kp="15" kv="1.5"/>
-    <position class="fairy_motor" name="leg_r3_joint" joint="leg_r3_joint" forcerange="-60 60" kp="25" kv="2.5"/>
-    <position class="fairy_motor" name="leg_r4_joint" joint="leg_r4_joint" forcerange="-36 36" kp="5" kv="0.1"/>
+    <position class="motor3" name="leg_r1_joint" joint="leg_r1_joint"/>
+    <position class="motor3" name="leg_r2_joint" joint="leg_r2_joint"/>
+    <position class="motor4" name="leg_r3_joint" joint="leg_r3_joint"/>
+    <position class="motor5" name="leg_r4_joint" joint="leg_r4_joint"/>
   </actuator>
 
   <sensor>
