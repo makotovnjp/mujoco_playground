@@ -34,8 +34,8 @@ def default_config() -> config_dict.ConfigDict:
       lin_vel_scale=2.0,
       history_len=1,
       noise_config=config_dict.create(
-          level=1.0,
-          # level=0.6,
+          # level=1.0,
+          level=0.6,
           scales=config_dict.create(
               joint_pos=0.01,
               joint_vel=1.5,
@@ -110,8 +110,8 @@ def default_config() -> config_dict.ConfigDict:
               termination=-1.0,
               foot_slip=-0.25,
               action_rate=-0.01,  # previous: -0.5
-              # feet_distance=-0.3,
-              feet_distance=-2.0,
+              feet_distance=-0.3,
+              # feet_distance=-2.0,
               collision=-0.1,
           ),
           tracking_sigma=0.5,
@@ -176,9 +176,10 @@ class Joystick(hunter_base.HunterEnv):
     self._init_q = self._init_q.at[2].set(-0.029)  # z position - proper standing height
     joint_init = jp.array([0.0, 0.0, -0.36, 0.72, -0.36, 0.0, -0.05, -0.36, 0.72, -0.36]) 
 
-    self._init_q = self._init_q.at[7:].set(joint_init)
+    self._init_q = self._init_q.at[7:17].set(joint_init)
 
-    self._default_pose = joint_init
+    self._default_pose = jp.concatenate([joint_init,jp.zeros(10)])
+      
     # self._init_q = jp.array(self._mj_model.keyframe("home").qpos)
     # self._default_pose = jp.array(self._mj_model.keyframe("home").qpos[7:])
 
@@ -285,7 +286,7 @@ class Joystick(hunter_base.HunterEnv):
         self.mj_model,
         qpos=qpos,
         qvel=qvel,
-        ctrl=qpos[7:],
+        ctrl=jp.concatenate([qpos[7:], qvel[6:]]),
         impl=self.mjx_model.impl.value,
         nconmax=self._config.nconmax,
         njmax=self._config.njmax,
@@ -402,6 +403,7 @@ class Joystick(hunter_base.HunterEnv):
 
     motor_targets = self._default_pose + action * self._config.action_scale
     motor_targets = jp.clip(motor_targets, self._lowers, self._uppers)
+
     data = mjx_env.step(
         self.mjx_model, state.data, motor_targets, self.n_substeps  # pytype: disable=attribute-error
     )
@@ -548,7 +550,7 @@ class Joystick(hunter_base.HunterEnv):
         noisy_linvel * self._config.lin_vel_scale,  # 3
         noisy_gyro,    # 3
         noisy_gravity,        # 3
-        noisy_joint_angles - self._default_pose,  # 10
+        noisy_joint_angles - self._default_pose[:10],  # 10
         noisy_joint_vel * self._config.dof_vel_scale,  # 10
         info["last_act"],  # 10
         info["command"],  # 3
@@ -570,10 +572,10 @@ class Joystick(hunter_base.HunterEnv):
         gyro,  # 3
         accelerometer,  # 3
         gravity,  # 3
-        linvel * self._config.lin_vel_scale,  # 3
+        linvel,  # 3
         global_angvel,  # 3
-        joint_angles - self._default_pose,
-        joint_vel * self._config.dof_vel_scale,
+        joint_angles - self._default_pose[:10],
+        joint_vel,
         root_height,  # 1
         data.actuator_force,  # 29
         contact,  # 2
@@ -769,7 +771,7 @@ class Joystick(hunter_base.HunterEnv):
   ) -> jax.Array:
     # Penalize motion at zero commands.
     unit_cmd = commands[:2] / jp.linalg.norm(commands[:2])
-    return jp.sum(jp.abs(joint_angles - self._default_pose)) * (
+    return jp.sum(jp.abs(joint_angles - self._hx_default_pose)) * (
         unit_cmd[1] < 0.1
     )
 

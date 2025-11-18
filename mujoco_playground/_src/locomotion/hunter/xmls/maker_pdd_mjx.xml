@@ -1,6 +1,6 @@
 <mujoco model="pdd_mjx">
   <compiler angle="radian" meshdir="meshes/"/>
-  <option iterations="1" ls_iterations="5" timestep="0.002">
+  <option iterations="1" ls_iterations="5" timestep="0.002" integrator="implicitfast">
     <flag eulerdamp="disable"/>
   </option>
   
@@ -193,52 +193,66 @@
   </worldbody>
   
   <actuator>
-    <position class="hunter" name="leg_l1_joint" joint="leg_l1_joint" forcerange="-36 36" kp="15" kv="1.0"/>
-    <position class="hunter" name="leg_l2_joint" joint="leg_l2_joint" forcerange="-36 36" kp="5" kv="0.5"/>
-    <position class="hunter" name="leg_l3_joint" joint="leg_l3_joint" forcerange="-60 60" kp="15" kv="1.5"/>
-    <position class="hunter" name="leg_l4_joint" joint="leg_l4_joint" forcerange="-60 60" kp="25" kv="2.5"/>
-    <position class="hunter" name="leg_l5_joint" joint="leg_l5_joint" forcerange="-36 36" kp="5" kv="0.1"/>
-
-    <position class="hunter" name="leg_r1_joint" joint="leg_r1_joint" forcerange="-36 36" kp="15" kv="1.0"/>
-    <position class="hunter" name="leg_r2_joint" joint="leg_r2_joint" forcerange="-36 36" kp="5" kv="0.5"/>
-    <position class="hunter" name="leg_r3_joint" joint="leg_r3_joint" forcerange="-60 60" kp="15" kv="1.5"/>
-    <position class="hunter" name="leg_r4_joint" joint="leg_r4_joint" forcerange="-60 60" kp="25" kv="2.5"/>
-    <position class="hunter" name="leg_r5_joint" joint="leg_r5_joint" forcerange="-36 36" kp="5" kv="0.1"/>
+    <position class="hunter" name="leg_l1_joint_p" joint="leg_l1_joint" forcerange="-36 36" kp="15"/>
+    <position class="hunter" name="leg_l2_joint_p" joint="leg_l2_joint" forcerange="-36 36" kp="5"/>
+    <position class="hunter" name="leg_l3_joint_p" joint="leg_l3_joint" forcerange="-60 60" kp="15"/>
+    <position class="hunter" name="leg_l4_joint_p" joint="leg_l4_joint" forcerange="-60 60" kp="25"/>
+    <position class="hunter" name="leg_l5_joint_p" joint="leg_l5_joint" forcerange="-36 36" kp="5"/>
+    
+    <position class="hunter" name="leg_r1_joint_p" joint="leg_r1_joint" forcerange="-36 36" kp="15"/>
+    <position class="hunter" name="leg_r2_joint_p" joint="leg_r2_joint" forcerange="-36 36" kp="5"/>
+    <position class="hunter" name="leg_r3_joint_p" joint="leg_r3_joint" forcerange="-60 60" kp="15"/>
+    <position class="hunter" name="leg_r4_joint_p" joint="leg_r4_joint" forcerange="-60 60" kp="25"/>
+    <position class="hunter" name="leg_r5_joint_p" joint="leg_r5_joint" forcerange="-36 36" kp="5"/>
+    
+    <velocity class="hunter" name="leg_l1_joint_v" joint="leg_l1_joint" kv="1.0"/>
+    <velocity class="hunter" name="leg_l2_joint_v" joint="leg_l2_joint" kv="0.5"/>
+    <velocity class="hunter" name="leg_l3_joint_v" joint="leg_l3_joint" kv="1.5"/>  
+    <velocity class="hunter" name="leg_l4_joint_v" joint="leg_l4_joint" kv="2.5"/>
+    <velocity class="hunter" name="leg_l5_joint_v" joint="leg_l5_joint" kv="0.1"/> 
+      
+    <velocity class="hunter" name="leg_r1_joint_v" joint="leg_r1_joint" kv="1.0"/>
+    <velocity class="hunter" name="leg_r2_joint_v" joint="leg_r2_joint" kv="0.5"/>
+    <velocity class="hunter" name="leg_r3_joint_v" joint="leg_r3_joint" kv="1.5"/>
+    <velocity class="hunter" name="leg_r4_joint_v" joint="leg_r4_joint" kv="2.5"/>      
+    <velocity class="hunter" name="leg_r5_joint_v" joint="leg_r5_joint" kv="0.1"/>
+  
+      
   </actuator>
   
   <sensor>
-    <actuatorpos name='leg_l1_joint_p' actuator='leg_l1_joint' user='13' />
-    <actuatorpos name='leg_l2_joint_p' actuator='leg_l2_joint' user='13' />
-    <actuatorpos name='leg_l3_joint_p' actuator='leg_l3_joint' user='13' />
-    <actuatorpos name='leg_l4_joint_p' actuator='leg_l4_joint' user='13' />
-    <actuatorpos name='leg_l5_joint_p' actuator='leg_l5_joint' user='13' />
-    <actuatorpos name='leg_r1_joint_p' actuator='leg_r1_joint' user='13' />
-    <actuatorpos name='leg_r2_joint_p' actuator='leg_r2_joint' user='13' />
-    <actuatorpos name='leg_r3_joint_p' actuator='leg_r3_joint' user='13' />
-    <actuatorpos name='leg_r4_joint_p' actuator='leg_r4_joint' user='13' />
-    <actuatorpos name='leg_r5_joint_p' actuator='leg_r5_joint' user='13' />
+    <actuatorpos name='leg_l1_joint_p' actuator='leg_l1_joint_p' user='13' />
+    <actuatorpos name='leg_l2_joint_p' actuator='leg_l2_joint_p' user='13' />
+    <actuatorpos name='leg_l3_joint_p' actuator='leg_l3_joint_p' user='13' />
+    <actuatorpos name='leg_l4_joint_p' actuator='leg_l4_joint_p' user='13' />
+    <actuatorpos name='leg_l5_joint_p' actuator='leg_l5_joint_p' user='13' />
+    <actuatorpos name='leg_r1_joint_p' actuator='leg_r1_joint_p' user='13' />
+    <actuatorpos name='leg_r2_joint_p' actuator='leg_r2_joint_p' user='13' />
+    <actuatorpos name='leg_r3_joint_p' actuator='leg_r3_joint_p' user='13' />
+    <actuatorpos name='leg_r4_joint_p' actuator='leg_r4_joint_p' user='13' />
+    <actuatorpos name='leg_r5_joint_p' actuator='leg_r5_joint_p' user='13' />
 
-    <actuatorvel name='leg_l1_joint_v' actuator='leg_l1_joint' user='13' />
-    <actuatorvel name='leg_l2_joint_v' actuator='leg_l2_joint' user='13' />
-    <actuatorvel name='leg_l3_joint_v' actuator='leg_l3_joint' user='13' />
-    <actuatorvel name='leg_l4_joint_v' actuator='leg_l4_joint' user='13' />
-    <actuatorvel name='leg_l5_joint_v' actuator='leg_l5_joint' user='13' />
-    <actuatorvel name='leg_r1_joint_v' actuator='leg_r1_joint' user='13' />
-    <actuatorvel name='leg_r2_joint_v' actuator='leg_r2_joint' user='13' />
-    <actuatorvel name='leg_r3_joint_v' actuator='leg_r3_joint' user='13' />
-    <actuatorvel name='leg_r4_joint_v' actuator='leg_r4_joint' user='13' />
-    <actuatorvel name='leg_r5_joint_v' actuator='leg_r5_joint' user='13' />
+    <actuatorvel name='leg_l1_joint_v' actuator='leg_l1_joint_v' user='13' />
+    <actuatorvel name='leg_l2_joint_v' actuator='leg_l2_joint_v' user='13' />
+    <actuatorvel name='leg_l3_joint_v' actuator='leg_l3_joint_v' user='13' />
+    <actuatorvel name='leg_l4_joint_v' actuator='leg_l4_joint_v' user='13' />
+    <actuatorvel name='leg_l5_joint_v' actuator='leg_l5_joint_v' user='13' />
+    <actuatorvel name='leg_r1_joint_v' actuator='leg_r1_joint_v' user='13' />
+    <actuatorvel name='leg_r2_joint_v' actuator='leg_r2_joint_v' user='13' />
+    <actuatorvel name='leg_r3_joint_v' actuator='leg_r3_joint_v' user='13' />
+    <actuatorvel name='leg_r4_joint_v' actuator='leg_r4_joint_v' user='13' />
+    <actuatorvel name='leg_r5_joint_v' actuator='leg_r5_joint_v' user='13' />
 
-    <actuatorfrc name='leg_l1_joint_f' actuator='leg_l1_joint' user='13' />
-    <actuatorfrc name='leg_l2_joint_f' actuator='leg_l2_joint' user='13' />
-    <actuatorfrc name='leg_l3_joint_f' actuator='leg_l3_joint' user='13' />
-    <actuatorfrc name='leg_l4_joint_f' actuator='leg_l4_joint' user='13' />
-    <actuatorfrc name='leg_l5_joint_f' actuator='leg_l5_joint' user='13' />
-    <actuatorfrc name='leg_r1_joint_f' actuator='leg_r1_joint' user='13' />
-    <actuatorfrc name='leg_r2_joint_f' actuator='leg_r2_joint' user='13' />
-    <actuatorfrc name='leg_r3_joint_f' actuator='leg_r3_joint' user='13' />
-    <actuatorfrc name='leg_r4_joint_f' actuator='leg_r4_joint' user='13' />
-    <actuatorfrc name='leg_r5_joint_f' actuator='leg_r5_joint' user='13' />
+    <actuatorfrc name='leg_l1_joint_f' actuator='leg_l1_joint_p' user='13' />
+    <actuatorfrc name='leg_l2_joint_f' actuator='leg_l2_joint_p' user='13' />
+    <actuatorfrc name='leg_l3_joint_f' actuator='leg_l3_joint_p' user='13' />
+    <actuatorfrc name='leg_l4_joint_f' actuator='leg_l4_joint_p' user='13' />
+    <actuatorfrc name='leg_l5_joint_f' actuator='leg_l5_joint_p' user='13' />
+    <actuatorfrc name='leg_r1_joint_f' actuator='leg_r1_joint_p' user='13' />
+    <actuatorfrc name='leg_r2_joint_f' actuator='leg_r2_joint_p' user='13' />
+    <actuatorfrc name='leg_r3_joint_f' actuator='leg_r3_joint_p' user='13' />
+    <actuatorfrc name='leg_r4_joint_f' actuator='leg_r4_joint_p' user='13' />
+    <actuatorfrc name='leg_r5_joint_f' actuator='leg_r5_joint_p' user='13' />
 
 
     <gyro site="imu" name="gyro"/>
