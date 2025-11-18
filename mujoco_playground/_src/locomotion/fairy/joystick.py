@@ -80,8 +80,8 @@ def default_config() -> config_dict.ConfigDict:
           interval_range=[5.0, 10.0],
           magnitude_range=[0.1, 2.0],
       ),
-      gait_frequency=[1.25, 1.5],
-      gaits=["walk"],
+      gait_frequency=[0.5, 4.0],
+      gaits=["walk", "stand"],
       foot_height=[0.1, 0.1,],
       impl="jax",
       nconmax=8 * 1024,
@@ -129,8 +129,8 @@ class Joystick(fairy_base.FairyEnv):
     self._hip_indices = jp.array([0, 4])
     self._knee_indices = jp.array([2, 6])
     self._weights = jp.array([
-        1.0, 0.01, 0.01, 1.0,
-        1.0, 0.01, 0.01, 1.0,
+        0.01, 0.01, 0.01, 1.0,
+        0.01, 0.01, 0.01, 1.0,
     ])  # fmt: skip
 
     self._hx_default_pose = self._default_pose[self._hx_idxs]

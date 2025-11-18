@@ -115,7 +115,7 @@
             <body name="R2" pos="0 -0.065 0">
               <joint name="leg_r2_joint" axis="0 1 0"
                     range="-3.14 3.14" limited="true" frictionloss="0.2"/>
-              <inertial pos="0.00006 0 -0.05962" mass="2.06632"
+              <inertial pos="0.0 0 -0.11924" mass="2.06632"
                         diaginertia="0.028423839552622263 0.027088604867877116 0.006885361957140555"/>
               <!-- Visual mesh (no collision) -->
               <geom type="mesh" mesh="ruleg" rgba="1 1 1 1" contype="0" conaffinity="0"/>
@@ -125,7 +125,7 @@
               <body name="R3" pos="0 0 -0.26">
                 <joint name="leg_r3_joint" axis="0 1 0"
                       range="-2.094 3.142" limited="true" frictionloss="0.2"/>
-                <inertial pos="0 0 -0.19822" mass="0.41492"
+                <inertial pos="0 0 -0.15" mass="0.41492"
                           diaginertia="0.004368293950062158 0.0043649330449301435 0.0007692542542232213"/>
                 <!-- Visual mesh (no collision) -->
                 <geom type="mesh" mesh="rlleg" rgba="1 1 1 1" contype="0" conaffinity="0"/>
@@ -163,7 +163,7 @@
 
             <body name="L2" pos="0 0.065 0">
               <joint name="leg_l2_joint" axis="0 1 0" range="-3.14 3.14"  limited="true" frictionloss="0.2"/>
-              <inertial pos="0.00006 0 -0.05962" mass="2.06632"
+              <inertial pos="0.00006 0 -0.11924" mass="2.06632"
                         diaginertia="0.028423839552622263 0.027088604867877116 0.006885361957140555"/>
               <!-- Visual mesh (no collision) -->
               <geom type="mesh" mesh="luleg" rgba="1 1 1 1" contype="0" conaffinity="0"/>
@@ -173,7 +173,7 @@
               <body name="L3" pos="0 0 -0.26">
                 <joint name="leg_l3_joint" axis="0 1 0"
                       range="-2.094 3.142"  limited="true" frictionloss="0.2"/>
-                <inertial pos="0 0 -0.19822" mass="0.41492"
+                <inertial pos="0 0 -0.15" mass="0.41492"
                           diaginertia="0.004368293950062158 0.0043649330449301435 0.0007692542542232213"/>
                 <!-- Visual mesh (no collision) -->
                 <geom type="mesh" mesh="llleg" rgba="1 1 1 1" contype="0" conaffinity="0"/>
