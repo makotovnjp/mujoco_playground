@@ -109,7 +109,8 @@ def default_config() -> config_dict.ConfigDict:
               # stand_still=+0.0,
               termination=-1.0,
               foot_slip=-0.25,
-              action_rate=-0.01,  # previous: -0.5
+              # action_rate=-0.01,  # previous: -0.5
+              action_rate=-0.1,  # previous: -0.5
               # feet_distance=-0.3,
               feet_distance=-2.0,
               collision=-0.1,
@@ -119,8 +120,8 @@ def default_config() -> config_dict.ConfigDict:
       command_config=config_dict.create(
           lin_vel_x=[-1.5, 1.5],
           lin_vel_y=[-1.0, 1.0],
-          ang_vel_yaw=[-1.2, 1.2]
-          # ang_vel_yaw=[-2*np.pi, 2*np.pi]
+          # ang_vel_yaw=[-1.2, 1.2]
+          ang_vel_yaw=[-2*np.pi, 2*np.pi]
       ),
       push_config=config_dict.create(
           enable=True,
@@ -129,7 +130,7 @@ def default_config() -> config_dict.ConfigDict:
       ),
     #   gait_frequency=[1.25, 2.0],
       # gait_frequency=[0.0, 0.5],
-      gait_frequency=[1.25, 4.0],
+      gait_frequency=[0.5, 4.0],
     #   gaits=["walk"],
       gaits=["walk", "stand"],
       # gaits=["walk","stand","run"],
@@ -570,10 +571,10 @@ class Joystick(hunter_base.HunterEnv):
         gyro,  # 3
         accelerometer,  # 3
         gravity,  # 3
-        linvel * self._config.lin_vel_scale,  # 3
+        linvel,  # 3
         global_angvel,  # 3
         joint_angles - self._default_pose,
-        joint_vel * self._config.dof_vel_scale,
+        joint_vel,
         root_height,  # 1
         data.actuator_force,  # 29
         contact,  # 2
