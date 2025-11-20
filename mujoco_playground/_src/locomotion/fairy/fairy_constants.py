@@ -1,0 +1,55 @@
+# Copyright 2025 DeepMind Technologies Limited
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
+"""Fairy constants."""
+from etils import epath
+from mujoco_playground._src import mjx_env
+
+ROOT_PATH = mjx_env.ROOT_PATH / "locomotion" / "fairy" / "xmls"
+FAIRY_FLAT_TERRAIN_XML = ROOT_PATH / "fairy_feetonly_flat_terrain.xml"
+FAIRY_ROUGH_TERRAIN_XML = ROOT_PATH / "fairy_feetonly_rough_terrain.xml"
+
+def task_to_xml(task_name: str) -> epath.Path:
+  return {
+      "flat_terrain": FAIRY_FLAT_TERRAIN_XML,
+      "rough_terrain": FAIRY_ROUGH_TERRAIN_XML,
+  }[task_name]
+
+# Feet sites and geoms for foot standing tasks
+FEET_SITES = [
+    "left_foot",
+    "right_foot",
+]
+
+LEFT_FEET_GEOMS = [
+    # "leg_l5_link",  # Left foot end effector
+    "left_foot1",
+    "left_foot2"
+]
+RIGHT_FEET_GEOMS = [
+    # "leg_r5_link",  # Right foot end effector
+    "right_foot1",
+    "right_foot2"
+]
+
+# Robot body names based on pdd.xml
+ROOT_BODY = "base_link"
+
+# Sensor names from pdd.xml
+GRAVITY_SENSOR = "upvector"
+GLOBAL_LINVEL_SENSOR = "global_linvel"
+GLOBAL_ANGVEL_SENSOR = "global_angvel"
+LOCAL_LINVEL_SENSOR = "local_linvel"
+ACCELEROMETER_SENSOR = "accelerometer"
+GYRO_SENSOR = "gyro"
