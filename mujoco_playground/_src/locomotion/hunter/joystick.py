@@ -18,7 +18,7 @@ from mujoco_playground._src.locomotion.hunter import hunter_constants
 
 _PHASES = np.array([
     [0, np.pi],  # walk
-    [0.0, 0.0], # stand
+    # [0.0, 0.0], # stand
     # [0, np.pi], # run
 ])
 
@@ -29,7 +29,8 @@ def default_config() -> config_dict.ConfigDict:
       episode_length=1000,
       early_termination=True,
       action_repeat=1,
-      action_scale=0.5,
+      # action_scale=0.5,
+      action_scale=1.0,
       dof_vel_scale=0.05,
       lin_vel_scale=2.0,
       history_len=1,
@@ -105,14 +106,18 @@ def default_config() -> config_dict.ConfigDict:
               joint_deviation_knee=-0.1,
               joint_deviation_hip=-0.5,
               pose=-1.0,  # previous: -0.1
-              stand_still=0.5,  # previous: +4.0
-              # stand_still=+0.0,
+              # stand_still=0.5,  # previous: +4.0
+              stand_still=+0.0,
               termination=-1.0,
               foot_slip=-0.25,
-              action_rate=-0.01,  # previous: -0.5
-              feet_distance=-0.3,
+              # action_rate=-0.01,  # previous: -0.5
+              action_rate=-0.0,
+              # feet_distance=-0.3,
+              feet_distance=-0.0,
               # feet_distance=-2.0,
-              collision=-0.1,
+              
+              # collision=-0.1,
+              collision=-0.0,
           ),
           tracking_sigma=0.5,
       ),
@@ -125,13 +130,15 @@ def default_config() -> config_dict.ConfigDict:
       push_config=config_dict.create(
           enable=True,
           interval_range=[5.0, 10.0],
-          magnitude_range=[0.1, 2.0],
+          magnitude_range=[0.1, 1.0],
       ),
     #   gait_frequency=[1.25, 2.0],
       # gait_frequency=[0.0, 0.5],
       gait_frequency=[1.25, 4.0],
-    #   gaits=["walk"],
-      gaits=["walk", "stand"],
+      # gait_frequency=[0.5, 4.0],
+      
+      gaits=["walk"],
+      # gaits=["walk", "stand"],
       # gaits=["walk","stand","run"],
       foot_height=[0.08, 0.2],
       impl="jax",
@@ -551,7 +558,7 @@ class Joystick(hunter_base.HunterEnv):
         noisy_gyro,    # 3
         noisy_gravity,        # 3
         noisy_joint_angles - self._default_pose[:10],  # 10
-        noisy_joint_vel * self._config.dof_vel_scale,  # 10
+        noisy_joint_vel,  # 10
         info["last_act"],  # 10
         info["command"],  # 3
         phase,  # 4

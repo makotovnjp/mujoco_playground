@@ -48,6 +48,9 @@ RIGHT_FEET_GEOMS = [
     "leg_r_f2_foot2",
 ]
 
+
+FEET_POS_SENSOR = [f"{site}_pos" for site in FEET_SITES]
+
 # Robot body names based on pdd.xml
 ROOT_BODY = "base_link"
 

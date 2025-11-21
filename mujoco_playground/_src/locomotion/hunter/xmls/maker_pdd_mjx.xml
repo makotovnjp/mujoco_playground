@@ -3,7 +3,8 @@
   <option iterations="1" ls_iterations="5" timestep="0.002" integrator="implicitfast">
     <flag eulerdamp="disable"/>
   </option>
-  
+  <!-- <option iterations="1" ls_iterations="5" timestep="0.002" integrator="implicitfast">
+  </option> -->
   <size njmax="500" nconmax="100" />
 
   <visual>
@@ -205,19 +206,17 @@
     <position class="hunter" name="leg_r4_joint_p" joint="leg_r4_joint" forcerange="-60 60" kp="25"/>
     <position class="hunter" name="leg_r5_joint_p" joint="leg_r5_joint" forcerange="-36 36" kp="5"/>
     
-    <velocity class="hunter" name="leg_l1_joint_v" joint="leg_l1_joint" kv="1.0"/>
-    <velocity class="hunter" name="leg_l2_joint_v" joint="leg_l2_joint" kv="0.5"/>
-    <velocity class="hunter" name="leg_l3_joint_v" joint="leg_l3_joint" kv="1.5"/>  
-    <velocity class="hunter" name="leg_l4_joint_v" joint="leg_l4_joint" kv="2.5"/>
-    <velocity class="hunter" name="leg_l5_joint_v" joint="leg_l5_joint" kv="0.1"/> 
+    <velocity class="hunter" name="leg_l1_joint_v" joint="leg_l1_joint" forcerange="-18 18" kv="1.0"/>
+    <velocity class="hunter" name="leg_l2_joint_v" joint="leg_l2_joint" forcerange="-18 18" kv="0.5"/>
+    <velocity class="hunter" name="leg_l3_joint_v" joint="leg_l3_joint" forcerange="-30 30" kv="1.5"/>  
+    <velocity class="hunter" name="leg_l4_joint_v" joint="leg_l4_joint" forcerange="-30 30" kv="2.5"/>
+    <velocity class="hunter" name="leg_l5_joint_v" joint="leg_l5_joint" forcerange="-18 18" kv="0.1"/> 
       
-    <velocity class="hunter" name="leg_r1_joint_v" joint="leg_r1_joint" kv="1.0"/>
-    <velocity class="hunter" name="leg_r2_joint_v" joint="leg_r2_joint" kv="0.5"/>
-    <velocity class="hunter" name="leg_r3_joint_v" joint="leg_r3_joint" kv="1.5"/>
-    <velocity class="hunter" name="leg_r4_joint_v" joint="leg_r4_joint" kv="2.5"/>      
-    <velocity class="hunter" name="leg_r5_joint_v" joint="leg_r5_joint" kv="0.1"/>
-  
-      
+    <velocity class="hunter" name="leg_r1_joint_v" joint="leg_r1_joint" forcerange="-18 18" kv="1.0"/>
+    <velocity class="hunter" name="leg_r2_joint_v" joint="leg_r2_joint" forcerange="-18 18" kv="0.5"/>
+    <velocity class="hunter" name="leg_r3_joint_v" joint="leg_r3_joint" forcerange="-30 30" kv="1.5"/>
+    <velocity class="hunter" name="leg_r4_joint_v" joint="leg_r4_joint" forcerange="-30 30" kv="2.5"/>      
+    <velocity class="hunter" name="leg_r5_joint_v" joint="leg_r5_joint" forcerange="-18 18" kv="0.1"/>
   </actuator>
   
   <sensor>
@@ -267,6 +266,7 @@
 
     <framelinvel objtype="site" objname="left_foot" name="left_foot_global_linvel"/>
     <framelinvel objtype="site" objname="right_foot" name="right_foot_global_linvel"/>
-
+    <framepos objtype="site" objname="left_foot" name="left_foot_pos"/>
+    <framepos objtype="site" objname="right_foot" name="right_foot_pos"/>
   </sensor>
 </mujoco>
