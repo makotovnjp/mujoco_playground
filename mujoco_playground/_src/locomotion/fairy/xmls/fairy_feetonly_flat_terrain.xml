@@ -9,7 +9,7 @@
     <default class="fairy">
       <!-- <geom condim="1" contype="0" conaffinity="0"/> -->
       <site size="0.001" rgba="0.5 0.5 0.5 0.3" group="4"/>
-      <joint damping="1.5" armature="0.005"/>
+      <joint damping="0.0" armature="0.005"/>
       <position inheritrange="1.0"/>
       <default class="motor1">
         <joint actuatorfrcrange="-36 36" frictionloss="0.3" damping="1.0"/>
@@ -113,7 +113,7 @@
         <body name="R_FOOT" pos="0 -0.08 0">
           <body name="R1" pos="0 0 0">
             <joint name="leg_r1_joint" axis="1 0 0"
-                  range="-2.094 2.094" limited="true" frictionloss="0.2"/>
+                  range="-0.4 0.4" limited="true" frictionloss="0.2"/>
             <inertial pos="0 0 0" mass="1.23047" diaginertia="0.0018303633358577802 0.0039401153269064335 0.0035094898580769786"/>
             <!-- Visual mesh (no collision) -->
             <geom type="mesh" mesh="rhip" rgba="1 1 1 1" contype="0" conaffinity="0"/>
@@ -122,7 +122,7 @@
 
             <body name="R2" pos="0 -0.065 0">
               <joint name="leg_r2_joint" axis="0 1 0"
-                    range="-3.14 3.14" limited="true" frictionloss="0.2"/>
+                    range="-1.2 0.5" limited="true" frictionloss="0.2"/>
               <inertial pos="0.0 0 -0.11924" mass="2.06632"
                         diaginertia="0.028423839552622263 0.027088604867877116 0.006885361957140555"/>
               <!-- Visual mesh (no collision) -->
@@ -132,7 +132,7 @@
 
               <body name="R3" pos="0 0 -0.26">
                 <joint name="leg_r3_joint" axis="0 1 0"
-                      range="-2.094 3.142" limited="true" frictionloss="0.2"/>
+                      range="-0.2 1.2" limited="true" frictionloss="0.2"/>
                 <inertial pos="0 0 -0.15" mass="0.41492"
                           diaginertia="0.004368293950062158 0.0043649330449301435 0.0007692542542232213"/>
                 <!-- Visual mesh (no collision) -->
@@ -142,7 +142,7 @@
 
                 <body name="R4" pos="0 0 -0.30056">
                   <joint name="leg_r4_joint" axis="0 1 0"
-                        range="-0.785 1.571" limited="true" frictionloss="0.2"/>
+                        range="-0.5 0.7" limited="true" frictionloss="0.2"/>
                   <inertial pos="0 0 -0.04246" mass="0.3"
                             diaginertia="0.00036615939455986174 0.0005477740783050022 0.0007028353336951787"/>
                   <!-- Visual mesh (no collision) -->
@@ -162,7 +162,7 @@
         <!-- Left leg (Motor ID 5-8) -->
         <body name="L_FOOT" pos="0 0.08 0">
           <body name="L1" pos="0 0 0">
-            <joint name="leg_l1_joint" axis="1 0 0" range="-2.094 2.094" limited="true" frictionloss="0.2"/>
+            <joint name="leg_l1_joint" axis="1 0 0" range="-0.4 0.4" limited="true" frictionloss="0.2"/>
             <inertial pos="0 0 0" mass="1.23047" diaginertia="0.0018233989548339167 0.003940115487341474 0.003502525316618075"/>
             <!-- Visual mesh (no collision) -->
             <geom type="mesh" mesh="lhip" rgba="1 1 1 1" contype="0" conaffinity="0"/>
@@ -170,7 +170,7 @@
             <geom type="capsule" fromto="0 0 0 0 0.065 0" size="0.03" rgba="0.5 0.5 0.5 0.3"/>
 
             <body name="L2" pos="0 0.065 0">
-              <joint name="leg_l2_joint" axis="0 1 0" range="-3.14 3.14"  limited="true" frictionloss="0.2"/>
+              <joint name="leg_l2_joint" axis="0 1 0" range="-1.2 0.5"  limited="true" frictionloss="0.2"/>
               <inertial pos="0.00006 0 -0.11924" mass="2.06632"
                         diaginertia="0.028423839552622263 0.027088604867877116 0.006885361957140555"/>
               <!-- Visual mesh (no collision) -->
@@ -180,7 +180,7 @@
 
               <body name="L3" pos="0 0 -0.26">
                 <joint name="leg_l3_joint" axis="0 1 0"
-                      range="-2.094 3.142"  limited="true" frictionloss="0.2"/>
+                      range="-0.2 1.2"  limited="true" frictionloss="0.2"/>
                 <inertial pos="0 0 -0.15" mass="0.41492"
                           diaginertia="0.004368293950062158 0.0043649330449301435 0.0007692542542232213"/>
                 <!-- Visual mesh (no collision) -->
@@ -190,7 +190,7 @@
 
                 <body name="L4" pos="0 0 -0.30056">
                   <joint name="leg_l4_joint" axis="0 1 0"
-                        range="-0.785 1.571" limited="true" frictionloss="0.2"/>
+                        range="-0.5 0.7" limited="true" frictionloss="0.2"/>
                   <inertial pos="0 0 -0.04246" mass="0.3"
                             diaginertia="0.00036615939455986174 0.0005477740783050022 0.0007028353336951787"/>
                   <!-- Visual mesh (no collision) -->
