@@ -12,23 +12,23 @@
       <joint damping="0.0" armature="0.005"/>
       <position inheritrange="1.0"/>
       <default class="motor1">
-        <joint actuatorfrcrange="-36 36" frictionloss="0.3" damping="1.0"/>
+        <joint actuatorfrcrange="-90 90" frictionloss="0.3" damping="1.0"/>
         <position kp="15"/>
       </default>
       <default class="motor2">
-        <joint actuatorfrcrange="-36 36" frictionloss="0.3" damping="0.5"/>
+        <joint actuatorfrcrange="-90 90" frictionloss="0.3" damping="0.5"/>
         <position kp="5"/>
       </default>
       <default class="motor3">
-        <joint actuatorfrcrange="-60 60" frictionloss="0.3" damping="1.5"/>
+        <joint actuatorfrcrange="-90 90" frictionloss="0.3" damping="1.5"/>
         <position kp="15"/>
       </default>
       <default class="motor4">
-        <joint actuatorfrcrange="-60 60" frictionloss="0.3" damping="2.5"/>
+        <joint actuatorfrcrange="-90 90" frictionloss="0.3" damping="2.5"/>
         <position kp="25"/>
       </default>
       <default class="motor5">
-        <joint actuatorfrcrange="-36 36" frictionloss="0.3"  damping="0.1"/>
+        <joint actuatorfrcrange="-90 90" frictionloss="0.3"  damping="0.1"/>
         <position kp="5"/>
       </default>
       <default class="visual">
