@@ -1,6 +1,6 @@
 <mujoco model="pdd_mjx">
   <compiler angle="radian" meshdir="meshes/"/>
-  <option iterations="3" ls_iterations="5" timestep="0.002">
+  <option iterations="2" ls_iterations="5" timestep="0.002">
     <flag eulerdamp="disable"/>
   </option>
   
@@ -15,7 +15,7 @@
     <default class="hunter">
       <!-- <joint damping="1" armature="0.1"/> -->
       <!-- <geom contype="0" conaffinity="0"/> -->
-      <position inheritrange="1" dampratio="1"/>
+      <position inheritrange="1" dampratio="0"/>
       <joint damping="0.00" frictionloss="0.2" armature="0.1"/>
       <default class="visual">
         <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.75294 0.75294 0.75294 1"/>
@@ -26,7 +26,7 @@
       <default class="collision">
         <geom group="3" mass="0" density="0"/>
         <default class="foot">
-          <geom type="sphere" size=".001"/>
+          <geom size=".001"/>
           <default class="foot1">
             <geom size="0.001" contype="0" conaffinity="0" density="0"/>
           </default>
@@ -37,9 +37,22 @@
       </default>
       <site size="0.001" rgba="0.5 0.5 0.5 0.3" group="4"/>
     </default>
-    <default class="hunter_motor">
-      <motor gear="1" ctrllimited="true" ctrlrange="-100  100" />
+    <default class="hunter_motor_1">
+      <joint damping="1.0" armature="0.1" actuatorfrcrange="-36 36"/>
     </default>
+    <default class="hunter_motor_2">
+      <joint damping="0.5" armature="0.1" actuatorfrcrange="-36 36"/>
+    </default>
+    <default class="hunter_motor_3">
+      <joint damping="1.5" armature="0.1" actuatorfrcrange="-94 94"/>
+    </default>
+    <default class="hunter_motor_4">
+      <joint damping="2.5" armature="0.1" actuatorfrcrange="-94 94"/>
+    </default>
+     <default class="hunter_motor_5">
+      <joint damping="1.0" armature="0.1" actuatorfrcrange="-36 36"/>
+    </default>
+  
   </default>
 
   <asset>
@@ -193,17 +206,17 @@
   </worldbody>
   
   <actuator>
-    <position class="hunter" name="leg_l1_joint" joint="leg_l1_joint" forcerange="-36 36" kp="15" kv="1.0"/>
-    <position class="hunter" name="leg_l2_joint" joint="leg_l2_joint" forcerange="-36 36" kp="5" kv="0.5"/>
-    <position class="hunter" name="leg_l3_joint" joint="leg_l3_joint" forcerange="-60 60" kp="15" kv="1.5"/>
-    <position class="hunter" name="leg_l4_joint" joint="leg_l4_joint" forcerange="-60 60" kp="25" kv="2.5"/>
-    <position class="hunter" name="leg_l5_joint" joint="leg_l5_joint" forcerange="-36 36" kp="5" kv="0.1"/>
+    <position class="hunter" name="leg_l1_joint" joint="leg_l1_joint" kp="15" />
+    <position class="hunter" name="leg_l2_joint" joint="leg_l2_joint" kp="5" />
+    <position class="hunter" name="leg_l3_joint" joint="leg_l3_joint" kp="15" />
+    <position class="hunter" name="leg_l4_joint" joint="leg_l4_joint" kp="25" />
+    <position class="hunter" name="leg_l5_joint" joint="leg_l5_joint" kp="5" />
 
-    <position class="hunter" name="leg_r1_joint" joint="leg_r1_joint" forcerange="-36 36" kp="15" kv="1.0"/>
-    <position class="hunter" name="leg_r2_joint" joint="leg_r2_joint" forcerange="-36 36" kp="5" kv="0.5"/>
-    <position class="hunter" name="leg_r3_joint" joint="leg_r3_joint" forcerange="-60 60" kp="15" kv="1.5"/>
-    <position class="hunter" name="leg_r4_joint" joint="leg_r4_joint" forcerange="-60 60" kp="25" kv="2.5"/>
-    <position class="hunter" name="leg_r5_joint" joint="leg_r5_joint" forcerange="-36 36" kp="5" kv="0.1"/>
+    <position class="hunter" name="leg_r1_joint" joint="leg_r1_joint" kp="15" />
+    <position class="hunter" name="leg_r2_joint" joint="leg_r2_joint" kp="5" />
+    <position class="hunter" name="leg_r3_joint" joint="leg_r3_joint" kp="15" />
+    <position class="hunter" name="leg_r4_joint" joint="leg_r4_joint" kp="25" />
+    <position class="hunter" name="leg_r5_joint" joint="leg_r5_joint" kp="5" />
   </actuator>
   
   <sensor>
