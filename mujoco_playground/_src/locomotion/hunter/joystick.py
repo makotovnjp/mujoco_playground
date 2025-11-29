@@ -24,8 +24,8 @@ _PHASES = np.array([
 
 def default_config() -> config_dict.ConfigDict:
   return config_dict.create(
-      ctrl_dt=0.02,
-      sim_dt=0.002,
+      ctrl_dt=0.01,
+      sim_dt=0.001,
       episode_length=1000,
       early_termination=True,
       action_repeat=1,
@@ -109,8 +109,8 @@ def default_config() -> config_dict.ConfigDict:
               # stand_still=+0.0,
               termination=-1.0,
               foot_slip=-0.25,
-              action_rate=-0.01,  # previous: -0.5
-              # action_rate=-0.1,  # previous: -0.5
+              # action_rate=-0.01,  # previous: -0.5
+              action_rate=-0.5,  # previous: -0.5
               # feet_distance=-0.3,
               feet_distance=-2.0,
               collision=-0.1,
@@ -120,8 +120,8 @@ def default_config() -> config_dict.ConfigDict:
       command_config=config_dict.create(
           lin_vel_x=[-1.5, 1.5],
           lin_vel_y=[-1.0, 1.0],
-          ang_vel_yaw=[-1.2, 1.2]
-          # ang_vel_yaw=[-2*np.pi, 2*np.pi]
+          # ang_vel_yaw=[-1.2, 1.2]
+          ang_vel_yaw=[-2*np.pi, 2*np.pi]
       ),
       push_config=config_dict.create(
           enable=True,

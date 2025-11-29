@@ -1,6 +1,6 @@
 <mujoco model="pdd_mjx">
   <compiler angle="radian" meshdir="meshes/"/>
-  <option iterations="2" ls_iterations="5" timestep="0.002">
+  <option iterations="2" ls_iterations="5" timestep="0.001">
     <flag eulerdamp="disable"/>
   </option>
   
