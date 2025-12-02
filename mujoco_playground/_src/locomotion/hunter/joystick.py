@@ -110,7 +110,7 @@ def default_config() -> config_dict.ConfigDict:
               termination=-1.0,
               foot_slip=-0.25,
               # action_rate=-0.01,  # previous: -0.5
-              action_rate=-0.5,  # previous: -0.5
+              action_rate=-0.2,  # previous: -0.5
               # feet_distance=-0.3,
               feet_distance=-2.0,
               collision=-0.1,

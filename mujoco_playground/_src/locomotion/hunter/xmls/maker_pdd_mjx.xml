@@ -44,10 +44,10 @@
       <joint damping="0.5" armature="0.1" actuatorfrcrange="-36 36"/>
     </default>
     <default class="hunter_motor_3">
-      <joint damping="1.5" armature="0.1" actuatorfrcrange="-94 94"/>
+      <joint damping="1.5" armature="0.1" actuatorfrcrange="-60 60"/>
     </default>
     <default class="hunter_motor_4">
-      <joint damping="2.5" armature="0.1" actuatorfrcrange="-94 94"/>
+      <joint damping="2.5" armature="0.1" actuatorfrcrange="-60 60"/>
     </default>
      <default class="hunter_motor_5">
       <joint damping="1.0" armature="0.1" actuatorfrcrange="-36 36"/>
