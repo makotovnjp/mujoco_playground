@@ -26,7 +26,7 @@
       <default class="collision">
         <geom group="3" mass="0" density="0"/>
         <default class="foot">
-          <geom size=".001"/>
+          <geom size="0.05005 0.01725 0.001" type="box"/>
           <default class="foot1">
             <geom size="0.001" contype="0" conaffinity="0" density="0"/>
           </default>
