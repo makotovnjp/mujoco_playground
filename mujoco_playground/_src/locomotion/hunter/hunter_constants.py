@@ -19,12 +19,14 @@ from mujoco_playground._src import mjx_env
 ROOT_PATH = mjx_env.ROOT_PATH / "locomotion" / "hunter" / "xmls"
 HUNTER_FLAT_TERRAIN_XML = ROOT_PATH / "maker_pdd_mjx.xml"
 HUNTER_ROUGH_TERRAIN_XML = ROOT_PATH / "maker_pdd_mjx_with_rough_terrain.xml"
+HUNTER_STAIR_TERRAIN_XML = ROOT_PATH / "maker_pdd_mjx_with_stair_terrain.xml"
 # HUNTER_XML = ROOT_PATH / "pdd_mjx_with_stair.xml"
 
 def task_to_xml(task_name: str) -> epath.Path:
   return {
       "flat_terrain": HUNTER_FLAT_TERRAIN_XML,
       "rough_terrain": HUNTER_ROUGH_TERRAIN_XML,
+      "stair_terrain": HUNTER_STAIR_TERRAIN_XML,
   }[task_name]
 
 # Feet sites and geoms for foot standing tasks

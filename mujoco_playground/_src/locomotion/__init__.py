@@ -96,7 +96,9 @@ _envs = {
     "HunterJoystickRoughTerrain": functools.partial(
         hunter_joystick.Joystick, task="rough_terrain"
     ),
-    "HunterJoystickStair":hunter_joystick_stair.Joystick,
+    "HunterJoystickStairTerrain":functools.partial(
+        hunter_joystick_stair.Joystick, task="stair_terrain"
+    ),,
 }
 
 _cfgs = {
@@ -127,7 +129,7 @@ _cfgs = {
     "HunterStand": hunter_stand.default_config,
     "HunterJoystick": hunter_joystick.default_config,
     "HunterJoystickRoughTerrain": hunter_joystick.default_config,
-    "HunterJoystickStair": hunter_joystick_stair.default_config,
+    "HunterJoystickStairTerrain": hunter_joystick_stair.default_config,
 }
 
 _randomizer = {
@@ -147,7 +149,8 @@ _randomizer = {
     "T1JoystickFlatTerrain": t1_randomize.domain_randomize,
     "T1JoystickRoughTerrain": t1_randomize.domain_randomize,
     "HunterJoystick": hunter_randomize.domain_randomize,
-    "HunterJoystickRoughTerrain": hunter_randomize.domain_randomize
+    "HunterJoystickRoughTerrain": hunter_randomize.domain_randomize,
+    "HunterJoystickStairTerrain": hunter_randomize.domain_randomize,
 }
 
 
