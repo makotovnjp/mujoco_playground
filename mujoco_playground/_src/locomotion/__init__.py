@@ -98,7 +98,7 @@ _envs = {
     ),
     "HunterJoystickStairTerrain":functools.partial(
         hunter_joystick_stair.Joystick, task="stair_terrain"
-    ),,
+    ),
 }
 
 _cfgs = {

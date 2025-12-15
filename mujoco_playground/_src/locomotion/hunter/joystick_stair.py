@@ -26,10 +26,10 @@ def default_config() -> config_dict.ConfigDict:
   return config_dict.create(
       ctrl_dt=0.01,
       sim_dt=0.001,
-      episode_length=1000,
+      episode_length=500,
       early_termination=True,
       action_repeat=1,
-      action_scale=0.5,
+      action_scale=1.0,
       dof_vel_scale=0.05,
       lin_vel_scale=2.0,
       history_len=1,
@@ -55,7 +55,7 @@ def default_config() -> config_dict.ConfigDict:
               feet_phase=3.0,
               # tracking_lin_vel=0.0,
               # tracking_ang_vel=0.0,
-              feet_air_time=2.0,
+              feet_air_time=5.0,
               feet_contact=0.0,
               # feet_air_time=0.0,
               # feet_contact=0.0,
@@ -67,12 +67,12 @@ def default_config() -> config_dict.ConfigDict:
               # lin_vel_z=-0.0,
               lin_vel_z=-0.0,  # previous: -5.0
               orientation=-2.0,
-              joint_deviation_knee=-0.1,
+              joint_deviation_knee=-0.0,
               joint_deviation_hip=-0.5,
-              pose=-1.0,  # previous: -0.1
-              stand_still=0.5,  # previous: +4.0
+              pose=-0.1,  # previous: -0.1
+              stand_still=0.0,  # previous: +4.0
               # stand_still=+0.0,
-              termination=-1.0,
+              termination=-3.0,
               foot_slip=-0.25,
               action_rate=-0.01,  # previous: -0.5
               # action_rate=-0.2,  # previous: -0.5
@@ -83,23 +83,23 @@ def default_config() -> config_dict.ConfigDict:
           tracking_sigma=0.5,
       ),
       command_config=config_dict.create(
-          lin_vel_x=[1.0, 2.0],
-          lin_vel_y=[-1.0, 1.0],
+          lin_vel_x=[1.0, 4.0],
+          lin_vel_y=[0.0, 1.0],
           ang_vel_yaw=[-1.2, 1.2]
         #   ang_vel_yaw=[-2*np.pi, 2*np.pi]
       ),
       push_config=config_dict.create(
-          enable=True,
+          enable=False,
           interval_range=[5.0, 10.0],
-          magnitude_range=[0.1, 2.0],
+          magnitude_range=[0.1, 1.0],
       ),
     #   gait_frequency=[1.25, 2.0],
       # gait_frequency=[0.0, 0.5],
-      gait_frequency=[0.5, 4.0],
+      gait_frequency=[0.25, 2.0],
     #   gaits=["walk"],
       gaits=["walk", "stand"],
       # gaits=["walk","stand","run"],
-      foot_height=[0.08, 0.2],
+      foot_height=[0.8, 1.6],
       impl="jax",
       nconmax=8 * 1024,
       njmax=10 + 8 * 4,
@@ -159,8 +159,8 @@ class Joystick(hunter_base.HunterEnv):
     self._hip_indices = jp.array([0, 1, 5, 6])
     self._knee_indices = jp.array([3, 8])
     self._weights = jp.array([
-        1.0, 1.0, 0.01, 0.01, 1.0,
-        1.0, 1.0, 0.01, 0.01, 1.0,
+        1.0, 1.0, 0.001, 0.01, 1.0,
+        1.0, 1.0, 0.001, 0.01, 1.0,
     ])  # fmt: skip
 
     self._hx_default_pose = self._default_pose[self._hx_idxs]
