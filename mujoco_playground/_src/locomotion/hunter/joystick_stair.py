@@ -17,7 +17,7 @@ from mujoco_playground._src.locomotion.hunter import base as hunter_base
 from mujoco_playground._src.locomotion.hunter import hunter_constants
 
 _PHASES = np.array([
-    [0, np.pi],  # walk
+    [0, np.pi/2],  # walk
     [0.0, 0.0], # stand
     # [0, np.pi], # run
 ])
@@ -55,24 +55,26 @@ def default_config() -> config_dict.ConfigDict:
               feet_phase=3.0,
               # tracking_lin_vel=0.0,
               # tracking_ang_vel=0.0,
-              feet_air_time=5.0,
+              feet_air_time=3.0,
               feet_contact=0.0,
               # feet_air_time=0.0,
               # feet_contact=0.0,
           
-              feet_clearance=-0.0,
+              # feet_clearance=-0.0,
+              feet_clearance=+1.0,
+              
 
               # Costs.
               ang_vel_xy=-0.15,  # previous: -0.0
               # lin_vel_z=-0.0,
               lin_vel_z=-0.0,  # previous: -5.0
-              orientation=-2.0,
-              joint_deviation_knee=-0.0,
+              orientation=-1.0,
+              joint_deviation_knee=-0.1,
               joint_deviation_hip=-0.5,
               pose=-0.1,  # previous: -0.1
               stand_still=0.0,  # previous: +4.0
               # stand_still=+0.0,
-              termination=-3.0,
+              termination=-5.0,
               foot_slip=-0.25,
               action_rate=-0.01,  # previous: -0.5
               # action_rate=-0.2,  # previous: -0.5
@@ -83,7 +85,7 @@ def default_config() -> config_dict.ConfigDict:
           tracking_sigma=0.5,
       ),
       command_config=config_dict.create(
-          lin_vel_x=[1.0, 4.0],
+          lin_vel_x=[1.0, 1.5],
           lin_vel_y=[0.0, 1.0],
           ang_vel_yaw=[-1.2, 1.2]
         #   ang_vel_yaw=[-2*np.pi, 2*np.pi]
@@ -99,7 +101,7 @@ def default_config() -> config_dict.ConfigDict:
     #   gaits=["walk"],
       gaits=["walk", "stand"],
       # gaits=["walk","stand","run"],
-      foot_height=[0.8, 1.6],
+      foot_height=[0.1, 0.15],
       impl="jax",
       nconmax=8 * 1024,
       njmax=10 + 8 * 4,
@@ -159,8 +161,8 @@ class Joystick(hunter_base.HunterEnv):
     self._hip_indices = jp.array([0, 1, 5, 6])
     self._knee_indices = jp.array([3, 8])
     self._weights = jp.array([
-        1.0, 1.0, 0.001, 0.01, 1.0,
-        1.0, 1.0, 0.001, 0.01, 1.0,
+        1.0, 1.0, 0.01, 0.01, 1.0,
+        1.0, 1.0, 0.01, 0.01, 1.0,
     ])  # fmt: skip
 
     self._hx_default_pose = self._default_pose[self._hx_idxs]
@@ -171,6 +173,7 @@ class Joystick(hunter_base.HunterEnv):
     self._feet_site_id = np.array(
         [self._mj_model.site(name).id for name in hunter_constants.FEET_SITES]
     )
+
     self._floor_geom_id = self._mj_model.geom("ground").id
     
     self._stair_body_id = self._mj_model.body("stairs").id
@@ -195,6 +198,17 @@ class Joystick(hunter_base.HunterEnv):
           list(range(sensor_adr, sensor_adr + sensor_dim))
       )
     self._foot_linvel_sensor_adr = jp.array(foot_linvel_sensor_adr)
+
+    # ## Get foot sensor address
+    # sensor_id = self._mj_model.sensor(f"foot_clearance_L").id
+    # sensor_adr = self._mj_model.sensor_adr[sensor_id]
+    # sensor_dim = self._mj_model.sensor_dim[sensor_id]
+    # self._foot_site_sensor_L_adr = list(range(sensor_adr, sensor_adr + sensor_dim))
+
+    # sensor_id = self._mj_model.sensor(f"foot_clearance_R").id
+    # sensor_adr = self._mj_model.sensor_adr[sensor_id]
+    # sensor_dim = self._mj_model.sensor_dim[sensor_id]
+    # self._foot_site_sensor_R_adr = list(range(sensor_adr, sensor_adr + sensor_dim))
 
     self._left_foot_box_geom_id = self._mj_model.geom("left_foot").id
     self._right_foot_box_geom_id = self._mj_model.geom("right_foot").id
@@ -407,7 +421,27 @@ class Joystick(hunter_base.HunterEnv):
         collision.geoms_colliding(data, geom_id, self._floor_geom_id)
         for geom_id in self._right_feet_geom_id
     ])
-    contact = jp.hstack([jp.any(left_feet_contact), jp.any(right_feet_contact)])
+
+    # Stair contact
+    left_feet_stair_contact = self._get_feet_and_stair_contact(
+        data, 
+        self._left_feet_geom_id, 
+        self._stair_geom_id
+    )
+    right_feet_stair_contact = self._get_feet_and_stair_contact(
+        data, 
+        self._right_feet_geom_id, 
+        self._stair_geom_id
+    )
+
+    left_feet_contact = jp.concatenate([left_feet_contact, left_feet_stair_contact])
+    right_feet_contact = jp.concatenate([right_feet_contact, right_feet_stair_contact])
+    
+    contact = jp.hstack([
+        jp.any(left_feet_contact), 
+        jp.any(right_feet_contact)
+    ])
+      
     contact_filt = contact | state.info["last_contact"]
     first_contact = (state.info["feet_air_time"] > 0.0) * contact_filt
     state.info["feet_air_time"] += self.dt
@@ -419,19 +453,6 @@ class Joystick(hunter_base.HunterEnv):
     obs = self._get_obs(data, state.info, contact)
     done = self._get_termination(data)
 
-    # joint_angles = data.qpos[7:]
-    # joint_vel = data.qvel[6:]
-    # base_z = data.xpos[self._base_body_id, 2]
-
-    # done = self.get_gravity(data)[-1] < 0.59
-    # done |= jp.any(joint_angles < self._lowers)
-    # done |= jp.any(joint_angles > self._uppers)
-    # done |= base_z < 0.65
-
-    # rewards = self._get_reward(data, action, state.info, state.metrics, done)
-    # rewards = {
-    #     k: v * self._config.reward_config.scales[k] for k, v in rewards.items()
-    # }
 
     pos, neg = self._get_reward(
         data, action, state.info, state.metrics, done, first_contact, contact
@@ -793,13 +814,44 @@ class Joystick(hunter_base.HunterEnv):
     )
     return jp.sum(vel_xy_norm_sq * feet_contact)
 
+  # def _cost_feet_clearance(self, data: mjx.Data) -> jax.Array:
+  #   feet_vel = data.sensordata[self._foot_linvel_sensor_adr]
+  #   vel_xy = feet_vel[..., :2]
+  #   vel_norm = jp.sqrt(jp.linalg.norm(vel_xy, axis=-1))
+  #   foot_pos = data.site_xpos[self._feet_site_id]
+  #   foot_z = foot_pos[..., -1]
+  #   delta = (foot_z - self._config.foot_height[1]) ** 2
+  #   return jp.sum(delta * vel_norm)
+
   def _cost_feet_clearance(self, data: mjx.Data) -> jax.Array:
-    feet_vel = data.sensordata[self._foot_linvel_sensor_adr]
-    vel_xy = feet_vel[..., :2]
-    vel_norm = jp.sqrt(jp.linalg.norm(vel_xy, axis=-1))
-    foot_pos = data.site_xpos[self._feet_site_id]
-    foot_z = foot_pos[..., -1]
-    delta = (foot_z - self._config.foot_height[1]) ** 2
+    # 1. Get Global (x, y, z) of the feet
+    # shape: (batch, 2, 3)
+    foot_pos = data.site_xpos[self._feet_site_id] 
+    
+    foot_x = foot_pos[..., 0] # Global X
+    foot_z = foot_pos[..., 2] # Global Z
+    
+    # 2. Calculate what the ground height is at that X position
+    # Adjust step_width and step_height to match your XML stairs
+    step_width = 0.5
+    step_height = 0.025
+    
+    # This math finds which "step" the foot is over
+    ground_z = jp.floor(foot_x / step_width) * step_height
+    ground_z = jp.maximum(0.0, ground_z) # Ensure ground isn't negative
+    
+    # 3. True Vertical Clearance
+    vertical_clearance = foot_z - ground_z
+    
+    # 4. Apply your Hinge Loss and Velocity Mask
+    target = self._config.foot_height[1]
+    delta = jp.square(jp.maximum(0.0, target - vertical_clearance))
+    
+    # Use your velocity norm as before
+    feet_vel = data.sensordata[..., self._foot_linvel_sensor_adr].reshape(-1, 2, 3)
+    vel_norm = jp.linalg.norm(feet_vel[..., :2], axis=-1) # (batch, 2)
+    
+    # Return sum of (penalty * velocity) for both feet
     return jp.sum(delta * vel_norm)
 
   def _cost_feet_distance(

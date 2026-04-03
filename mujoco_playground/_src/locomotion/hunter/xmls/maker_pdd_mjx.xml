@@ -47,7 +47,7 @@
       <joint damping="1.0" armature="0.1" actuatorfrcrange="-94 94"/>
     </default>
     <default class="hunter_motor_4">
-      <joint damping="2.5" armature="0.1" actuatorfrcrange="-94 94"/>
+      <joint damping="1.5" armature="0.1" actuatorfrcrange="-94 94"/>
     </default>
      <default class="hunter_motor_5">
       <joint damping="1.0" armature="0.1" actuatorfrcrange="-36 36"/>
@@ -94,7 +94,7 @@
       condim="1" conaffinity='15' />
 
     <body name="base_link" pos="0 0 0.7" childclass="hunter">
-      <inertial pos="-0.010856 -6.8e-05 -0.007128" quat="0.979606 0.00882716 0.200723 -0.00231074" mass="5.67363" 
+      <inertial pos="-0.010856 -6.8e-05 -0.007128" quat="0.0 0.00882716 0.200723 -0.00231074" mass="5.67363" 
       	diaginertia="0.0355096 0.0296524 0.0283549"/>
       <joint type='slide' axis='1 0 0' limited='false' />
       <joint type='slide' axis='0 1 0' limited='false' />
@@ -151,7 +151,7 @@
                   <site name="leg_l_f2_site" pos="0 0 0"/>
                 </body>
                 <geom name="left_foot" class="foot"/>
-                <site name="left_foot" pos="0 0 0" />
+                <site name="left_foot" pos="0 0 0" euler="0 3.14 0" />
               </body>
             </body>
           </body>
@@ -196,7 +196,7 @@
                   <site name="leg_r_f2_site" pos="0 0 0"/>
                 </body>
                 <geom name="right_foot" class="foot"/>
-                <site name="right_foot" pos="0 0 0" />
+                <site name="right_foot" pos="0 0 0" euler="0 3.14 0" />
               </body>
             </body>
           </body>
@@ -266,6 +266,10 @@
 
     <framelinvel objtype="site" objname="left_foot" name="left_foot_global_linvel"/>
     <framelinvel objtype="site" objname="right_foot" name="right_foot_global_linvel"/>
+
+    <!-- To get the actual foot height -->
+    <!-- <rangefinder name="foot_clearance_L" site="left_foot"/>
+    <rangefinder name="foot_clearance_R" site="right_foot"/> -->
 
   </sensor>
 </mujoco>
